@@ -3,9 +3,13 @@ module Resque
     module ExponentialBackoff
       include Resque::Plugins::Retry
 
+      def retry_limit
+        @retry_limit ||= 6
+      end
+
       # get retry delay
       def seconds_until_retry
-        backoff_strategy[retry_attempt - 1] || backoff_strategy.last
+        backoff_strategy[retry_attempt] || backoff_strategy.last
       end
 
       # define backoff strategy
