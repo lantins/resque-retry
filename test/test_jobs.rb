@@ -19,7 +19,7 @@ end
 
 class RetryWithModifiedArgsJob < RetryDefaultsJob
   @queue = :testing
-  
+
   def self.args_for_retry(*args)
     args.each { |arg| arg << 'bar' }
   end
@@ -46,16 +46,16 @@ end
 
 class RetryCustomExceptionsJob < RetryDefaultsJob
   @queue = :testing
-  
+
   @retry_limit = 5
   @retry_exceptions = [CustomException, HierarchyCustomException]
-  
+
   def self.perform(exception)
     case exception
-      when 'CustomException' then raise CustomException
-      when 'HierarchyCustomException' then raise HierarchyCustomException
-      when 'AnotherCustomException' then raise AnotherCustomException
-      else raise StandardError
+    when 'CustomException' then raise CustomException
+    when 'HierarchyCustomException' then raise HierarchyCustomException
+    when 'AnotherCustomException' then raise AnotherCustomException
+    else raise StandardError
     end
   end
 end

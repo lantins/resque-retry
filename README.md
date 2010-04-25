@@ -16,7 +16,7 @@ resque-retry provides retry, delay and exponential backoff support for resque jo
   - Small & Extendable - plenty of places to override retry logic/settings.
 
 **n.b.** [resque-scheduler][rqs] is _really_ recommended if you wish to delay between
-retry attempts.
+retry attempts, otherwise your workers will block using `#sleep`.
 
 Usage
 -----

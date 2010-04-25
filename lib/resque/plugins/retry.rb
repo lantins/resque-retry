@@ -18,6 +18,14 @@ module Resque
         @retry_attempt ||= 0
       end
 
+      def seconds_until_retry
+        @seconds_until_retry ||= 0
+      end
+
+      def args_for_retry(*args)
+        args
+      end
+
       def retry_exception?(exception)
         return true if retry_exceptions.nil?
         !! retry_exceptions.any? { |ex| ex >= exception }
@@ -34,14 +42,6 @@ module Resque
           return false if retry_attempt >= retry_limit
         end
         retry_exception?(exception.class)
-      end
-
-      def seconds_until_retry
-        @seconds_until_retry ||= 0
-      end
-
-      def args_for_retry(*args)
-        args
       end
 
       def try_again(*args)
