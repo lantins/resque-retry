@@ -11,7 +11,7 @@ module Resque
 
       # 0 = retry forever
       def retry_limit
-        @retry_limit ||= 0
+        @retry_limit ||= 1
       end
 
       def retry_attempt
@@ -30,7 +30,7 @@ module Resque
       # at some point let people extend the criteria? give the user a chance
       # to say no.
       def retry_criteria_valid?(exception, *args)
-        unless retry_limit == 0
+        if retry_limit > 0
           return false if retry_attempt >= retry_limit
         end
         retry_exception?(exception.class)

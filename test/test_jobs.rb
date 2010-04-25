@@ -8,8 +8,16 @@ class RetryDefaultsJob
   extend Resque::Plugins::Retry
   @queue = :testing
 
-  def perform(*args)
+  def self.perform(*args)
     raise
+  end
+end
+
+class RetryWithModifiedArgsJob < RetryDefaultsJob
+  @queue = :testing
+  
+  def self.args_for_retry(*args)
+    args.each { |arg| arg << 'bar' }
   end
 end
 
@@ -22,8 +30,8 @@ class FailFiveTimesJob < RetryDefaultsJob
   @queue = :testing
   @retry_limit = 6
 
-  def perform(*args)
-    raise if retry_attempt < 4
+  def self.perform(*args)
+    raise if retry_attempt <= 4
   end
 end
 

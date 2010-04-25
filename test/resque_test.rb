@@ -11,8 +11,8 @@ class ResqueTest < Test::Unit::TestCase
   def test_good_job
     clean_perform_job(GoodJob, 1234, { :cats => :maiow }, [true, false, false])
 
-    assert_equal 0, Resque.info[:failed], '0 failed jobs'
-    assert_equal 1, Resque.info[:processed], '1 processed job'
+    assert_equal 0, Resque.info[:failed], 'failed jobs'
+    assert_equal 1, Resque.info[:processed], 'processed job'
     assert_equal 0, Resque.delayed_queue_schedule_size
   end
 end
