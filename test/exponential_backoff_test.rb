@@ -13,7 +13,7 @@ class ExponentialBackoffTest < Test::Unit::TestCase
     end
   end
 
-  def test_backoff_strategy
+  def test_default_backoff_strategy
     now = Time.now
     Resque.enqueue(ExponentialBackoffJob)
     2.times do
@@ -37,5 +37,23 @@ class ExponentialBackoffTest < Test::Unit::TestCase
     assert_equal now.to_i + 3600, delayed[2], '3rd delay'
     assert_equal now.to_i + 10_800, delayed[3], '4th delay'
     assert_equal now.to_i + 21_600, delayed[4], '5th delay'
+  end
+  
+  def test_custom_backoff_strategy
+    now = Time.now
+    4.times do
+      Resque.enqueue(CustomExponentialBackoffJob)
+      perform_next_job @worker
+    end
+    
+    delayed = Resque.delayed_queue_peek(0, 3)
+    assert_equal now.to_i + 10, delayed[0], '1st delay'
+    assert_equal now.to_i + 20, delayed[1], '2nd delay'
+    assert_equal now.to_i + 30, delayed[2], '3rd delay'
+    assert_equal 2, Resque.delayed_timestamp_size(delayed[2]), '4th delay should share delay with 3rd'
+    
+    assert_equal 4, Resque.info[:processed], 'processed jobs'
+    assert_equal 4, Resque.info[:failed], 'failed jobs'
+    assert_equal 0, Resque.info[:pending], 'pending jobs'
   end
 end

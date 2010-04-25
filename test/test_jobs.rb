@@ -44,6 +44,18 @@ class ExponentialBackoffJob < RetryDefaultsJob
   @queue = :testing
 end
 
+class CustomExponentialBackoffJob
+  extend Resque::Plugins::ExponentialBackoff
+  @queue = :testing
+  
+  @retry_limit = 4
+  @backoff_strategy = [10, 20, 30]
+  
+  def self.perform(*args)
+    raise
+  end
+end
+
 class RetryCustomExceptionsJob < RetryDefaultsJob
   @queue = :testing
 

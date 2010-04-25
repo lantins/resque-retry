@@ -4,7 +4,7 @@ module Resque
       include Resque::Plugins::Retry
 
       def retry_limit
-        @retry_limit ||= 6
+        @retry_limit ||= backoff_strategy.length
       end
 
       # get retry delay
