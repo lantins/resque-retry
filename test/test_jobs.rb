@@ -51,7 +51,7 @@ class CustomExponentialBackoffJob
   @retry_limit = 4
   @backoff_strategy = [10, 20, 30]
   
-  def self.perform(*args)
+  def self.perform(url, hook_id, hmac_key)
     raise
   end
 end

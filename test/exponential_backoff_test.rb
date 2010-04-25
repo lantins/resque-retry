@@ -25,7 +25,7 @@ class ExponentialBackoffTest < Test::Unit::TestCase
     assert_equal 0, Resque.info[:pending], 'pending jobs'
 
     delayed = Resque.delayed_queue_peek(0, 1)
-    assert_equal now.to_i + 60, delayed[0], '1st delay'
+    assert_equal now.to_i + 60, delayed[0], '2nd delay' # the first had a zero delay.
 
     5.times do
       Resque.enqueue(ExponentialBackoffJob)
@@ -33,16 +33,16 @@ class ExponentialBackoffTest < Test::Unit::TestCase
     end
 
     delayed = Resque.delayed_queue_peek(0, 5)
-    assert_equal now.to_i + 600, delayed[1], '2nd delay'
-    assert_equal now.to_i + 3600, delayed[2], '3rd delay'
-    assert_equal now.to_i + 10_800, delayed[3], '4th delay'
-    assert_equal now.to_i + 21_600, delayed[4], '5th delay'
+    assert_equal now.to_i + 600, delayed[1], '3rd delay'
+    assert_equal now.to_i + 3600, delayed[2], '4th delay'
+    assert_equal now.to_i + 10_800, delayed[3], '5th delay'
+    assert_equal now.to_i + 21_600, delayed[4], '6th delay'
   end
   
   def test_custom_backoff_strategy
     now = Time.now
     4.times do
-      Resque.enqueue(CustomExponentialBackoffJob)
+      Resque.enqueue(CustomExponentialBackoffJob, 'http://lividpenguin.com', 1305, 'cd8079192d379dc612f17c660591a6cfb05f1dda')
       perform_next_job @worker
     end
     

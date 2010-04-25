@@ -15,6 +15,7 @@ spec = Gem::Specification.new do |s|
   s.add_dependency('resque', '~> 1.8.0')
   s.add_development_dependency('turn')
   s.add_development_dependency('yard')
+  s.add_development_dependency('resque_scheduler')
 
   s.description       = <<EOL
 A resque plugin; provides retry, delay and exponential backoff support for
