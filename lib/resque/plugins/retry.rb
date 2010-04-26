@@ -51,7 +51,7 @@ module Resque
       # attempts.
       #
       # @return [String] redis key
-      def key(*args)
+      def redis_retry_key(*args)
         ['resque-retry', name, identifier(*args)].compact.join(":")
       end
 
@@ -147,8 +147,9 @@ module Resque
       #
       # Increments and sets the `@retry_attempt` count.
       def before_perform_retry(*args)
-        Resque.redis.setnx(key(*args), -1)             # default to -1 if not set.
-        @retry_attempt = Resque.redis.incr(key(*args)) # increment by 1.
+        retry_key = redis_retry_key(*args)
+        Resque.redis.setnx(retry_key, -1)             # default to -1 if not set.
+        @retry_attempt = Resque.redis.incr(retry_key) # increment by 1.
       end
 
       ##
@@ -156,7 +157,7 @@ module Resque
       #
       # Deletes retry attempt count from Redis.
       def after_perform_retry(*args)
-        Resque.redis.del(key(*args))
+        Resque.redis.del(redis_retry_key(*args))
       end
 
       ##

@@ -4,7 +4,7 @@ spec = Gem::Specification.new do |s|
   s.date              = Time.now.strftime('%Y-%m-%d')
   s.summary           = 'A resque plugin; provides retry, delay and exponential backoff support for resque jobs.'
   s.homepage          = 'http://github.com/lantins/resque-retry'
-  s.authors           = ['Luke Antins']
+  s.authors           = ['Luke Antins', 'Ryan Carver']
   s.email             = 'luke@lividpenguin.com'
   s.has_rdoc          = false
 
