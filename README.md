@@ -113,7 +113,29 @@ Some things worth noting:
 
 ### Job Identifier/Key
 
-yada yada
+The retry attempt is incremented and stored in a Redis key. The key is
+built using the `identifier`. If you have a lot of arguments or really long
+ones, you should consider overriding `identifier` to define a more precise
+or loose custom identifier.
+
+The default identifier is just your job arguments joined with a dash `-`.
+
+By default the key uses this format: 
+`resque-retry:<job class name>:<identifier>`.
+
+Or you can define the entire key by overriding `redis_retry_key`.
+
+   class DeliverSMS
+     extend Resque::Plugins::Retry
+
+     def self.identifier(mo_id, mobile_number, message)
+       "#{mobile_number}:#{mo_id}"
+     end
+
+     self.perform(mo_id, mobile_number, message)
+       heavy_lifting
+     end
+   end
 
 ### Retry Arguments
 
