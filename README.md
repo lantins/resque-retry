@@ -3,43 +3,94 @@ resque-retry
 
 A [Resque][rq] plugin. Requires Resque 1.8.0.
 
-resque-exponential-backoff is a plugin to add retry/exponential backoff to
-your resque jobs.
+resque-retry provides retry, delay and exponential backoff support for
+resque jobs.
 
-resque-retry provides retry, delay and exponential backoff support for resque jobs.
-
-### Some Features
+### Features
 
   - Redis backed retry count/limit.
   - Retry on all or specific exceptions.
   - Exponential backoff (varying the delay between retrys).
   - Small & Extendable - plenty of places to override retry logic/settings.
 
-**n.b.** [resque-scheduler][rqs] is _really_ recommended if you wish to delay between
-retry attempts, otherwise your workers will block using `#sleep`.
+**n.b.** [resque-scheduler][rqs] is _really_ recommended if you wish to
+delay between retry attempts, otherwise your workers will block
+using `sleep`.
 
 Usage
 -----
 
+Just extend your module/class with this module, and your ready to retry!
+
+Customisation is pretty easy, the below examples should give you
+some ideas =), adapt for your own usage as needed:
+
 ### Retry
+
+Retry the job **once** on failure, with zero delay.
+
+    require 'require-retry'
 
     class DeliverWebHook
       extend Resque::Plugins::Retry
-      
+
       def self.perform(url, hook_id, hmac_key)
         heavy_lifting
       end
     end
 
-### Exponential backoff
+When a job runs, the number of retry attempts is checked and incremented
+in Redis. If your job fails, the number of retry attempts is used to
+determine if we can requeue the job for another go.
+
+### Custom Retry
+
+    class DeliverWebHook
+      extend Resque::Plugins::Retry
+
+      @retry_limit = 10
+      @retry_delay = 120
+
+      def self.perform(url, hook_id, hmac_key)
+        heavy_lifting
+      end
+    end
+
+The above modification will allow your job to retry upto 10 times, with
+a delay of 120 seconds, or 2 minutes between retry attempts.
+
+Alternatively you could override the `retry_delay` method to do something
+more special.
+
+### Exponential Backoff
+
+Use this if you wish to vary the delay between retry attempts:
 
     class DeliverSMS
       extend Resque::Plugins::ExponentialBackoff
-      
+
       def self.perform(mobile_number, message)
         heavy_lifting
       end
     end
+
+**Default Settings**
+
+    key: m = minutes, h = hours
+
+                  no delay, 1m, 10m,   1h,    3h,    6h
+    @backoff_strategy = [0, 60, 600, 3600, 10800, 21600]
+
+The first delay will be 0 seconds, the 2nd will be 60 seconds, etc...
+Again, tweak to your own needs.
+
+The number if retrys is equal to the size of the `backoff_strategy`
+array, unless you set `retry_limit` yourself.
+
+Install
+-------
+
+    $ gem install resque-retry
 
 [rq]: http://github.com/defunkt/resque
 [rqs]: http://github.com/bvandenbos/resque-scheduler
