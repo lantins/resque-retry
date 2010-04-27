@@ -8,7 +8,7 @@ module Resque
     #   class DeliverSMS
     #     extend Resque::Plugins::ExponentialBackoff
     #
-    #     def self.perform(url, hook_id, hmac_key)
+    #     def self.perform(mo_id, mobile_number, message)
     #       heavy_lifting
     #     end
     #   end
@@ -24,11 +24,11 @@ module Resque
     #     @backoff_strategy = [0, 60]
     #
     #     # used to build redis key, for counting job attempts.
-    #     def self.identifier(url, hook_id, hmac_key)
-    #       "#{url}-#{hook_id}"
+    #     def self.identifier(mo_id, mobile_number, message)
+    #       "#{mobile_number}:#{mo_id}"
     #     end
     #
-    #     self.perform(mobile_number, message)
+    #     self.perform(mo_id, mobile_number, message)
     #       heavy_lifting
     #     end
     #   end
