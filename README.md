@@ -17,13 +17,13 @@ resque jobs.
 delay between retry attempts, otherwise your workers will block
 using `sleep`.
 
-Usage
------
+Usage / Examples
+----------------
 
 Just extend your module/class with this module, and your ready to retry!
 
 Customisation is pretty easy, the below examples should give you
-some ideas =), adapt for your own usage as needed:
+some ideas =), adapt for your own usage and feel free to pick and mix!
 
 ### Retry
 
@@ -47,7 +47,6 @@ determine if we can requeue the job for another go.
 
     class DeliverWebHook
       extend Resque::Plugins::Retry
-
       @retry_limit = 10
       @retry_delay = 120
 
@@ -86,6 +85,39 @@ Again, tweak to your own needs.
 
 The number if retrys is equal to the size of the `backoff_strategy`
 array, unless you set `retry_limit` yourself.
+
+### Retry Specific Exceptions
+
+The default will allow a retry for any type of exception. You may change
+it so only specific exceptions are retried using `retry_exceptions`:
+
+    class DeliverSMS
+      extend Resque::Plugins::Retry
+      @retry_exceptions = [NetworkError]
+      
+      def self.perform(mobile_number, message)
+        heavy_lifting
+      end
+    end
+
+The above modification will **only** retry if a `NetworkError` (or subclass)
+exception is thrown.
+
+Customise & Extend
+------------------
+
+Please take a look at the yardoc/code for more details on methods you may
+wish to override.
+
+Some things worth noting:
+
+### Job Identifier/Key
+
+yada yada
+
+### Retry Arguments
+
+cats maiow
 
 Install
 -------
