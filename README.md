@@ -68,7 +68,7 @@ Use this if you wish to vary the delay between retry attempts:
     class DeliverSMS
       extend Resque::Plugins::ExponentialBackoff
 
-      def self.perform(mobile_number, message)
+      def self.perform(mt_id, mobile_number, message)
         heavy_lifting
       end
     end
@@ -95,7 +95,7 @@ it so only specific exceptions are retried using `retry_exceptions`:
       extend Resque::Plugins::Retry
       @retry_exceptions = [NetworkError]
       
-      def self.perform(mobile_number, message)
+      def self.perform(mt_id, mobile_number, message)
         heavy_lifting
       end
     end
@@ -128,18 +128,32 @@ Or you can define the entire key by overriding `redis_retry_key`.
     class DeliverSMS
       extend Resque::Plugins::Retry
 
-      def self.identifier(mo_id, mobile_number, message)
-        "#{mobile_number}:#{mo_id}"
+      def self.identifier(mt_id, mobile_number, message)
+        "#{mobile_number}:#{mt_id}"
       end
 
-      self.perform(mo_id, mobile_number, message)
+      self.perform(mt_id, mobile_number, message)
         heavy_lifting
       end
     end
 
 ### Retry Arguments
 
-cats maiow
+You may override `args_for_retry`, which is passed the current
+job arguments, to modify the arguments for the next retry attempt.
+
+    class DeliverViaSMSC
+      extend Resque::Plugins::Retry
+      
+      # retry using the emergency SMSC.
+      def self.args_for_retry(smsc_id, mt_message)
+        [999, mt_message]
+      end
+
+      self.perform(smsc_id, mt_message)
+        heavy_lifting
+      end
+    end
 
 Install
 -------
