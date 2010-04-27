@@ -17,7 +17,7 @@ class RetryTest < Test::Unit::TestCase
     assert_equal 1, RetryDefaultsJob.retry_limit, 'default retry limit'
     assert_equal 0, RetryDefaultsJob.retry_attempt, 'default number of retry attempts'
     assert_equal nil, RetryDefaultsJob.retry_exceptions, 'default retry exceptions; nil = any'
-    assert_equal 0, RetryDefaultsJob.seconds_until_retry, 'default seconds until retry'
+    assert_equal 0, RetryDefaultsJob.retry_delay, 'default seconds until retry'
   end
 
   def test_retry_once_by_default

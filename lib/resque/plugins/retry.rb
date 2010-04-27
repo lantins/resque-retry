@@ -1,6 +1,6 @@
 module Resque
   module Plugins
-    
+
     ##
     # If you want your job to retry on failure, simply extend your module/class
     # with this module:
@@ -19,7 +19,7 @@ module Resque
     #     extend Resque::Plugins::Retry
     #
     #     @retry_limit = 8          # default: 1
-    #     @seconds_until_retry = 60 # default: 0
+    #     @retry_delay = 60 # default: 0
     #
     #     # used to build redis key, for counting job attempts.
     #     def self.identifier(url, hook_id, hmac_key)
@@ -80,8 +80,8 @@ module Resque
       # Number of seconds to delay until the job is retried.
       # 
       # @return [Number] number of seconds to delay
-      def seconds_until_retry
-        @seconds_until_retry ||= 0
+      def retry_delay
+        @retry_delay ||= 0
       end
 
       ##
@@ -132,12 +132,12 @@ module Resque
       # Will retry the job.
       #
       # n.b. If your not using the resque-scheduler plugin your job will block
-      # your worker, while it sleeps for `seconds_until_retry`.
+      # your worker, while it sleeps for `retry_delay`.
       def try_again(*args)
-        if Resque.respond_to?(:enqueue_in) && seconds_until_retry > 0
-          Resque.enqueue_in(seconds_until_retry, self, *args_for_retry(*args))
+        if Resque.respond_to?(:enqueue_in) && retry_delay > 0
+          Resque.enqueue_in(retry_delay, self, *args_for_retry(*args))
         else
-          sleep(seconds_until_retry) if seconds_until_retry > 0
+          sleep(retry_delay) if retry_delay > 0
           Resque.enqueue(self, *args_for_retry(*args))
         end
       end
