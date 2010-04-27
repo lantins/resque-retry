@@ -125,17 +125,17 @@ By default the key uses this format:
 
 Or you can define the entire key by overriding `redis_retry_key`.
 
-   class DeliverSMS
-     extend Resque::Plugins::Retry
+    class DeliverSMS
+      extend Resque::Plugins::Retry
 
-     def self.identifier(mo_id, mobile_number, message)
-       "#{mobile_number}:#{mo_id}"
-     end
+      def self.identifier(mo_id, mobile_number, message)
+        "#{mobile_number}:#{mo_id}"
+      end
 
-     self.perform(mo_id, mobile_number, message)
-       heavy_lifting
-     end
-   end
+      self.perform(mo_id, mobile_number, message)
+        heavy_lifting
+      end
+    end
 
 ### Retry Arguments
 
