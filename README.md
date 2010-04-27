@@ -144,7 +144,7 @@ job arguments, to modify the arguments for the next retry attempt.
 
     class DeliverViaSMSC
       extend Resque::Plugins::Retry
-      
+
       # retry using the emergency SMSC.
       def self.args_for_retry(smsc_id, mt_message)
         [999, mt_message]
