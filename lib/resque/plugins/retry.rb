@@ -132,15 +132,12 @@ module Resque
 
       ##
       # Will retry the job.
-      #
-      # n.b. If your not using the resque-scheduler plugin your job will block
-      # your worker, while it sleeps for `retry_delay`.
       def try_again(*args)
-        if Resque.respond_to?(:enqueue_in) && retry_delay > 0
-          Resque.enqueue_in(retry_delay, self, *args_for_retry(*args))
-        else
-          sleep(retry_delay) if retry_delay > 0
+        if retry_delay <= 0
+          # If the delay is 0, no point passing it through the scheduler
           Resque.enqueue(self, *args_for_retry(*args))
+        else
+          Resque.enqueue_in(retry_delay, self, *args_for_retry(*args))
         end
       end
 

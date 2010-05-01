@@ -1,7 +1,7 @@
 resque-retry
 ============
 
-A [Resque][rq] plugin. Requires Resque 1.8.0.
+A [Resque][rq] plugin. Requires Resque 1.8.0 & [resque-scheduler][rqs]
 
 resque-retry provides retry, delay and exponential backoff support for
 resque jobs.
@@ -12,10 +12,6 @@ resque jobs.
   - Retry on all or specific exceptions.
   - Exponential backoff (varying the delay between retrys).
   - Small & Extendable - plenty of places to override retry logic/settings.
-
-**n.b.** [resque-scheduler][rqs] is _really_ recommended if you wish to
-delay between retry attempts, otherwise your workers will block
-using `sleep`.
 
 Usage / Examples
 ----------------
@@ -43,17 +39,6 @@ Retry the job **once** on failure, with zero delay.
 When a job runs, the number of retry attempts is checked and incremented
 in Redis. If your job fails, the number of retry attempts is used to
 determine if we can requeue the job for another go.
-
-### PLEASE NOTE: resque-scheduler vs. sleep
-
-If the job is to be retried, the delay until the retry can be handled
-two ways:
-
-- resque-scheduler | If Resque responds to `enqueue_in`, the job will be
-scheduled to retry in `retry_delay` seconds.
-- `sleep` | If Resque does not respond to `enqueue_in`, the job will `sleep`
-for `retry_delay` seconds. This is **not** recommended as your worker will
-block/not process other jobs.
 
 ### Custom Retry
 
