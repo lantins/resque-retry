@@ -18,29 +18,14 @@ spec = Gem::Specification.new do |s|
   s.add_development_dependency('yard')
 
   s.description       = <<EOL
-A resque plugin; provides retry, delay and exponential backoff support for
+resque-retry provides retry, delay and exponential backoff support for
 resque jobs.
 
-Retry Example:
+Features:
 
-    require 'resque-retry'
-
-    class DeliverWebHook
-      extend Resque::Plugins::Retry
-
-      def self.perform(url, hook_id, hmac_key)
-        heavy_lifting
-      end
-    end
-    
-Exponential Backoff Example:
-
-    class DeliverSMS
-      extend Resque::Plugins::ExponentialBackoff
-
-      def self.perform(mobile_number, message)
-        heavy_lifting
-      end
-    end
+* Redis backed retry count/limit.
+* Retry on all or specific exceptions.
+* Exponential backoff (varying the delay between retrys).
+* Small & Extendable - plenty of places to override retry logic/settings.
 EOL
 end
