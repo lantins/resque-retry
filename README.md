@@ -33,6 +33,7 @@ Retry the job **once** on failure, with zero delay.
 
     class DeliverWebHook
       extend Resque::Plugins::Retry
+      @queue = :web_hooks
 
       def self.perform(url, hook_id, hmac_key)
         heavy_lifting
@@ -43,10 +44,23 @@ When a job runs, the number of retry attempts is checked and incremented
 in Redis. If your job fails, the number of retry attempts is used to
 determine if we can requeue the job for another go.
 
+### PLEASE NOTE: resque-scheduler vs. sleep
+
+If the job is to be retried, the delay until the retry can be handled
+two ways:
+
+- resque-scheduler | If Resque responds to `enqueue_in`, the job will be
+scheduled to retry in `retry_delay` seconds.
+- `sleep` | If Resque does not respond to `enqueue_in`, the job will `sleep`
+for `retry_delay` seconds. This is **not** recommended as your worker will
+block/not process other jobs.
+
 ### Custom Retry
 
     class DeliverWebHook
       extend Resque::Plugins::Retry
+      @queue = :web_hooks
+
       @retry_limit = 10
       @retry_delay = 120
 
@@ -67,6 +81,7 @@ Use this if you wish to vary the delay between retry attempts:
 
     class DeliverSMS
       extend Resque::Plugins::ExponentialBackoff
+      @queue = :mt_messages
 
       def self.perform(mt_id, mobile_number, message)
         heavy_lifting
@@ -93,8 +108,10 @@ it so only specific exceptions are retried using `retry_exceptions`:
 
     class DeliverSMS
       extend Resque::Plugins::Retry
+      @queue = :mt_messages
+
       @retry_exceptions = [NetworkError]
-      
+
       def self.perform(mt_id, mobile_number, message)
         heavy_lifting
       end
@@ -127,6 +144,7 @@ Or you can define the entire key by overriding `redis_retry_key`.
 
     class DeliverSMS
       extend Resque::Plugins::Retry
+      @queue = :mt_messages
 
       def self.identifier(mt_id, mobile_number, message)
         "#{mobile_number}:#{mt_id}"
@@ -144,7 +162,8 @@ job arguments, to modify the arguments for the next retry attempt.
 
     class DeliverViaSMSC
       extend Resque::Plugins::Retry
-
+      @queue = :mt_smsc_messages
+      
       # retry using the emergency SMSC.
       def self.args_for_retry(smsc_id, mt_message)
         [999, mt_message]

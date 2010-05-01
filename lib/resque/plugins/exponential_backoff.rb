@@ -7,6 +7,7 @@ module Resque
     #
     #   class DeliverSMS
     #     extend Resque::Plugins::ExponentialBackoff
+    #     @queue = :mt_messages
     #
     #     def self.perform(mt_id, mobile_number, message)
     #       heavy_lifting
@@ -17,6 +18,7 @@ module Resque
     #
     #   class DeliverSMS
     #     extend Resque::Plugins::ExponentialBackoff
+    #     @queue = :mt_messages
     #
     #     @retry_limit = 4
     #

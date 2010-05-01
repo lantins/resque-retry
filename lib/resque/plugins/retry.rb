@@ -7,6 +7,7 @@ module Resque
     #
     #   class DeliverWebHook
     #     extend Resque::Plugins::Retry # allows 1 retry by default.
+    #     @queue = :web_hooks
     #
     #     def self.perform(url, hook_id, hmac_key)
     #       heavy_lifting
@@ -17,6 +18,7 @@ module Resque
     #
     #   class DeliverWebHook
     #     extend Resque::Plugins::Retry
+    #     @queue = :web_hooks
     #
     #     @retry_limit = 8          # default: 1
     #     @retry_delay = 60 # default: 0
