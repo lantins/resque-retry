@@ -21,5 +21,5 @@ YARD::Rake::YardocTask.new :yardoc do |t|
     t.options = ['--output-dir', "doc/",
                  '--files', 'LICENSE',
                  '--readme', 'README.md',
-                 '--title', 'resque-exponential-backoff documentation']
+                 '--title', 'resque-retry documentation']
 end
