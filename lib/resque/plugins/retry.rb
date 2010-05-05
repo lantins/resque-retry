@@ -168,7 +168,7 @@ module Resque
         if retry_criteria_valid?(exception, *args)
           try_again(*args)
         else
-          delete_retry_redis_key(*args)
+          Resque.redis.del(redis_retry_key(*args))
         end
       end
     end
