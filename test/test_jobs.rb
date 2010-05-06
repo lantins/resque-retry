@@ -3,6 +3,7 @@ HierarchyCustomException = Class.new(CustomException)
 AnotherCustomException = Class.new(StandardError)
 
 class GoodJob
+  extend Resque::Plugins::Retry
   @queue = :testing
   def self.perform(*args)
   end

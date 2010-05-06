@@ -108,28 +108,34 @@ class RetryTest < Test::Unit::TestCase
   def test_delete_redis_key_when_job_is_successful
     Resque.enqueue(GoodJob, 'arg1')
 
-    assert_equal nil, Resque.redis.get('resque-retry:GoodJob:arg1')
+    assert_equal nil, Resque.redis.get(GoodJob.redis_retry_key('arg1'))
     perform_next_job(@worker)
-    assert_equal nil, Resque.redis.get('resque-retry:GoodJob:arg1')
+    assert_equal nil, Resque.redis.get(GoodJob.redis_retry_key('arg1'))
   end
 
   def test_delete_redis_key_after_final_failed_retry
     Resque.enqueue(FailFiveTimesJob, 'yarrrr')
-    assert_equal nil, Resque.redis.get('resque-retry:FailFiveTimesJob:yarrrr')
+    assert_equal nil, Resque.redis.get(FailFiveTimesJob.redis_retry_key('yarrrr'))
 
     perform_next_job(@worker)
-    assert_equal '0', Resque.redis.get('resque-retry:FailFiveTimesJob:yarrrr')
+    assert_equal '0', Resque.redis.get(FailFiveTimesJob.redis_retry_key('yarrrr'))
 
     perform_next_job(@worker)
-    assert_equal '1', Resque.redis.get('resque-retry:FailFiveTimesJob:yarrrr')
+    assert_equal '1', Resque.redis.get(FailFiveTimesJob.redis_retry_key('yarrrr'))
 
     5.times do
       perform_next_job(@worker)
     end
-    assert_equal nil, Resque.redis.get('resque-retry:FailFiveTimesJob:yarrrr')
+    assert_equal nil, Resque.redis.get(FailFiveTimesJob.redis_retry_key('yarrrr'))
 
     assert_equal 5, Resque.info[:failed], 'failed jobs'
     assert_equal 6, Resque.info[:processed], 'processed job'
     assert_equal 0, Resque.info[:pending], 'pending jobs'
+  end
+  
+  def test_job_without_args_has_no_ending_colon_in_redis_key
+    assert_equal 'resque-retry:GoodJob:yarrrr', GoodJob.redis_retry_key('yarrrr')
+    assert_equal 'resque-retry:GoodJob:foo', GoodJob.redis_retry_key('foo')
+    assert_equal 'resque-retry:GoodJob', GoodJob.redis_retry_key
   end
 end

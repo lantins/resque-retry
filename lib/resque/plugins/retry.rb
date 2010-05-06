@@ -45,7 +45,8 @@ module Resque
       # @param [Array] args job arguments
       # @return [String] job identifier
       def identifier(*args)
-        args.join('-')
+        args_string = args.join('-')
+        args_string.empty? ? nil : args_string
       end
 
       ##
