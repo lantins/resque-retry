@@ -55,7 +55,7 @@ module Resque
       #
       # @return [String] redis key
       def redis_retry_key(*args)
-        ['resque-retry', name, identifier(*args)].compact.join(":")
+        ['resque-retry', name, identifier(*args)].compact.join(":").gsub(/\s/, '')
       end
 
       ##
