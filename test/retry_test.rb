@@ -132,10 +132,14 @@ class RetryTest < Test::Unit::TestCase
     assert_equal 6, Resque.info[:processed], 'processed job'
     assert_equal 0, Resque.info[:pending], 'pending jobs'
   end
-  
+
   def test_job_without_args_has_no_ending_colon_in_redis_key
     assert_equal 'resque-retry:GoodJob:yarrrr', GoodJob.redis_retry_key('yarrrr')
     assert_equal 'resque-retry:GoodJob:foo', GoodJob.redis_retry_key('foo')
     assert_equal 'resque-retry:GoodJob', GoodJob.redis_retry_key
+  end
+
+  def test_redis_retry_key_removes_whitespace
+    assert_equal 'resque-retry:GoodJob:arg1-removespace', GoodJob.redis_retry_key('arg1', 'remove space')
   end
 end

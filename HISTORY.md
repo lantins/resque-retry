@@ -1,3 +1,7 @@
+## 0.0.3 (2010-06-02)
+
+* Bugfix: Make sure that `redis_retry_key` has no whitespace.
+
 ## 0.0.2 (2010-05-06)
 
 * Bugfix: Were calling non-existent method to delete redis key.
