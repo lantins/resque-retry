@@ -1,3 +1,7 @@
+## 0.0.4 (2010-06-16)
+
+* Relax gemspec dependancies.
+
 ## 0.0.3 (2010-06-02)
 
 * Bugfix: Make sure that `redis_retry_key` has no whitespace.
