@@ -4,8 +4,6 @@ $TESTING = true
 
 require 'test/unit'
 require 'rubygems'
-require 'resque'
-require 'resque_scheduler'
 require 'turn'
 
 require 'resque-retry'
