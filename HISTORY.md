@@ -1,3 +1,7 @@
+## 0.0.5 (2010-06-27)
+
+* Handle our own dependancies.
+
 ## 0.0.4 (2010-06-16)
 
 * Relax gemspec dependancies.

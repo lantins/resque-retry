@@ -1,6 +1,6 @@
 spec = Gem::Specification.new do |s|
   s.name              = 'resque-retry'
-  s.version           = '0.0.4'
+  s.version           = '0.0.5'
   s.date              = Time.now.strftime('%Y-%m-%d')
   s.summary           = 'A resque plugin; provides retry, delay and exponential backoff support for resque jobs.'
   s.homepage          = 'http://github.com/lantins/resque-retry'
