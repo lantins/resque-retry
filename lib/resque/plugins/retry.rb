@@ -138,6 +138,11 @@ module Resque
         false
       end
 
+      def retry_criteria_check(&block)
+        @retry_criteria_checks ||= []
+        @retry_criteria_checks << block
+      end
+
       ##
       # Will retry the job.
       def try_again(*args)
