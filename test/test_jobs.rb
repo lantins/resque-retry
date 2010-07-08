@@ -72,3 +72,12 @@ class RetryCustomExceptionsJob < RetryDefaultsJob
     end
   end
 end
+
+module RetryModuleDefaultsJob
+  extend Resque::Plugins::Retry
+  @queue = :testing
+
+  def self.perform(*args)
+    raise
+  end
+end

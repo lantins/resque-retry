@@ -31,6 +31,17 @@ class RetryTest < Test::Unit::TestCase
     assert_equal 2, Resque.info[:processed], 'processed job'
   end
 
+  def test_module_retry_defaults
+    Resque.enqueue(RetryModuleDefaultsJob)
+    3.times do
+      perform_next_job(@worker)
+    end
+
+    assert_equal 0, Resque.info[:pending], 'pending jobs'
+    assert_equal 2, Resque.info[:failed], 'failed jobs'
+    assert_equal 2, Resque.info[:processed], 'processed job'
+  end
+
   def test_job_args_are_maintained
     test_args = ['maiow', 'cat', [42, 84]]
 
@@ -142,4 +153,5 @@ class RetryTest < Test::Unit::TestCase
   def test_redis_retry_key_removes_whitespace
     assert_equal 'resque-retry:GoodJob:arg1-removespace', GoodJob.redis_retry_key('arg1', 'remove space')
   end
+
 end
