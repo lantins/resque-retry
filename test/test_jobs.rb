@@ -81,3 +81,56 @@ module RetryModuleDefaultsJob
     raise
   end
 end
+
+module RetryModuleCustomRetryCriteriaCheckTrue
+  extend Resque::Plugins::Retry
+  @queue = :testing
+  
+  # make sure the retry exceptions check will return false.
+  @retry_exceptions = [CustomException]
+  
+  retry_criteria_check do |exception, *args|
+    p "first level"
+    true
+  end
+
+  def self.perform(*args)
+    raise
+  end
+end
+
+module RetryModuleCustomRetryCriteriaCheckFalse
+  extend Resque::Plugins::Retry
+  @queue = :testing
+  
+  # make sure the retry exceptions check will return false.
+  @retry_exceptions = [CustomException]
+  
+  retry_criteria_check do |exception, *args|
+    p "first level"
+    false
+  end
+
+  def self.perform(*args)
+    raise
+  end
+end
+
+
+class CustomRetryCriteriaCheckFirstLevel < RetryDefaultsJob
+  @queue = :testing
+
+  retry_criteria_check do |exception, *args|
+    p "first level"
+    false
+  end
+end
+
+class CustomRetryCriteriaCheckSecondLevel < CustomRetryCriteriaCheckFirstLevel
+  @queue = :testing
+
+  retry_criteria_check do |exception, *args|
+    p "second level"
+    true
+  end
+end
