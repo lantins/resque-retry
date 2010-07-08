@@ -124,11 +124,18 @@ module Resque
       # @param [Array] args job arguments
       # @return [Boolean]
       def retry_criteria_valid?(exception, *args)
-        # FIXME: let people extend retry criteria, give them a chance to say no.
-        if retry_limit > 0
-          return false if retry_attempt >= retry_limit
-        end
+        # if the retry limit was reached, dont bother checking anything else.
+        return false if retry_limit_reached?
+
+        # check if we should retry this type of exception.
         retry_exception?(exception.class)
+      end
+
+      def retry_limit_reached?
+        if retry_limit > 0
+          return true if retry_attempt >= retry_limit
+        end
+        false
       end
 
       ##
