@@ -35,6 +35,7 @@ module Resque
     #
     module Retry
       def inherited(subclass)
+        super(subclass)
         subclass.instance_variable_set("@retry_criteria_checks", retry_criteria_checks.dup)
       end
 
