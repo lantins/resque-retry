@@ -18,6 +18,25 @@ class RetryDefaultsJob
   end
 end
 
+class InheritTestJob < RetryDefaultsJob
+end
+
+class InheritTestWithExtraJob < InheritTestJob
+  retry_criteria_check do |exception, *args|
+    false
+  end
+end
+
+class InheritTestWithMoreExtraJob < InheritTestWithExtraJob
+  retry_criteria_check do |exception, *args|
+    false
+  end
+
+  retry_criteria_check do |exception, *args|
+    false
+  end
+end
+
 class RetryWithModifiedArgsJob < RetryDefaultsJob
   @queue = :testing
 
@@ -48,10 +67,10 @@ end
 class CustomExponentialBackoffJob
   extend Resque::Plugins::ExponentialBackoff
   @queue = :testing
-  
+
   @retry_limit = 4
   @backoff_strategy = [10, 20, 30]
-  
+
   def self.perform(url, hook_id, hmac_key)
     raise
   end
@@ -85,10 +104,10 @@ end
 module RetryModuleCustomRetryCriteriaCheck
   extend Resque::Plugins::Retry
   @queue = :testing
-  
+
   # make sure the retry exceptions check will return false.
   @retry_exceptions = [CustomException]
-  
+
   retry_criteria_check do |exception, *args|
     true
   end
@@ -119,3 +138,42 @@ class CustomRetryCriteriaCheckDoRetry < CustomRetryCriteriaCheckDontRetry
     true
   end
 end
+
+# A job to test whether self.inherited is respected
+# when added by other modules.
+class InheritOrderingJobExtendFirst
+  extend Resque::Plugins::Retry
+
+  retry_criteria_check do |exception, *args|
+    false
+  end
+
+  class << self
+    attr_accessor :test_value
+  end
+
+  def self.inherited(subclass)
+    super(subclass)
+    subclass.test_value = "test"
+  end
+end
+
+class InheritOrderingJobExtendLast
+  class << self
+    attr_accessor :test_value
+  end
+
+  def self.inherited(subclass)
+    super(subclass)
+    subclass.test_value = "test"
+  end
+
+  extend Resque::Plugins::Retry
+
+  retry_criteria_check do |exception, *args|
+    false
+  end
+end
+
+class InheritOrderingJobExtendFirstSubclass < InheritOrderingJobExtendFirst; end
+class InheritOrderingJobExtendLastSubclass < InheritOrderingJobExtendLast; end
