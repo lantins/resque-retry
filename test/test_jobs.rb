@@ -101,6 +101,9 @@ end
 class CustomRetryCriteriaCheckDontRetry < RetryDefaultsJob
   @queue = :testing
 
+  # make sure the retry exceptions check will return false.
+  @retry_exceptions = [CustomException]
+
   retry_criteria_check do |exception, *args|
     p "first level"
     false

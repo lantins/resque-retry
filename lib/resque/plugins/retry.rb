@@ -34,6 +34,15 @@ module Resque
     #   end
     #
     module Retry
+      def inherited(subclass)
+        subclass.instance_variable_set("@retry_criteria_checks", retry_criteria_checks.dup)
+      end
+
+      #def self.included(base)
+      #  p "included!!!!!"
+      #  subclass.instance_variable_set("@retry_criteria_checks", retry_criteria_checks.dup)
+      #end
+
       ##
       # @abstract You may override to implement a custom identifier,
       #           you should consider doing this if your job arguments
@@ -127,8 +136,27 @@ module Resque
         # if the retry limit was reached, dont bother checking anything else.
         return false if retry_limit_reached?
 
-        # check if we should retry this type of exception.
-        retry_exception?(exception.class)
+        should_retry = false
+        # call user retry criteria check blocks.
+        retry_criteria_checks.each do |criteria_check|
+          should_retry ||= !!criteria_check.call(exception, *args)
+        end
+
+        should_retry
+      end
+
+      def retry_criteria_checks
+        @retry_criteria_checks ||= []
+        
+        # add built in crteria checks.
+        if @retry_criteria_checks.empty?
+          @retry_criteria_checks << lambda do |exception, *args|
+            # FIXME: The bindings are incorrect when this runs...
+            retry_exception?(exception.class)
+          end
+        end
+        
+        @retry_criteria_checks
       end
 
       def retry_limit_reached?
@@ -139,8 +167,8 @@ module Resque
       end
 
       def retry_criteria_check(&block)
-        @retry_criteria_checks ||= []
-        @retry_criteria_checks << block
+        #@retry_criteria_checks = retry_criteria_checks
+        retry_criteria_checks << block
       end
 
       ##
