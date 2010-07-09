@@ -139,7 +139,7 @@ module Resque
         should_retry = false
         # call user retry criteria check blocks.
         retry_criteria_checks.each do |criteria_check|
-          should_retry ||= !!criteria_check.call(exception, *args)
+          should_retry ||= !!instance_exec(exception, *args, &criteria_check)
         end
 
         should_retry
@@ -151,7 +151,6 @@ module Resque
         # add built in crteria checks.
         if @retry_criteria_checks.empty?
           @retry_criteria_checks << lambda do |exception, *args|
-            # FIXME: The bindings are incorrect when this runs...
             retry_exception?(exception.class)
           end
         end

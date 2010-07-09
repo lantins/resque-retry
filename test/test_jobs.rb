@@ -105,7 +105,6 @@ class CustomRetryCriteriaCheckDontRetry < RetryDefaultsJob
   @retry_exceptions = [CustomException]
 
   retry_criteria_check do |exception, *args|
-    p "first level"
     false
   end
 end
@@ -117,7 +116,6 @@ class CustomRetryCriteriaCheckDoRetry < CustomRetryCriteriaCheckDontRetry
   @retry_exceptions = [CustomException]
 
   retry_criteria_check do |exception, *args|
-    p "second level"
     true
   end
 end
