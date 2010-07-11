@@ -1,7 +1,6 @@
 module Resque
   module Plugins
 
-    ##
     # If you want your job to retry on failure using a varying delay, simply
     # extend your module/class with this module:
     #
@@ -38,7 +37,6 @@ module Resque
     module ExponentialBackoff
       include Resque::Plugins::Retry
 
-      ##
       # Defaults to the number of delays in the backoff strategy.
       #
       # @return [Number] maximum number of retries
@@ -46,7 +44,6 @@ module Resque
         @retry_limit ||= backoff_strategy.length
       end
 
-      ##
       # Selects the delay from the backoff strategy.
       #
       # @return [Number] seconds to delay until the next retry.
@@ -54,7 +51,6 @@ module Resque
         backoff_strategy[retry_attempt] || backoff_strategy.last
       end
 
-      ##
       # @abstract
       # The backoff strategy is used to vary the delay between retry attempts.
       # 

@@ -10,7 +10,6 @@ require 'resque-retry'
 require dir + '/test_jobs'
 
 
-##
 # make sure we can run redis
 if !system("which redis-server")
   puts '', "** can't find `redis-server` in your path"
@@ -19,7 +18,6 @@ if !system("which redis-server")
 end
 
 
-##
 # start our own redis when the tests start,
 # kill it when they end
 at_exit do
@@ -42,7 +40,6 @@ puts "Starting redis for testing at localhost:9736..."
 `redis-server #{dir}/redis-test.conf`
 Resque.redis = '127.0.0.1:9736'
 
-##
 # Test helpers
 class Test::Unit::TestCase
   def perform_next_job(worker, &block)
