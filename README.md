@@ -105,6 +105,36 @@ it so only specific exceptions are retried using `retry_exceptions`:
 The above modification will **only** retry if a `NetworkError` (or subclass)
 exception is thrown.
 
+### Custom Retry Criteria Check Callbacks
+
+You may define custom retry criteria callbacks:
+
+    class TurkWorker
+      extend Resque::Plugins::Retry
+      @queue = :turk_job_processor
+
+      @retry_exceptions = [NetworkError]
+
+      retry_criteria_check do |exception, *args|
+        if exception.message =~ /InvalidJobId/
+          false # don't retry if we got passed a invalid job id.
+        else
+          true  # its okay for a retry attempt to continue.
+        end
+      end
+
+      def self.perform(job_id)
+        heavy_lifting
+      end
+    end
+
+Similar to the previous example, this job will retry if either a
+`NetworkError` (or subclass) exception is thrown **or** any of the callbacks
+return true.
+
+Use `@retry_exceptions = [] # empty array` if you just wish to use callbacks
+to determine if you should retry.
+
 Customise & Extend
 ------------------
 

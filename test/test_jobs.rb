@@ -183,7 +183,7 @@ class InheritOrderingJobExtendFirst
 
   def self.inherited(subclass)
     super(subclass)
-    subclass.test_value = "test"
+    subclass.test_value = 'test'
   end
 end
 
@@ -194,7 +194,7 @@ class InheritOrderingJobExtendLast
 
   def self.inherited(subclass)
     super(subclass)
-    subclass.test_value = "test"
+    subclass.test_value = 'test'
   end
 
   extend Resque::Plugins::Retry
