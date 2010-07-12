@@ -1,3 +1,7 @@
+## 0.0.6 (2010-07-11)
+
+* Feature: Added support for custom retry criteria check callbacks.
+
 ## 0.0.5 (2010-06-27)
 
 * Handle our own dependancies.
