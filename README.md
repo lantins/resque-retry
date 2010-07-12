@@ -132,8 +132,8 @@ Similar to the previous example, this job will retry if either a
 `NetworkError` (or subclass) exception is thrown **or** any of the callbacks
 return true.
 
-Use `@retry_exceptions = [] # empty array` if you just wish to use callbacks
-to determine if you should retry.
+Use `@retry_exceptions = []` to **only** use callbacks, to determine if the
+job should retry.
 
 Customise & Extend
 ------------------
