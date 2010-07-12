@@ -39,4 +39,37 @@ class RetryCriteriaTest < Test::Unit::TestCase
     assert_equal 2, Resque.info[:failed], 'failed jobs'
     assert_equal 2, Resque.info[:processed], 'processed job'
   end
+
+  def test_retry_criteria_check_multiple_never_retry
+    Resque.enqueue(CustomRetryCriteriaCheckMultipleFailTwice, 'dont')
+    6.times do
+      perform_next_job(@worker)
+    end
+
+    assert_equal 0, Resque.info[:pending], 'pending jobs'
+    assert_equal 1, Resque.info[:failed], 'failed jobs'
+    assert_equal 1, Resque.info[:processed], 'processed job'
+  end
+
+  def test_retry_criteria_check_multiple_do_retry
+    Resque.enqueue(CustomRetryCriteriaCheckMultipleFailTwice, 'do')
+    6.times do
+      perform_next_job(@worker)
+    end
+
+    assert_equal 0, Resque.info[:pending], 'pending jobs'
+    assert_equal 2, Resque.info[:failed], 'failed jobs'
+    assert_equal 3, Resque.info[:processed], 'processed job'
+  end
+
+  def test_retry_criteria_check_multiple_do_retry_again
+    Resque.enqueue(CustomRetryCriteriaCheckMultipleFailTwice, 'do_again')
+    6.times do
+      perform_next_job(@worker)
+    end
+
+    assert_equal 0, Resque.info[:pending], 'pending jobs'
+    assert_equal 2, Resque.info[:failed], 'failed jobs'
+    assert_equal 3, Resque.info[:processed], 'processed job'
+  end
 end

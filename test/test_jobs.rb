@@ -139,6 +139,35 @@ class CustomRetryCriteriaCheckDoRetry < CustomRetryCriteriaCheckDontRetry
   end
 end
 
+# A job using multiple custom retry criteria checks.
+# It always fails 2 times.
+class CustomRetryCriteriaCheckMultipleFailTwice
+  extend Resque::Plugins::Retry
+  @retry_limit = 6
+  @queue = :testing
+
+  # make sure we dont retry due to default exception behaviour.
+  @retry_exceptions = []
+
+  retry_criteria_check do |exception, *args|
+    exception.message == 'dont' ? false : true
+  end
+
+  retry_criteria_check do |exception, *args|
+    exception.message == 'do' ? true : false
+  end
+
+  retry_criteria_check do |exception, *args|
+    exception.message == 'do_again' ? true : false
+  end
+
+  def self.perform(msg)
+    if retry_attempt < 2 # always fail twice please.
+      raise StandardError, msg
+    end
+  end
+end
+
 # A job to test whether self.inherited is respected
 # when added by other modules.
 class InheritOrderingJobExtendFirst
