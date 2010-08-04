@@ -2,6 +2,14 @@ CustomException = Class.new(StandardError)
 HierarchyCustomException = Class.new(CustomException)
 AnotherCustomException = Class.new(StandardError)
 
+class NoRetryJob
+  @queue = :testing
+
+  def self.perform(*args)
+    raise "error"
+  end
+end
+
 class GoodJob
   extend Resque::Plugins::Retry
   @queue = :testing
@@ -48,6 +56,11 @@ end
 class NeverGiveUpJob < RetryDefaultsJob
   @queue = :testing
   @retry_limit = 0
+end
+
+class LimitThreeJob < RetryDefaultsJob
+  @queue = :testing
+  @retry_limit = 3
 end
 
 class FailFiveTimesJob < RetryDefaultsJob

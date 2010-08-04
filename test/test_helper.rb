@@ -40,6 +40,19 @@ puts "Starting redis for testing at localhost:9736..."
 `redis-server #{dir}/redis-test.conf`
 Resque.redis = '127.0.0.1:9736'
 
+# Mock failure backend for testing MultipleWithRetrySuppression
+class MockFailureBackend < Resque::Failure::Base
+  class << self
+    attr_accessor :errors
+  end
+
+  def save
+    self.class.errors << exception.to_s
+  end
+
+  self.errors = []
+end
+
 # Test helpers
 class Test::Unit::TestCase
   def perform_next_job(worker, &block)
