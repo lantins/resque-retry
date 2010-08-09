@@ -1,0 +1,42 @@
+<% timestamp = params[:timestamp].to_i %>
+
+<h1>Delayed jobs scheduled for <%= format_time(Time.at(timestamp)) %></h1>
+
+<p class='sub'>Showing <%= start = params[:start].to_i %> to <%= start + 20 %> of
+  <b><%= size = resque.delayed_timestamp_size(timestamp) %></b> jobs</p>
+
+<table class='jobs'>
+  <tr>
+    <th>Class</th>
+    <th>Args</th>
+    <th>Retry Count</th>
+    <th>Exception</th>
+    <th>Backtrace</th>
+  </tr>
+  <% jobs = resque.delayed_timestamp_peek(timestamp, start, 20) %>
+  <% jobs.each do |job| %>
+      <% retry_key = Resque.constantize(job['class']).redis_retry_key(job["args"]) %>
+      <tr>
+        <td class='class'><%= job['class'] %></td>
+        <td class='args'><%= h job['args'].inspect %></td>
+        <td><%= Resque.redis.get(retry_key) %> </td>
+        <% failure =  Resque.decode(Resque.redis["failure_#{retry_key}"] )%>
+        <td><code><%= failure['exception'] %></code></td>
+        <td class='error'>
+          <% if failure['backtrace'] %>
+              <a href="#" class="backtrace"><%= h(failure['error']) %></a>
+              <pre style='display:none'><%= h failure['backtrace'].join("\n") %></pre>
+          <% else %>
+              <%= h failure['error'] %>
+          <% end %>
+        </td>
+      </tr>
+  <% end %>
+  <% if jobs.empty? %>
+      <tr>
+        <td class='no-data' colspan='2'>There are no pending jobs scheduled for this time.</td>
+      </tr>
+  <% end %>
+</table>
+
+<%= partial :next_more, :start => start, :size => size %>
