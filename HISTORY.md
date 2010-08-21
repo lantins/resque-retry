@@ -1,4 +1,4 @@
-## 0.0.6 (2010-07-11)
+## 0.0.6 (2010-07-12)
 
 * Feature: Added support for custom retry criteria check callbacks.
 

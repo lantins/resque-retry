@@ -16,13 +16,16 @@ class ExponentialBackoffTest < Test::Unit::TestCase
   def test_default_backoff_strategy
     now = Time.now
     Resque.enqueue(ExponentialBackoffJob)
-    2.times do
-      perform_next_job @worker
-    end
 
-    assert_equal 2, Resque.info[:processed], 'processed jobs'
-    assert_equal 2, Resque.info[:failed], 'failed jobs'
-    assert_equal 0, Resque.info[:pending], 'pending jobs'
+    perform_next_job @worker
+    assert_equal 1, Resque.info[:processed], '1 processed job'
+    assert_equal 1, Resque.info[:failed], 'first ever run, and it should of failed, but never retried'
+    assert_equal 1, Resque.info[:pending], '1 pending job, because it never hits the scheduler'
+
+    perform_next_job @worker
+    assert_equal 2, Resque.info[:processed], '2nd run, but first retry'
+    assert_equal 2, Resque.info[:failed], 'should of failed again, this is the first retry attempt'
+    assert_equal 0, Resque.info[:pending], '0 pending jobs, it should be in the delayed queue'
 
     delayed = Resque.delayed_queue_peek(0, 1)
     assert_equal now.to_i + 60, delayed[0], '2nd delay' # the first had a zero delay.
