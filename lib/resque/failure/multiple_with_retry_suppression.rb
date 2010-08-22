@@ -2,18 +2,39 @@ require 'resque/failure/multiple'
 
 module Resque
   module Failure
+
+    # A multiple failure backend, with retry suppression.
+    #
+    # For example: if you had a job that could retry 5 times, your failure 
+    # backends are not notified unless the _final_ retry attempt also fails.
+    #
+    # Example:
+    #
+    #   require 'resque-retry'
+    #   require 'resque/failure/redis'
+    #
+    #   Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
+    #   Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
+    #
     class MultipleWithRetrySuppression < Multiple
+      include Resque::Helpers
+
       module CleanupHooks
-        def after_perform_retry_cleanup(*args)
+        # Resque after_perform hook.
+        #
+        # Deletes retry failure information from Redis.
+        def after_perform_retry_failure_cleanup(*args)
           retry_key = redis_retry_key(*args)
-          failure_key = Resque::Failure::MultipleWithRetrySuppression.
-            failure_key(retry_key)
+          failure_key = Resque::Failure::MultipleWithRetrySuppression.failure_key(retry_key)
           Resque.redis.del(failure_key)
         end
       end
 
-      include Resque::Helpers
-
+      # Called when the job fails.
+      #
+      # If the job will retry, suppress the failure from the other backends.
+      # Store the lastest failure information in redis, used by the web
+      # interface.
       def save
         unless retryable? && retrying?
           cleanup_retry_failure_log!
@@ -30,7 +51,7 @@ module Resque
           }
 
           # Register cleanup hooks.
-          unless klass.respond_to?(:after_perform_retry_cleanup)
+          unless klass.respond_to?(:after_perform_retry_failure_cleanup)
             klass.send(:extend, CleanupHooks)
           end
 
