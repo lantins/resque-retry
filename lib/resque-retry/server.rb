@@ -1,30 +1,44 @@
-# Extend Resque::Server to add tabs
+# Extend Resque::Server to add tabs.
 module ResqueRetry
-
   module Server
 
     def self.included(base)
-      base.class_eval do
+      base.class_eval {
+        helpers do
+          def retry_key_for_job(job)
+            klass = Resque.constantize(job['class'])
+            if klass.respond_to?(:redis_retry_key)
+              klass.redis_retry_key(job['args'])
+            else
+              nil
+            end
+          end
 
+          def retry_attempts_for_job(job)
+            Resque.redis.get(retry_key_for_job(job))
+          end
 
-        get "/retry" do
-          # Is there a better way to specify alternate template locations with sinatra?
-          erb File.read(File.join(File.dirname(__FILE__), 'server/views/retry.erb'))
+          def retry_failure_details(retry_key)
+            Resque.decode(Resque.redis["failure_#{retry_key}"])
+          end
+
+          def local_template(path)
+            # Is there a better way to specify alternate template locations with sinatra?
+            File.read(File.join(File.dirname(__FILE__), "server/views/#{path}"))
+          end
         end
 
-        get "/retry/:timestamp" do
-          # Is there a better way to specify alternate template locations with sinatra?
-          erb File.read(File.join(File.dirname(__FILE__), 'server/views/retry_timestamp.erb'))
+        get '/retry' do
+          erb local_template('retry.erb')
         end
 
-
-      end
-
+        get '/retry/:timestamp' do
+          erb local_template('retry_timestamp.erb')
+        end
+      }
     end
 
-
   end
-
 end
 
 Resque::Server.tabs << 'Retry'
