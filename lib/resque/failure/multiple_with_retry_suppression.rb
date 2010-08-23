@@ -61,7 +61,7 @@ module Resque
 
       # Expose this for the hook's use.
       def self.failure_key(retry_key)
-        "failure_" + retry_key
+        'failure_' + retry_key
       end
 
       protected

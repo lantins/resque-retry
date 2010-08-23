@@ -1,22 +1,112 @@
 resque-retry
 ============
 
-A [Resque][rq] plugin. Requires Resque 1.8.0 & [resque-scheduler][rqs]
+A [Resque][rq] plugin. Requires Resque 1.8.0 & [resque-scheduler][rqs].
 
 resque-retry provides retry, delay and exponential backoff support for
 resque jobs.
-
-### Features
 
   - Redis backed retry count/limit.
   - Retry on all or specific exceptions.
   - Exponential backoff (varying the delay between retrys).
   - Small & Extendable - plenty of places to override retry logic/settings.
+  - Multiple failure backend with retry suppression & resque-web tab.
 
-Usage / Examples
-----------------
+Install & Quick Start
+---------------------
 
-Just extend your module/class with this module, and your ready to retry!
+To install:
+
+    $ gem install resque-retry
+
+You'll want add this to your `Rakefile`:
+
+    require 'resque_scheduler/tasks'
+
+The delay between retry attempts is provided by [resque-scheduler][rqs].
+You'll want to run the scheduler process, otherwise delayed retry attempts
+will never perform:
+
+    $ rake resque:scheduler
+
+Use the plugin:
+
+    require 'resque-retry'
+
+    class ExampleRetryJob
+      extend Resque::Plugins::Retry
+      @queue = :example_queue
+
+      @retry_limit = 3
+      @retry_delay = 60
+
+      def self.perform(*args)
+        # your magic/heavy lifting goes here.
+      end
+    end
+
+Then start up a resque worker as normal:
+
+    $ QUEUE=* rake resque:work
+
+Now if you ExampleRetryJob fails, it will be retried 3 times, with a 60 second
+delay between attempts.
+
+For more explanation and examples, please see the remaining documentation.
+
+Failure Backend & Resque Web Additions
+--------------------------------------
+
+Lets say your using the Redis failure backend of resque (the default).
+Every time a job fails, the failure queue is populated with the job and
+exception details.
+
+Normally this is useful, but if your jobs retry... it can cause a bit of a mess.
+
+For example: given a job that retried 4 times before completing successful.
+You'll have a lot of failures for the same job and you wont be sure if it
+actually completed successfully just by just using the resque-web interface.
+
+### Failure Backend
+
+`MultipleWithRetrySuppression` is a multiple failure backend, with retry suppression.
+
+Here's an example, using the Redis failure backend:
+
+    require 'resque-retry'
+    require 'resque/failure/redis'
+
+    # require my jobs & application code.
+
+    Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
+    Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
+
+If a job fails, but **can and will** retry, the failure details wont be
+logged in the Redis failed queue *(visible via resque-web)*.
+
+If the job fails, but **can't or won't** retry, the failure will be logged in
+the Redis failed queue, like a normal failure *(without retry)* would.
+
+### Resque Web Additions
+
+If your using the `MultipleWithRetrySuppression` failure backend, you should
+also checkout the resque-web additions!
+
+The new Retry tab displays delayed jobs with retry information; the number of
+attempts and the exception details from the last failure.
+
+Make sure you include this in your `config.ru` or similar file:
+
+    require 'resque-retry'
+    require 'resque-retry/server'
+
+    # require my jobs & application code.
+
+Retry Options & Logic
+---------------------
+
+Please take a look at the yardoc/code for more details on methods you may
+wish to override.
 
 Customisation is pretty easy, the below examples should give you
 some ideas =), adapt for your own usage and feel free to pick and mix!
@@ -135,14 +225,6 @@ return true.
 Use `@retry_exceptions = []` to **only** use callbacks, to determine if the
 job should retry.
 
-Customise & Extend
-------------------
-
-Please take a look at the yardoc/code for more details on methods you may
-wish to override.
-
-Some things worth noting:
-
 ### Job Identifier/Key
 
 The retry attempt is incremented and stored in a Redis key. The key is
@@ -178,7 +260,7 @@ job arguments, to modify the arguments for the next retry attempt.
     class DeliverViaSMSC
       extend Resque::Plugins::Retry
       @queue = :mt_smsc_messages
-      
+
       # retry using the emergency SMSC.
       def self.args_for_retry(smsc_id, mt_message)
         [999, mt_message]
@@ -189,10 +271,16 @@ job arguments, to modify the arguments for the next retry attempt.
       end
     end
 
-Install
--------
+Contributing/Pull Requests
+--------------------------
 
-    $ gem install resque-retry
+  - Yes please!
+  - Fork the project.
+  - Make your feature addition or bug fix.
+  - Add tests for it.
+  - Commit.
+  - Send me a pull request. Bonus points for topic branches.
+  - If you edit the gemspec/version etc, do it in another commit please.
 
 [rq]: http://github.com/defunkt/resque
 [rqs]: http://github.com/bvandenbos/resque-scheduler

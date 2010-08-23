@@ -19,7 +19,7 @@ module Resque
     #     extend Resque::Plugins::Retry
     #     @queue = :web_hooks
     #
-    #     @retry_limit = 8          # default: 1
+    #     @retry_limit = 8  # default: 1
     #     @retry_delay = 60 # default: 0
     #
     #     # used to build redis key, for counting job attempts.
