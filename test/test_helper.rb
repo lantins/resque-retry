@@ -5,6 +5,11 @@ $TESTING = true
 require 'test/unit'
 require 'rubygems'
 require 'turn'
+require 'simplecov-html'
+
+SimpleCov.start do
+  add_filter "/test/"
+end
 
 require 'resque-retry'
 require dir + '/test_jobs'

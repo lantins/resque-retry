@@ -14,8 +14,10 @@ spec = Gem::Specification.new do |s|
 
   s.add_dependency('resque', '>= 1.8.0')
   s.add_dependency('resque-scheduler', '>= 1.8.0')
+  s.add_development_dependency('test-unit')
   s.add_development_dependency('turn')
   s.add_development_dependency('yard')
+  s.add_development_dependency('simplecov-html', '>= 0.3.0')
 
   s.description       = <<-EOL
   resque-retry provides retry, delay and exponential backoff support for
@@ -27,5 +29,6 @@ spec = Gem::Specification.new do |s|
   * Retry on all or specific exceptions.
   * Exponential backoff (varying the delay between retrys).
   * Small & Extendable - plenty of places to override retry logic/settings.
+  * Multiple failure backend with retry suppression & resque-web tab.
   EOL
 end

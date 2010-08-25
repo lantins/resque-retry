@@ -6,11 +6,11 @@ A [Resque][rq] plugin. Requires Resque 1.8.0 & [resque-scheduler][rqs].
 resque-retry provides retry, delay and exponential backoff support for
 resque jobs.
 
-  - Redis backed retry count/limit.
-  - Retry on all or specific exceptions.
-  - Exponential backoff (varying the delay between retrys).
-  - Small & Extendable - plenty of places to override retry logic/settings.
-  - Multiple failure backend with retry suppression & resque-web tab.
+  * Redis backed retry count/limit.
+  * Retry on all or specific exceptions.
+  * Exponential backoff (varying the delay between retrys).
+  * Small & Extendable - plenty of places to override retry logic/settings.
+  * Multiple failure backend with retry suppression & resque-web tab.
 
 Install & Quick Start
 ---------------------
@@ -274,13 +274,13 @@ job arguments, to modify the arguments for the next retry attempt.
 Contributing/Pull Requests
 --------------------------
 
-  - Yes please!
-  - Fork the project.
-  - Make your feature addition or bug fix.
-  - Add tests for it.
-  - Commit.
-  - Send me a pull request. Bonus points for topic branches.
-  - If you edit the gemspec/version etc, do it in another commit please.
+  * Yes please!
+  * Fork the project.
+  * Make your feature addition or bug fix.
+  * Add tests for it.
+  * Commit.
+  * Send me a pull request. Bonus points for topic branches.
+  * If you edit the gemspec/version etc, do it in another commit please.
 
 [rq]: http://github.com/defunkt/resque
 [rqs]: http://github.com/bvandenbos/resque-scheduler
