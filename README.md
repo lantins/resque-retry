@@ -9,8 +9,8 @@ resque jobs.
   * Redis backed retry count/limit.
   * Retry on all or specific exceptions.
   * Exponential backoff (varying the delay between retrys).
-  * Small & Extendable - plenty of places to override retry logic/settings.
   * Multiple failure backend with retry suppression & resque-web tab.
+  * Small & Extendable - plenty of places to override retry logic/settings.
 
 Install & Quick Start
 ---------------------
@@ -21,6 +21,7 @@ To install:
 
 You'll want add this to your `Rakefile`:
 
+    require 'resque/tasks'
     require 'resque_scheduler/tasks'
 
 The delay between retry attempts is provided by [resque-scheduler][rqs].
@@ -76,7 +77,7 @@ Here's an example, using the Redis failure backend:
     require 'resque-retry'
     require 'resque/failure/redis'
 
-    # require my jobs & application code.
+    # require your jobs & application code.
 
     Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
     Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
@@ -100,7 +101,9 @@ Make sure you include this in your `config.ru` or similar file:
     require 'resque-retry'
     require 'resque-retry/server'
 
-    # require my jobs & application code.
+    # require your jobs & application code.
+
+    run Resque::Server.new
 
 Retry Options & Logic
 ---------------------
@@ -111,7 +114,7 @@ wish to override.
 Customisation is pretty easy, the below examples should give you
 some ideas =), adapt for your own usage and feel free to pick and mix!
 
-### Retry
+### Retry Defaults
 
 Retry the job **once** on failure, with zero delay.
 
@@ -225,6 +228,25 @@ return true.
 Use `@retry_exceptions = []` to **only** use callbacks, to determine if the
 job should retry.
 
+### Retry Arguments
+
+You may override `args_for_retry`, which is passed the current
+job arguments, to modify the arguments for the next retry attempt.
+
+    class DeliverViaSMSC
+      extend Resque::Plugins::Retry
+      @queue = :mt_smsc_messages
+
+      # retry using the emergency SMSC.
+      def self.args_for_retry(smsc_id, mt_message)
+        [999, mt_message]
+      end
+
+      self.perform(smsc_id, mt_message)
+        heavy_lifting
+      end
+    end
+
 ### Job Identifier/Key
 
 The retry attempt is incremented and stored in a Redis key. The key is
@@ -248,25 +270,6 @@ Or you can define the entire key by overriding `redis_retry_key`.
       end
 
       self.perform(mt_id, mobile_number, message)
-        heavy_lifting
-      end
-    end
-
-### Retry Arguments
-
-You may override `args_for_retry`, which is passed the current
-job arguments, to modify the arguments for the next retry attempt.
-
-    class DeliverViaSMSC
-      extend Resque::Plugins::Retry
-      @queue = :mt_smsc_messages
-
-      # retry using the emergency SMSC.
-      def self.args_for_retry(smsc_id, mt_message)
-        [999, mt_message]
-      end
-
-      self.perform(smsc_id, mt_message)
         heavy_lifting
       end
     end

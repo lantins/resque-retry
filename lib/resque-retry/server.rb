@@ -5,6 +5,7 @@ module ResqueRetry
     def self.included(base)
       base.class_eval {
         helpers do
+          # builds a retry key for the specified job.
           def retry_key_for_job(job)
             klass = Resque.constantize(job['class'])
             if klass.respond_to?(:redis_retry_key)
@@ -14,14 +15,17 @@ module ResqueRetry
             end
           end
 
+          # gets the number of retry attempts for a job.
           def retry_attempts_for_job(job)
             Resque.redis.get(retry_key_for_job(job))
           end
-
+          
+          # gets the failure details hash for a job.
           def retry_failure_details(retry_key)
             Resque.decode(Resque.redis["failure_#{retry_key}"])
           end
 
+          # reads a 'local' template file.
           def local_template(path)
             # Is there a better way to specify alternate template locations with sinatra?
             File.read(File.join(File.dirname(__FILE__), "server/views/#{path}"))
@@ -42,7 +46,6 @@ module ResqueRetry
 end
 
 Resque::Server.tabs << 'Retry'
-
 Resque::Server.class_eval do
   include ResqueRetry::Server
 end

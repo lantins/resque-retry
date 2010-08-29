@@ -1,3 +1,9 @@
+## 0.1.0 (2010-08-29)
+
+* Feature: Multiple failure backend with retry suppression.
+* Feature: resque-web tab showing retry information.
+* Improved README documentation, added a 'Quick Start' section.
+
 ## 0.0.6 (2010-07-12)
 
 * Feature: Added support for custom retry criteria check callbacks.

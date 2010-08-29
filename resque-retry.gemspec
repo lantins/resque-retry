@@ -1,6 +1,6 @@
 spec = Gem::Specification.new do |s|
   s.name              = 'resque-retry'
-  s.version           = '0.0.6'
+  s.version           = '0.1.0'
   s.date              = Time.now.strftime('%Y-%m-%d')
   s.summary           = 'A resque plugin; provides retry, delay and exponential backoff support for resque jobs.'
   s.homepage          = 'http://github.com/lantins/resque-retry'
@@ -28,7 +28,7 @@ spec = Gem::Specification.new do |s|
   * Redis backed retry count/limit.
   * Retry on all or specific exceptions.
   * Exponential backoff (varying the delay between retrys).
-  * Small & Extendable - plenty of places to override retry logic/settings.
   * Multiple failure backend with retry suppression & resque-web tab.
+  * Small & Extendable - plenty of places to override retry logic/settings.
   EOL
 end
