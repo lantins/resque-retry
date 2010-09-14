@@ -5,7 +5,7 @@ $TESTING = true
 require 'test/unit'
 require 'rubygems'
 require 'turn'
-require 'simplecov-html'
+require 'simplecov'
 
 SimpleCov.start do
   add_filter "/test/"
