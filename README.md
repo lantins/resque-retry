@@ -19,7 +19,7 @@ To install:
 
     $ gem install resque-retry
 
-You'll want add this to your `Rakefile`:
+Add this to your `Rakefile`:
 
     require 'resque/tasks'
     require 'resque_scheduler/tasks'
@@ -118,7 +118,7 @@ some ideas =), adapt for your own usage and feel free to pick and mix!
 
 Retry the job **once** on failure, with zero delay.
 
-    require 'require-retry'
+    require 'resque-retry'
 
     class DeliverWebHook
       extend Resque::Plugins::Retry
