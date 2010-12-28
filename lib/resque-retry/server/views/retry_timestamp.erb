@@ -22,6 +22,7 @@
     <th>Retry Attempts</th>
     <th>Exception</th>
     <th>Backtrace</th>
+    <th>Actions</th>
   </tr>
   <% jobs = resque.delayed_timestamp_peek(timestamp, start, 20) %>
   <% jobs.each do |job| %>
@@ -45,6 +46,7 @@
           <% end %>
         </td>
       <% end %>
+      <td><a href="<%= url "retry/#{timestamp}/jobs/#{CGI.escape(Resque.encode(job))}/remove" %>" class="remove">Remove</a></td>
     </tr>
   <% end %>
   <% if jobs.empty? %>
