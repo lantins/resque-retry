@@ -36,10 +36,9 @@ module ResqueRetry
           def cancel_retry(job)
             klass = Resque.constantize(job['class'])
             retry_key = retry_key_for_job(job)
-            puts retry_key
-            puts Resque.remove_delayed(klass, job['args'])
-            puts Resque.redis.del("failure_#{retry_key}")
-            puts Resque.redis.del(retry_key)
+            Resque.remove_delayed(klass, *job["args"])
+            Resque.redis.del("failure_#{retry_key}")
+            Resque.redis.del(retry_key)
           end
         end
 
@@ -51,10 +50,10 @@ module ResqueRetry
           erb local_template('retry_timestamp.erb')
         end
 
-        get "/retry/:timestamp/jobs/:id/remove" do
+        post "/retry/:timestamp/jobs/:id/remove" do
           job = Resque.decode(params[:id])
           cancel_retry(job)
-          redirect u('retry')
+          redirect u("retry/#{params[:timestamp]}")
         end
       }
     end
