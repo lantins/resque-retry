@@ -21,7 +21,8 @@
   </tr>
   <% timestamps = resque.delayed_queue_peek(start, start+20) %>
   <% timestamps.each do |timestamp| %>
-    <% job = resque.delayed_timestamp_peek(timestamp, 0, 1).first || {} %>
+    <% job = resque.delayed_timestamp_peek(timestamp, 0, 1).first %>
+    <% next unless job %>
     <% retry_key = retry_key_for_job(job) %>
     <tr>
       <td>
