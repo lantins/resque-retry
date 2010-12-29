@@ -26,6 +26,10 @@
     <% retry_key = retry_key_for_job(job) %>
     <tr>
       <td>
+        <form action="<%= url "retry/#{timestamp}/remove" %>" method="post">
+          <input type="hidden" name="timestamp" value="<%= timestamp.to_i %>">
+          <input type="submit" value="Remove">
+        </form>
         <form action="<%= url "/delayed/queue_now" %>" method="post">
           <input type="hidden" name="timestamp" value="<%= timestamp.to_i %>">
           <input type="submit" value="Queue now">

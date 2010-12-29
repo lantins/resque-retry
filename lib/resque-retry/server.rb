@@ -50,6 +50,13 @@ module ResqueRetry
           erb local_template('retry_timestamp.erb')
         end
 
+        post "/retry/:timestamp/remove" do
+          Resque.delayed_timestamp_peek(params[:timestamp], 0, 0).each do |job|
+            cancel_retry(job)
+          end
+          redirect u("retry")
+        end
+
         post "/retry/:timestamp/jobs/:id/remove" do
           job = Resque.decode(params[:id])
           cancel_retry(job)
