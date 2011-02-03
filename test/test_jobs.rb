@@ -247,5 +247,17 @@ class InheritOrderingJobExtendLast
   end
 end
 
+class NormalRetryCountJob
+  extend Resque::Plugins::Retry
+
+  @retry_delay = 3
+end
+
+class CustomRetryCountJob
+  extend Resque::Plugins::Retry
+
+  @retry_delay = { RuntimeError => 7, Exception => 11, Timeout::Error => 13 }
+end
+
 class InheritOrderingJobExtendFirstSubclass < InheritOrderingJobExtendFirst; end
 class InheritOrderingJobExtendLastSubclass < InheritOrderingJobExtendLast; end
