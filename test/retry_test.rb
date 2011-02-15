@@ -27,6 +27,12 @@ class RetryTest < Test::Unit::TestCase
     assert_equal 7, CustomRetryCountJob.retry_delay(RuntimeError)
     assert_equal 11, CustomRetryCountJob.retry_delay(Exception)
     assert_equal 13, CustomRetryCountJob.retry_delay(Timeout::Error)
+
+    assert_equal [1,2,7], NormalRetryCountArrayJob.retry_delay
+    assert_equal 0, CustomRetryCountArrayJob.retry_delay
+    assert_equal [1,2,7], CustomRetryCountArrayJob.retry_delay(RuntimeError)
+    assert_equal 11, CustomRetryCountArrayJob.retry_delay(Exception)
+    assert_equal [2,4,6,8,10], CustomRetryCountArrayJob.retry_delay(Timeout::Error)
   end
 
   def test_retry_once_by_default
