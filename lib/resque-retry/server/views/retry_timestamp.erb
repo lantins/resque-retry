@@ -22,6 +22,7 @@
     <th>Retry Attempts</th>
     <th>Exception</th>
     <th>Backtrace</th>
+    <th>Actions</th>
   </tr>
   <% jobs = resque.delayed_timestamp_peek(timestamp, start, 20) %>
   <% jobs.each do |job| %>
@@ -45,11 +46,17 @@
           <% end %>
         </td>
       <% end %>
+      <td>
+        <form action="<%= url "retry/#{timestamp}/jobs/#{CGI.escape(Resque.encode(job))}/remove" %>" method="post">
+          <input type="hidden" name="timestamp" value="<%= timestamp.to_i %>">
+          <input type="submit" value="Remove">
+        </form>
+      </td>
     </tr>
   <% end %>
   <% if jobs.empty? %>
     <tr>
-      <td class="no-data" colspan="5">
+      <td class="no-data" colspan="6">
         There are no pending jobs scheduled for this time.
       </td>
     </tr>
