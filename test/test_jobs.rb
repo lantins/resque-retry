@@ -64,6 +64,11 @@ end
 
 class NeverGiveUpJob < RetryDefaultsJob
   @queue = :testing
+  @retry_limit = -1
+end
+
+class NeverRetryJob < RetryDefaultsJob
+  @queue = :testing
   @retry_limit = 0
 end
 
