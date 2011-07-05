@@ -63,7 +63,8 @@ module Resque
       end
 
       # Maximum number of retrys we can attempt to successfully perform the job.
-      # A retry limit of 0 or below will retry forever.
+      # A retry limit of 0 will never retry.
+      # A retry limit of -1 or below will retry forever.
       #
       # @return [Fixnum]
       def retry_limit
@@ -147,10 +148,13 @@ module Resque
       #
       # @return [Boolean]
       def retry_limit_reached?
-        if retry_limit > 0
-          return true if retry_attempt >= retry_limit
+        if retry_limit == 0
+          true
+        elsif retry_limit > 0
+          true if retry_attempt >= retry_limit
+        else
+          false
         end
-        false
       end
 
       # Register a retry criteria check callback to be run before retrying

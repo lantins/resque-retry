@@ -71,6 +71,17 @@ class RetryTest < Test::Unit::TestCase
     assert_equal 10, Resque.info[:processed], 'processed job'
   end
 
+  def test_retry_never_retry
+    Resque.enqueue(NeverRetryJob)
+    10.times do
+      perform_next_job(@worker)
+    end
+
+    assert_equal 0, Resque.info[:pending], 'pending jobs'
+    assert_equal 1, Resque.info[:failed], 'failed jobs'
+    assert_equal 1, Resque.info[:processed], 'processed job'
+  end
+
   def test_fail_five_times_then_succeed
     Resque.enqueue(FailFiveTimesJob)
     7.times do
