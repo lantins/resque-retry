@@ -30,6 +30,16 @@ module ResqueRetry
             # Is there a better way to specify alternate template locations with sinatra?
             File.read(File.join(File.dirname(__FILE__), "server/views/#{path}"))
           end
+
+          # Cancels job retry
+          #
+          def cancel_retry(job)
+            klass = Resque.constantize(job['class'])
+            retry_key = retry_key_for_job(job)
+            Resque.remove_delayed(klass, *job["args"])
+            Resque.redis.del("failure_#{retry_key}")
+            Resque.redis.del(retry_key)
+          end
         end
 
         get '/retry' do
@@ -38,6 +48,19 @@ module ResqueRetry
 
         get '/retry/:timestamp' do
           erb local_template('retry_timestamp.erb')
+        end
+
+        post "/retry/:timestamp/remove" do
+          Resque.delayed_timestamp_peek(params[:timestamp], 0, 0).each do |job|
+            cancel_retry(job)
+          end
+          redirect u("retry")
+        end
+
+        post "/retry/:timestamp/jobs/:id/remove" do
+          job = Resque.decode(params[:id])
+          cancel_retry(job)
+          redirect u("retry/#{params[:timestamp]}")
         end
       }
     end
