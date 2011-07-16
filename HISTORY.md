@@ -1,3 +1,7 @@
+## 0.2.0 (2011-07-00)
+
+* Added Bundler `Gemfile`.
+
 ## 0.1.0 (2010-08-29)
 
 * Feature: Multiple failure backend with retry suppression.
