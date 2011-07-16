@@ -1,3 +1,5 @@
 .*.sw?
+.gem
+.idea
 Gemfile.lock
 coverage/*
