@@ -1,3 +1,5 @@
+require 'cgi'
+
 # Extend Resque::Server to add tabs.
 module ResqueRetry
   module Server
@@ -17,12 +19,12 @@ module ResqueRetry
 
           # gets the number of retry attempts for a job.
           def retry_attempts_for_job(job)
-            Resque.redis.get(retry_key_for_job(job))
+            Resque.decode(Resque.redis.get(retry_key_for_job(job)))
           end
           
           # gets the failure details hash for a job.
           def retry_failure_details(retry_key)
-            Resque.decode(Resque.redis["failure_#{retry_key}"])
+            Resque.decode(Resque.redis.get("failure_#{retry_key}"))
           end
 
           # reads a 'local' template file.

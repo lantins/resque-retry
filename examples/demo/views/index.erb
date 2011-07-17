@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <title>resque-retry demo</title>
+  </head>
+  <body>
+    <p><a href="/resque/">View Resque Web Interface</a></p>
+
+    <table border="0" style="text-align: right;">
+      <tr>
+        <th>pending jobs:</th>
+        <td><%= @info[:pending] %></td>
+      </tr>
+      <tr>
+        <th>processed jobs:</th>
+        <td><%= @info[:processed] %></td>
+      </tr>
+      <tr>
+        <th>failed jobs:</th>
+        <td><%= @info[:failed] %></td>
+      </tr>
+      <tr>
+        <th>total queues:</th>
+        <td><%= @info[:queues] %></td>
+      </tr>
+    </table>
+
+    <br />
+
+    <form method="POST">
+      <input type="submit" value="Create Successful Job"/>
+    </form>
+
+    <form action="/failing" method="POST">
+      <input type="submit" value="Create Failing Job"/>
+    </form>
+
+    <form action="/failing-with-retry" method="POST">
+      <input type="submit" value="Create Failing Job With Retry"/>
+    </form>
+
+  </body>
+</html>

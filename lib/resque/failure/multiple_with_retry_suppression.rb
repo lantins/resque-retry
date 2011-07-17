@@ -55,7 +55,7 @@ module Resque
             klass.send(:extend, CleanupHooks)
           end
 
-          redis[failure_key] = Resque.encode(data)
+          redis.set(failure_key, Resque.encode(data))
         end
       end
 

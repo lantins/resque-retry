@@ -36,15 +36,19 @@
       <% else %>
         <td><%= retry_attempts %></td>
         <% failure = retry_failure_details(retry_key) %>
-        <td><code><%= failure['exception'] %></code></td>
-        <td class="error">
-          <% if failure['backtrace'] %>
-            <a href="#" class="backtrace"><%= h(failure['error']) %></a>
-            <pre style="display:none"><%= h failure['backtrace'].join("\n") %></pre>
-          <% else %>
-            <%= h failure['error'] %>
-          <% end %>
-        </td>
+        <% if failure.nil? %>
+          <td colspan="2"><i>n/a - not using resque-retry failure backend</i></td>
+        <% else %>
+          <td><code><%= failure['exception'] %></code></td>
+          <td class="error">
+            <% if failure['backtrace'] %>
+              <a href="#" class="backtrace"><%= h(failure['error']) %></a>
+              <pre style="display:none"><%= h failure['backtrace'].join("\n") %></pre>
+            <% else %>
+              <%= h failure['error'] %>
+            <% end %>
+          </td>
+        <% end %>
       <% end %>
       <td>
         <form action="<%= url "retry/#{timestamp}/jobs/#{CGI.escape(Resque.encode(job))}/remove" %>" method="post">
