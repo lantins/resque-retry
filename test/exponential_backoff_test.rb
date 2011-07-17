@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/test_helper'
 
-class ExponentialBackoffTest < Test::Unit::TestCase
+class ExponentialBackoffTest < MiniTest::Unit::TestCase
   def setup
     Resque.redis.flushall
     @worker = Resque::Worker.new(:testing)
@@ -8,9 +8,8 @@ class ExponentialBackoffTest < Test::Unit::TestCase
   end
 
   def test_resque_plugin_lint
-    assert_nothing_raised do
-      Resque::Plugin.lint(Resque::Plugins::ExponentialBackoff)
-    end
+    # will raise exception if were not a good plugin.
+    assert Resque::Plugin.lint(Resque::Plugins::ExponentialBackoff)
   end
 
   def test_default_backoff_strategy

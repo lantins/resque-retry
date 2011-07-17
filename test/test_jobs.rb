@@ -13,6 +13,15 @@ end
 class GoodJob
   extend Resque::Plugins::Retry
   @queue = :testing
+
+  def self.perform(*args)
+  end
+end
+
+class RetryDefaultSettingsJob
+  extend Resque::Plugins::Retry
+  @queue = :testing
+
   def self.perform(*args)
   end
 end

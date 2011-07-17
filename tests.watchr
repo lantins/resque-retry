@@ -2,17 +2,15 @@
 #   $ watchr tests.watchr
 
 # --------------------------------------------------
-# Rules
+# Rules (n.b. were simply just running all tests)
 # --------------------------------------------------
 
 # if we edit main lib files
-watch( '^lib/(.*).rb'                               )  { ruby all_tests }
+watch( '^lib/(.*).rb'                       )  { ruby all_tests }
 # if we edit Gemfile or Gemspec.
-watch( '^(Gemfile*|resque-retry.gemspec)'     )  { ruby all_tests }
+watch( '^(Gemfile*|resque-retry.gemspec)'   )  { ruby all_tests }
 # if we edit any test related files.
-watch( '^test/.*'                  )  { ruby all_tests }
-
-#### INTERGRATION
+watch( '^test/.*'                           )  { ruby all_tests }
 
 # --------------------------------------------------
 # Signal Handling

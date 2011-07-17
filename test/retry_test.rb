@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/test_helper'
 
-class RetryTest < Test::Unit::TestCase
+class RetryTest < MiniTest::Unit::TestCase
   def setup
     Resque.redis.flushall
     @worker = Resque::Worker.new(:testing)
@@ -8,16 +8,15 @@ class RetryTest < Test::Unit::TestCase
   end
 
   def test_resque_plugin_lint
-    assert_nothing_raised do
-      Resque::Plugin.lint(Resque::Plugins::Retry)
-    end
+    # will raise exception if were not a good plugin.
+    assert Resque::Plugin.lint(Resque::Plugins::Retry)
   end
 
   def test_default_settings
-    assert_equal 1, RetryDefaultsJob.retry_limit, 'default retry limit'
-    assert_equal 0, RetryDefaultsJob.retry_attempt, 'default number of retry attempts'
-    assert_equal nil, RetryDefaultsJob.retry_exceptions, 'default retry exceptions; nil = any'
-    assert_equal 0, RetryDefaultsJob.retry_delay, 'default seconds until retry'
+    assert_equal 1, RetryDefaultSettingsJob.retry_limit, 'default retry limit'
+    assert_equal 0, RetryDefaultSettingsJob.retry_attempt, 'default number of retry attempts'
+    assert_equal nil, RetryDefaultSettingsJob.retry_exceptions, 'default retry exceptions; nil = any'
+    assert_equal 0, RetryDefaultSettingsJob.retry_delay, 'default seconds until retry'
   end
 
   def test_retry_once_by_default

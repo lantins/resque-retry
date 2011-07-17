@@ -14,7 +14,8 @@ spec = Gem::Specification.new do |s|
 
   s.add_dependency('resque', '>= 1.8.0')
   s.add_dependency('resque-scheduler', '>= 1.8.0')
-  s.add_development_dependency('test-unit')
+  s.add_development_dependency('minitest')
+  s.add_development_dependency('rack-test')
   s.add_development_dependency('turn')
   s.add_development_dependency('yard')
   s.add_development_dependency('simplecov', '>= 0.3.0')

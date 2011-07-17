@@ -2,8 +2,8 @@ dir = File.dirname(File.expand_path(__FILE__))
 $LOAD_PATH.unshift dir + '/../lib'
 $TESTING = true
 
-require 'test/unit'
-require 'rubygems'
+require 'minitest/unit'
+require 'rack/test'
 require 'turn'
 require 'simplecov'
 
@@ -59,7 +59,7 @@ class MockFailureBackend < Resque::Failure::Base
 end
 
 # Test helpers
-class Test::Unit::TestCase
+class MiniTest::Unit::TestCase
   def perform_next_job(worker, &block)
     return unless job = @worker.reserve
     @worker.perform(job, &block)

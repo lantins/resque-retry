@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/test_helper'
 
-class MultipleFailureTest < Test::Unit::TestCase
+class MultipleFailureTest < MiniTest::Unit::TestCase
   def setup
     Resque.redis.flushall
     @worker = Resque::Worker.new(:testing)
