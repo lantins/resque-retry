@@ -80,6 +80,14 @@ class MultipleFailureTest < Test::Unit::TestCase
     assert_equal 5, MockFailureBackend.errors.size
   end
 
+  def test_custom_identifier_job
+    Resque.enqueue(CustomIdentifierFailingJob, 'qq', 2)
+    4.times do
+      perform_next_job(@worker)
+    end
+    assert_equal 1, MockFailureBackend.errors.size
+  end
+
   def teardown
     Resque::Failure.backend = @old_failure_backend
   end
