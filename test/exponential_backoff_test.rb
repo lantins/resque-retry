@@ -19,7 +19,7 @@ class ExponentialBackoffTest < Test::Unit::TestCase
 
     perform_next_job @worker
     assert_equal 1, Resque.info[:processed], '1 processed job'
-    assert_equal 1, Resque.info[:failed], 'first ever run, and it should of failed, but never retried'
+    assert_equal 1, Resque.info[:failed], 'first ever run, and it should have failed, but never retried'
     assert_equal 1, Resque.info[:pending], '1 pending job, because it never hits the scheduler'
 
     perform_next_job @worker

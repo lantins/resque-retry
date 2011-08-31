@@ -89,6 +89,14 @@ module Resque
       end
 
       # @abstract
+      # Number of seconds to sleep after job is requeued
+      # 
+      # @return [Number] number of seconds to sleep
+      def sleep_after_requeue
+        @sleep_after_requeue ||= 0
+      end
+      
+      # @abstract
       # Modify the arguments used to retry the job. Use this to do something
       # other than try the exact same job again.
       #
@@ -177,7 +185,7 @@ module Resque
         retry_criteria_checks << block
       end
 
-      # Will retry the job.
+      # Retries the job.
       def try_again(*args)
         if retry_delay <= 0
           # If the delay is 0, no point passing it through the scheduler
@@ -185,6 +193,7 @@ module Resque
         else
           Resque.enqueue_in(retry_delay, self, *args_for_retry(*args))
         end
+        sleep sleep_after_requeue if sleep_after_requeue
       end
 
       # Resque before_perform hook.
