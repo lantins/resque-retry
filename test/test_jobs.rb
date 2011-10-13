@@ -26,6 +26,35 @@ class RetryDefaultsJob
   end
 end
 
+class JobRetryQueue
+  extend Resque::Plugins::Retry
+  @queue = :testing_retry
+
+  def self.perform(*args)
+  end
+end
+
+class JobWithRetryQueue
+  extend Resque::Plugins::Retry
+  @queue = :testing
+  @retry_job_class = JobRetryQueue
+
+  def self.perform(*args)
+    raise
+  end
+end
+
+class DelayedJobWithRetryQueue
+  extend Resque::Plugins::Retry
+  @queue = :testing
+  @retry_delay = 1
+  @retry_job_class = JobRetryQueue
+
+  def self.perform(*args)
+    raise
+  end
+end
+
 class InheritTestJob < RetryDefaultsJob
 end
 

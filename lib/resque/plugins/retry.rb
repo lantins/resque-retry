@@ -179,11 +179,12 @@ module Resque
 
       # Will retry the job.
       def try_again(*args)
+        @retry_job_class ||= self
         if retry_delay <= 0
           # If the delay is 0, no point passing it through the scheduler
-          Resque.enqueue(self, *args_for_retry(*args))
+          Resque.enqueue(@retry_job_class, *args_for_retry(*args))
         else
-          Resque.enqueue_in(retry_delay, self, *args_for_retry(*args))
+          Resque.enqueue_in(retry_delay, @retry_job_class, *args_for_retry(*args))
         end
       end
 
