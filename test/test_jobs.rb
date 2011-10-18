@@ -67,6 +67,12 @@ class LimitThreeJob < RetryDefaultsJob
   end
 end
 
+class LimitThreeJobDelay1Hour < LimitThreeJob
+  @queue = :testing
+  @retry_limit = 3
+  @retry_delay = 3600
+end
+
 class FailFiveTimesJob < RetryDefaultsJob
   @queue = :testing
   @retry_limit = 6
@@ -201,32 +207,6 @@ class InheritOrderingJobExtendFirst
   def self.inherited(subclass)
     super(subclass)
     subclass.test_value = 'test'
-  end
-end
-
-# This job switches to successful after
-# n +tries+.
-class SwitchToSuccessJob < GoodJob
-  @queue = :testing
-  @max_retries = 3
-
-  class << self
-    attr_accessor :successful_after
-    attr_accessor :tries
-
-    def reset_defaults
-      self.tries = 0
-      self.successful_after = 2
-    end
-  end
-
-  reset_defaults
-
-  def self.perform(*args)
-    if self.tries < self.successful_after
-      self.tries += 1
-      raise "error"
-    end
   end
 end
 
