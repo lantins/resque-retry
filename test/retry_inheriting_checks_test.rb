@@ -30,4 +30,16 @@ class RetryInheritingChecksTest < Test::Unit::TestCase
     assert_equal 1, klass.retry_criteria_checks.size
     assert_equal 'test', klass.test_value
   end
+
+  def test_retry_criteria_check_should_be_evaluated_under_child_context
+    Resque.enqueue(InheritedJob, 'arg')
+
+    10.times do
+      perform_next_job(@worker)
+    end
+
+    assert_equal 0, BaseJob.retry_attempt, "BaseJob retry attempts"
+    assert_equal 0, InheritedJob.retry_attempt, "InheritedJob retry attempts"
+    assert_equal 5, InheritedRetryJob.retry_attempt, "InheritedRetryJob retry attempts"
+  end
 end

@@ -6,6 +6,7 @@ require 'test/unit'
 require 'rubygems'
 require 'turn'
 require 'simplecov'
+require 'mocha'
 
 SimpleCov.start do
   add_filter "/test/"
@@ -28,11 +29,7 @@ end
 at_exit do
   next if $!
 
-  if defined?(MiniTest)
-    exit_code = MiniTest::Unit.new.run(ARGV)
-  else
-    exit_code = Test::Unit::AutoRunner.run
-  end
+  exit_code = Test::Unit::AutoRunner.run
 
   pid = `ps -e -o pid,command | grep [r]edis-test`.split(" ")[0]
   puts "Killing test redis server..."

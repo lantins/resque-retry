@@ -129,7 +129,7 @@ module Resque
 
         # call user retry criteria check blocks.
         retry_criteria_checks.each do |criteria_check|
-          should_retry ||= !!criteria_check.call(exception, *args)
+          should_retry ||= !!instance_exec(exception, *args, &criteria_check)
         end
 
         should_retry
