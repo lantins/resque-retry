@@ -123,9 +123,10 @@ class RetryTest < Test::Unit::TestCase
 
     assert job_from_retry_queue = Resque.pop(:testing_retry)
     assert_equal ['arg1'], job_from_retry_queue['args']
+    assert_equal nil, Resque.redis.get(JobWithRetryQueue.redis_retry_key('arg1'))
   end
 
-  def test_retry_failed_jobs_in_separate_queue
+  def test_retry_delayed_failed_jobs_in_separate_queue
     Resque.enqueue(DelayedJobWithRetryQueue, 'arg1')
     Resque.expects(:enqueue_in).with(1, JobRetryQueue, 'arg1')
 
