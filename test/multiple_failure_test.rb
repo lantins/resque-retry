@@ -26,6 +26,13 @@ class MultipleFailureTest < Test::Unit::TestCase
     assert Resque.redis.exists(key)
   end
 
+  def test_retry_key_splatting_args
+    RetryDefaultsJob.expects(:redis_retry_key).with({"a" => 1, "b" => 2}).times(3)
+    Resque.enqueue(RetryDefaultsJob, {"a" => 1, "b" => 2})
+
+    perform_next_job(@worker)
+  end
+
   def test_last_failure_removed_from_redis_after_error_limit
     Resque.enqueue(LimitThreeJob)
     3.times do
