@@ -126,6 +126,14 @@ class RetryTest < Test::Unit::TestCase
     assert_equal nil, Resque.redis.get(JobWithRetryQueue.redis_retry_key('arg1'))
   end
 
+  def test_clean_retry_key_should_splat_args
+    JobWithRetryQueue.expects(:clean_retry_key).once.with({"a" => 1, "b" => 2})
+
+    Resque.enqueue(JobWithRetryQueue, {"a" => 1, "b" => 2})
+
+    perform_next_job(@worker)
+  end
+
   def test_retry_delayed_failed_jobs_in_separate_queue
     Resque.enqueue(DelayedJobWithRetryQueue, 'arg1')
     Resque.expects(:enqueue_in).with(1, JobRetryQueue, 'arg1')

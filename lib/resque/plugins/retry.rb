@@ -187,7 +187,7 @@ module Resque
           Resque.enqueue_in(retry_delay, retry_in_queue, *args_for_retry(*args))
         end
 
-        clean_retry_key(args) if @retry_job_class
+        clean_retry_key(*args) if @retry_job_class
       end
 
       def clean_retry_key(*args)
