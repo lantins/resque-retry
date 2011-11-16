@@ -185,7 +185,7 @@ module Resque
       def try_again(exception, *args)
         # some plugins define retry_delay and have it take no arguments, so rather than break those,
         # we'll just check here to see whether it takes the additional exception class argument or not
-        my_retry_delay = (method(:retry_delay).arity > 0 ? retry_delay(exception.class) : retry_delay)
+        my_retry_delay = ([-1, 1].include?(method(:retry_delay).arity) ? retry_delay(exception.class) : retry_delay)
         if my_retry_delay <= 0
           # If the delay is 0, no point passing it through the scheduler
           Resque.enqueue(self, *args_for_retry(*args))
