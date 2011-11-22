@@ -19,6 +19,7 @@ spec = Gem::Specification.new do |s|
   s.add_development_dependency('rack-test')
   s.add_development_dependency('turn')
   s.add_development_dependency('yard')
+  s.add_development_dependency('json')
   s.add_development_dependency('simplecov', '>= 0.3.0')
 
   s.description       = <<-EOL
