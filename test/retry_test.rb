@@ -92,6 +92,22 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_equal 0, Resque.info[:pending], 'pending jobs'
   end
 
+  def test_retry_delay_sleep
+    assert_equal 0, Resque.info[:failed], 'failed jobs'
+    Resque.enqueue(SleepDelay1SecondJob)
+    before = Time.now
+    3.times do
+      perform_next_job(@worker)
+    end
+    actual_delay = Time.now - before
+    
+    assert actual_delay >= 1, "did not sleep long enough: #{actual_delay} seconds"
+    assert actual_delay < 2, "slept too long: #{actual_delay} seconds"
+    assert_equal 1, Resque.info[:failed], 'failed jobs'
+    assert_equal 2, Resque.info[:processed], 'processed job'
+    assert_equal 0, Resque.info[:pending], 'pending jobs'
+  end
+  
   def test_can_determine_if_exception_may_be_retried
     assert_equal true, RetryDefaultsJob.retry_exception?(StandardError), 'StandardError may retry'
     assert_equal true, RetryDefaultsJob.retry_exception?(CustomException), 'CustomException may retry'
