@@ -147,11 +147,36 @@ determine if we can requeue the job for another go.
       end
     end
 
-The above modification will allow your job to retry upto 10 times, with
+The above modification will allow your job to retry up to 10 times, with
 a delay of 120 seconds, or 2 minutes between retry attempts.
 
 Alternatively you could override the `retry_delay` method to do something
 more special.
+
+### Sleep After Requeuing
+
+Sometimes it is useful to delay the worker that failed a job attempt, but still requeue the job for immediate processing
+by other workers. This can be done with `@sleep_after_requeue`:
+
+    class DeliverWebHook
+      extend Resque::Plugins::Retry
+      @queue = :web_hooks
+
+      @sleep_after_requeue = 5
+
+      def self.perform(url, hook_id, hmac_key)
+        heavy_lifting
+      end
+    end
+
+This retries the job once and causes the worker that failed to sleep for 5 seconds after requeuing the job.  If there are
+multiple workers in the system this allows the job to be retried immediately while the original worker heals itself.  For
+example failed jobs may cause other (non-worker) OS processes to die.  A system monitor such as [god][god] can fix
+the server while the job is being retried on a different worker.
+
+`@sleep_after_requeue` is independent of `@retry_delay`.  If you set both, they both take effect.
+
+You can override the method `sleep_after_requeue` to set the sleep value dynamically.
 
 ### Exponential Backoff
 
@@ -176,7 +201,7 @@ Use this if you wish to vary the delay between retry attempts:
 The first delay will be 0 seconds, the 2nd will be 60 seconds, etc...
 Again, tweak to your own needs.
 
-The number if retrys is equal to the size of the `backoff_strategy`
+The number of retries is equal to the size of the `backoff_strategy`
 array, unless you set `retry_limit` yourself.
 
 ### Retry Specific Exceptions
@@ -285,5 +310,6 @@ Contributing/Pull Requests
   * Send me a pull request. Bonus points for topic branches.
   * If you edit the gemspec/version etc, do it in another commit please.
 
+[god]: http://github.com/mojombo/god
 [rq]: http://github.com/defunkt/resque
 [rqs]: http://github.com/bvandenbos/resque-scheduler

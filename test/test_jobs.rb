@@ -35,6 +35,15 @@ class RetryDefaultsJob
   end
 end
 
+class SleepDelay1SecondJob < RetryDefaultsJob
+  @queue = :testing
+  @sleep_after_requeue = 1
+
+  def self.perform(*args)
+    raise if retry_attempt == 0
+  end
+end
+
 class InheritTestJob < RetryDefaultsJob
 end
 
