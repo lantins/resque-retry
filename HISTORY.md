@@ -6,6 +6,8 @@
     PREVIOUSLY: 0 == infinite retries.
            NOW: -1 == infinite retries; 0 == means never retry.
 
+* Bugfix: `#redis_retry_key` incorrectly built key when custom identifier
+  was used. (Bogdan Gusiev)
 * Feature: Ability to remove retry jobs using resque-web. (Thiago Morello)
 * Added example demo application.
 * Added Bundler `Gemfile`.
