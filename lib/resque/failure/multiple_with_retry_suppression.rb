@@ -19,27 +19,16 @@ module Resque
     class MultipleWithRetrySuppression < Multiple
       include Resque::Helpers
 
-      module CleanupHooks
-        # Resque after_perform hook.
-        #
-        # Deletes retry failure information from Redis.
-        def after_perform_retry_failure_cleanup(*args)
-          retry_key = redis_retry_key(*args)
-          failure_key = Resque::Failure::MultipleWithRetrySuppression.failure_key(retry_key)
-          Resque.redis.del(failure_key)
-        end
-      end
-
       # Called when the job fails.
       #
       # If the job will retry, suppress the failure from the other backends.
       # Store the lastest failure information in redis, used by the web
       # interface.
       def save
-        unless retryable? && retrying?
+        if ! (retryable? && retrying?)
           cleanup_retry_failure_log!
           super
-        else
+        elsif retry_delay > 0
           data = {
             :failed_at => Time.now.strftime("%Y/%m/%d %H:%M:%S"),
             :payload   => payload,
@@ -50,12 +39,7 @@ module Resque
             :queue     => queue
           }
 
-          # Register cleanup hooks.
-          unless klass.respond_to?(:after_perform_retry_failure_cleanup)
-            klass.send(:extend, CleanupHooks)
-          end
-
-          redis.set(failure_key, Resque.encode(data))
+          redis.setex(failure_key, 2*retry_delay, Resque.encode(data))
         end
       end
 
@@ -67,6 +51,10 @@ module Resque
       protected
       def klass
         constantize(payload['class'])
+      end
+
+      def retry_delay
+        klass.retry_delay
       end
 
       def retry_key
