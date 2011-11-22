@@ -1,6 +1,6 @@
 spec = Gem::Specification.new do |s|
   s.name              = 'resque-retry'
-  s.version           = '0.1.0'
+  s.version           = '0.2.0'
   s.date              = Time.now.strftime('%Y-%m-%d')
   s.summary           = 'A resque plugin; provides retry, delay and exponential backoff support for resque jobs.'
   s.homepage          = 'http://github.com/lantins/resque-retry'
@@ -17,7 +17,6 @@ spec = Gem::Specification.new do |s|
   s.add_dependency('resque-scheduler', '>= 1.8.0')
   s.add_development_dependency('minitest')
   s.add_development_dependency('rack-test')
-  s.add_development_dependency('turn')
   s.add_development_dependency('yard')
   s.add_development_dependency('json')
   s.add_development_dependency('simplecov', '>= 0.3.0')
