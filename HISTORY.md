@@ -6,8 +6,6 @@
     PREVIOUSLY: 0 == infinite retries.
            NOW: -1 == infinite retries; 0 == means never retry.
 
-* Bugfix: MultipleWithRetrySuppression swallowed errors if class did not
-  exist. (Evan Battaglia)
 * Bugfix: `#redis_retry_key` incorrectly built key when custom identifier
   was used. (Bogdan Gusiev)
 * Feature: Ability to sleep worker after re-queuing a job, may be used to bias
