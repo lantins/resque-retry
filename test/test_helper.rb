@@ -3,8 +3,8 @@ $LOAD_PATH.unshift dir + '/../lib'
 $TESTING = true
 
 require 'minitest/unit'
+require 'minitest/pride'
 require 'rack/test'
-require 'turn'
 require 'simplecov'
 
 SimpleCov.start do

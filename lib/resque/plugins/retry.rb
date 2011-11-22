@@ -63,7 +63,8 @@ module Resque
       end
 
       # Maximum number of retrys we can attempt to successfully perform the job.
-      # A retry limit of 0 will never retry.
+      #
+      # A retry limit of 0 will *never* retry.
       # A retry limit of -1 or below will retry forever.
       #
       # @return [Fixnum]

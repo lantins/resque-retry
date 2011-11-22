@@ -1,5 +1,13 @@
-## 0.2.0 (2011-07-00)
+## 0.2.0 (2011-11-00)
 
+**INCLUDES NON-BACKWARDS COMPATIBLE CHANGES**
+
+* IMPORTANT: `retry_limit` behaviour has changed. (Nicolas Fouché)
+    PREVIOUSLY: 0 == infinite retries.
+           NOW: -1 == infinite retries; 0 == means never retry.
+
+* Feature: Ability to remove retry jobs using resque-web. (Thiago Morello)
+* Added example demo application.
 * Added Bundler `Gemfile`.
 
 ## 0.1.0 (2010-08-29)
