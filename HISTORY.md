@@ -8,6 +8,8 @@
 
 * Bugfix: `#redis_retry_key` incorrectly built key when custom identifier
   was used. (Bogdan Gusiev)
+* Feature: Ability to sleep worker after re-queuing a job, may be used to bias
+  against the same worker from picking up the job again. (Michael Keirnan)
 * Feature: Ability to remove retry jobs using resque-web. (Thiago Morello)
 * Added example demo application.
 * Added Bundler `Gemfile`.

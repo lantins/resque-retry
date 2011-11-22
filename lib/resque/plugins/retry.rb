@@ -198,7 +198,7 @@ module Resque
         else
           Resque.enqueue_in(retry_delay, self, *args_for_retry(*args))
         end
-        sleep sleep_after_requeue if sleep_after_requeue
+        sleep(sleep_after_requeue) if sleep_after_requeue > 0
       end
 
       # Resque before_perform hook.
