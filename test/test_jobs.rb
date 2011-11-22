@@ -261,5 +261,22 @@ class InheritOrderingJobExtendLast
   end
 end
 
+
 class InheritOrderingJobExtendFirstSubclass < InheritOrderingJobExtendFirst; end
 class InheritOrderingJobExtendLastSubclass < InheritOrderingJobExtendLast; end
+
+class CustomIdentifierFailingJob
+  extend Resque::Plugins::Retry
+
+  @queue = :testing
+  @retry_limit = 2
+  @retry_delay = 0
+
+  def self.identifier(*args)
+    args.first.to_s
+  end
+
+  def self.perform(*args)
+    raise 'failed'
+  end
+end

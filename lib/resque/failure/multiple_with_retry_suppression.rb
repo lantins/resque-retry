@@ -70,7 +70,7 @@ module Resque
       end
 
       def retry_key
-        klass.redis_retry_key(payload['args'])
+        klass.redis_retry_key(*payload['args'])
       end
 
       def failure_key
