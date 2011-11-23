@@ -19,7 +19,7 @@ module ResqueRetry
 
           # gets the number of retry attempts for a job.
           def retry_attempts_for_job(job)
-            Resque.decode(Resque.redis.get(retry_key_for_job(job)))
+            Resque.redis.get(retry_key_for_job(job))
           end
           
           # gets the failure details hash for a job.
