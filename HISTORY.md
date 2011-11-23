@@ -1,3 +1,8 @@
+## 0.2.1 (2011-11-23)
+
+* Bugfix: Fixed error when we tried to parse a number/string as JSON on the
+  reque-retry web interface.
+
 ## 0.2.0 (2011-11-22)
 
 **INCLUDES NON-BACKWARDS COMPATIBLE CHANGES**
