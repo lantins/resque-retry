@@ -88,7 +88,7 @@ module Resque
       # @return [Number] number of seconds to delay
       def retry_delay(exception_class = nil)
         if @retry_exceptions.is_a?(Hash)
-          @retry_exceptions[exception_class] || (@retry_delay ||= 0)
+          @retry_exceptions[exception_class] || 0
         else
           @retry_delay ||= 0
         end
