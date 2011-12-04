@@ -223,6 +223,24 @@ it so only specific exceptions are retried using `retry_exceptions`:
 The above modification will **only** retry if a `NetworkError` (or subclass)
 exception is thrown.
 
+You may also want to specify different retry delays for different exception types.  You may optionally set
+@retry_exceptions to a hash where the keys are your specific exception classes to retry on, and the values are your
+retry delays in seconds
+
+    class DeliverSMS
+      extend Resque::Plugins::Retry
+      @queue = :mt_messages
+
+      @retry_exceptions = { NetworkError => 30, SystemCallError => 120 }
+
+      def self.perform(mt_id, mobile_number, message)
+        heavy_lifting
+      end
+    end
+
+In the above example, Resque would retry any DeliverSMS jobs which throw a NetworkError 30 seconds later, and any
+DeliverSMS jobs which throw a SystemCallError 120 seconds later.
+
 ### Custom Retry Criteria Check Callbacks
 
 You may define custom retry criteria callbacks:
