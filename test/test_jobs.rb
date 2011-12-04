@@ -281,7 +281,6 @@ class PerExceptionClassRetryCountJob
   extend Resque::Plugins::Retry
 
   @retry_exceptions = { RuntimeError => 7, Exception => 11, Timeout::Error => 13 }
-  @retry_delay = 3
 end
 
 
@@ -294,6 +293,5 @@ end
 class PerExceptionClassRetryCountArrayJob
   extend Resque::Plugins::Retry
 
-  @retry_delay = 3
   @retry_exceptions = { RuntimeError => [1,2,7], Exception => 11, Timeout::Error => [2,4,6,8,10] }
 end
