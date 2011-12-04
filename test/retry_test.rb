@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/test_helper'
+require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 
 class RetryTest < MiniTest::Unit::TestCase
   def setup
@@ -178,6 +178,25 @@ class RetryTest < MiniTest::Unit::TestCase
 
   def test_redis_retry_key_removes_whitespace
     assert_equal 'resque-retry:GoodJob:arg1-removespace', GoodJob.redis_retry_key('arg1', 'remove space')
+  end
+
+  def test_retry_delay
+    assert_equal 3, NormalRetryCountJob.retry_delay
+    assert_equal 3, PerExceptionClassRetryCountJob.retry_delay
+    assert_equal 7, PerExceptionClassRetryCountJob.retry_delay(RuntimeError)
+    assert_equal 11, PerExceptionClassRetryCountJob.retry_delay(Exception)
+    assert_equal 13, PerExceptionClassRetryCountJob.retry_delay(Timeout::Error)
+
+    assert_equal [1,2,7], NormalRetryCountArrayJob.retry_delay
+    assert_equal 3, PerExceptionClassRetryCountArrayJob.retry_delay
+    assert_equal [1,2,7], PerExceptionClassRetryCountArrayJob.retry_delay(RuntimeError)
+    assert_equal 11, PerExceptionClassRetryCountArrayJob.retry_delay(Exception)
+    assert_equal [2,4,6,8,10], PerExceptionClassRetryCountArrayJob.retry_delay(Timeout::Error)
+  end
+
+  def test_retry_exceptions
+    assert_equal [RuntimeError, Exception, Timeout::Error], NormalRetryCountJob.retry_exceptions
+    assert_equal [RuntimeError, Exception, Timeout::Error], PerExceptionClassRetryCountJob.retry_exceptions
   end
 
 end
