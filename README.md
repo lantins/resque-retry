@@ -155,8 +155,9 @@ more special.
 
 ### Sleep After Requeuing
 
-Sometimes it is useful to delay the worker that failed a job attempt, but still requeue the job for immediate processing
-by other workers. This can be done with `@sleep_after_requeue`:
+Sometimes it is useful to delay the worker that failed a job attempt, but
+still requeue the job for immediate processing by other workers. This can be
+done with `@sleep_after_requeue`:
 
     class DeliverWebHook
       extend Resque::Plugins::Retry
@@ -169,14 +170,18 @@ by other workers. This can be done with `@sleep_after_requeue`:
       end
     end
 
-This retries the job once and causes the worker that failed to sleep for 5 seconds after requeuing the job.  If there are
-multiple workers in the system this allows the job to be retried immediately while the original worker heals itself.  For
-example failed jobs may cause other (non-worker) OS processes to die.  A system monitor such as [god][god] can fix
-the server while the job is being retried on a different worker.
+This retries the job once and causes the worker that failed to sleep for 5
+seconds after requeuing the job. If there are multiple workers in the system
+this allows the job to be retried immediately while the original worker heals
+itself.For example failed jobs may cause other (non-worker) OS processes to
+die. A system monitor such as [god][god] can fix the server while the job is
+being retried on a different worker.
 
-`@sleep_after_requeue` is independent of `@retry_delay`.  If you set both, they both take effect.
+`@sleep_after_requeue` is independent of `@retry_delay`. If you set both, they
+both take effect.
 
-You can override the method `sleep_after_requeue` to set the sleep value dynamically.
+You can override the method `sleep_after_requeue` to set the sleep value
+dynamically.
 
 ### Exponential Backoff
 
@@ -223,23 +228,27 @@ it so only specific exceptions are retried using `retry_exceptions`:
 The above modification will **only** retry if a `NetworkError` (or subclass)
 exception is thrown.
 
-You may also want to specify different retry delays for different exception types.  You may optionally set
-@retry_exceptions to a hash where the keys are your specific exception classes to retry on, and the values are your
-retry delays in seconds
+You may also want to specify different retry delays for different exception
+types. You may optionally set `@retry_exceptions` to a hash where the keys are
+your specific exception classes to retry on, and the values are your retry
+delays in seconds or an array of retry delays to be used similar to
+exponential backoff.
 
     class DeliverSMS
       extend Resque::Plugins::Retry
       @queue = :mt_messages
 
-      @retry_exceptions = { NetworkError => 30, SystemCallError => 120 }
+      @retry_exceptions = { NetworkError => 30, SystemCallError => [120, 240] }
 
       def self.perform(mt_id, mobile_number, message)
         heavy_lifting
       end
     end
 
-In the above example, Resque would retry any DeliverSMS jobs which throw a NetworkError 30 seconds later, and any
-DeliverSMS jobs which throw a SystemCallError 120 seconds later.
+In the above example, Resque would retry any `DeliverSMS` jobs which throw a
+`NetworkError` or `SystemCallError`. If the job throws a `NetworkError` it
+will be retried 30 seconds later, if it throws `SystemCallError` it will first
+retry 120 seconds later then subsequent retry attempts 240 seconds later.
 
 ### Custom Retry Criteria Check Callbacks
 
