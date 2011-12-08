@@ -6,11 +6,11 @@
 # --------------------------------------------------
 
 # if we edit main lib files
-watch( '^lib/(.*).rb'                       )  { ruby all_tests }
+watch( '^lib/.*.rb'                         )  { ruby all_tests }
 # if we edit Gemfile or Gemspec.
 watch( '^(Gemfile*|resque-retry.gemspec)'   )  { ruby all_tests }
 # if we edit any test related files.
-watch( '^test/.*'                           )  { ruby all_tests }
+watch( '^test/(.*).rb'                      )  { |m| ruby m[0] }
 
 # --------------------------------------------------
 # Signal Handling

@@ -273,25 +273,31 @@ end
 class NormalRetryCountJob
   extend Resque::Plugins::Retry
 
-  @retry_exceptions = [RuntimeError, Exception, Timeout::Error]
+  @queue = :testing
   @retry_delay = 3
+  @retry_exceptions = [RuntimeError, Exception, Timeout::Error]
 end
 
 class PerExceptionClassRetryCountJob
   extend Resque::Plugins::Retry
 
+  @queue = :testing
+  @retry_limit = 3
   @retry_exceptions = { RuntimeError => 7, Exception => 11, Timeout::Error => 13 }
-end
 
-
-class NormalRetryCountArrayJob
-  extend Resque::Plugins::Retry
-
-  @retry_delay = [1,2,7]
+  def self.perform
+    raise RuntimeError, 'I always fail with a RuntimeError'
+  end
 end
 
 class PerExceptionClassRetryCountArrayJob
   extend Resque::Plugins::Retry
 
-  @retry_exceptions = { RuntimeError => [1,2,7], Exception => 11, Timeout::Error => [2,4,6,8,10] }
+  @queue = :testing
+  @retry_limit = 3
+  @retry_exceptions = { Exception => 11, RuntimeError => [5, 10, 15],  Timeout::Error => [2, 4, 6, 8, 10] }
+
+  def self.perform
+    raise RuntimeError, 'I always fail with a RuntimeError'
+  end
 end

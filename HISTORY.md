@@ -1,3 +1,7 @@
+## HEAD
+
+* Feature: Ability to set `retry_delay` per exception type. (Dave Benvenuti)
+
 ## 0.2.1 (2011-11-23)
 
 * Bugfix: Fixed error when we tried to parse a number/string as JSON on the
