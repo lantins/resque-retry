@@ -40,8 +40,8 @@ class RetryTest < MiniTest::Unit::TestCase
     # now lets see if the delays are correct?
     delayed = Resque.delayed_queue_peek(0, 3)
     assert_in_delta (start_time + 5),  delayed[0], 1.00, '1st retry delay timestamp'
-    assert_in_delta (start_time + 10), delayed[0], 1.00, '2nd retry delay timestamp'
-    assert_in_delta (start_time + 15), delayed[0], 1.00, '3rd retry delay timestamp'
+    assert_in_delta (start_time + 10), delayed[1], 1.00, '2nd retry delay timestamp'
+    assert_in_delta (start_time + 15), delayed[2], 1.00, '3rd retry delay timestamp'
   end
 
 end

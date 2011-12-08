@@ -185,15 +185,6 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_equal 7, PerExceptionClassRetryCountJob.retry_delay(RuntimeError)
     assert_equal 11, PerExceptionClassRetryCountJob.retry_delay(Exception)
     assert_equal 13, PerExceptionClassRetryCountJob.retry_delay(Timeout::Error)
-
-    assert_equal [5, 10, 15], PerExceptionClassRetryCountArrayJob.retry_delay(RuntimeError)
-    assert_equal 11, PerExceptionClassRetryCountArrayJob.retry_delay(Exception)
-    assert_equal [2, 4, 6, 8, 10], PerExceptionClassRetryCountArrayJob.retry_delay(Timeout::Error)
-  end
-
-  def test_retry_exceptions
-    assert_equal [RuntimeError, Exception, Timeout::Error], NormalRetryCountJob.retry_exceptions
-    assert_equal [RuntimeError, Exception, Timeout::Error], PerExceptionClassRetryCountJob.retry_exceptions
   end
 
 end
