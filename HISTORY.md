@@ -1,5 +1,7 @@
 ## HEAD
 
+## 0.2.1 (2011-12-08)
+
 * Feature: Ability to set `retry_delay` per exception type. (Dave Benvenuti)
 
 ## 0.2.1 (2011-11-23)
