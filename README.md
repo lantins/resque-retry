@@ -19,6 +19,9 @@ To install:
 
     $ gem install resque-retry
 
+If your using [Bundler][bundler] to manage your dependencies, you should add `gem
+'resque-retry'` to your projects `Gemfile`.
+
 Add this to your `Rakefile`:
 
     require 'resque/tasks'
@@ -340,3 +343,5 @@ Contributing/Pull Requests
 [god]: http://github.com/mojombo/god
 [rq]: http://github.com/defunkt/resque
 [rqs]: http://github.com/bvandenbos/resque-scheduler
+[bundler]: http://gembundler.com/
+
