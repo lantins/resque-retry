@@ -33,8 +33,7 @@ module ResqueRetry
             File.read(File.join(File.dirname(__FILE__), "server/views/#{path}"))
           end
 
-          # Cancels job retry
-          #
+          # cancels job retry
           def cancel_retry(job)
             klass = Resque.constantize(job['class'])
             retry_key = retry_key_for_job(job)
