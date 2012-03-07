@@ -1,5 +1,7 @@
 ## HEAD
 
+* Bugfix: `Remove` button on retry web interface was not working.
+
 ## 0.2.1 (2011-12-08)
 
 * Feature: Ability to set `retry_delay` per exception type. (Dave Benvenuti)
