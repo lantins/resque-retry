@@ -42,7 +42,7 @@ module Resque
 
       # @abstract You may override to implement a custom identifier,
       #           you should consider doing this if your job arguments
-      #           are many/long or may not cleanly cleanly to strings.
+      #           are many/long or may not cleanly convert to strings.
       #
       # Builds an identifier using the job arguments. This identifier
       # is used as part of the redis key.
