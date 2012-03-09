@@ -44,6 +44,35 @@ class SleepDelay1SecondJob < RetryDefaultsJob
   end
 end
 
+class JobRetryQueue
+  extend Resque::Plugins::Retry
+  @queue = :testing_retry
+
+  def self.perform(*args)
+  end
+end
+
+class JobWithRetryQueue
+  extend Resque::Plugins::Retry
+  @queue = :testing
+  @retry_job_class = JobRetryQueue
+
+  def self.perform(*args)
+    raise
+  end
+end
+
+class DelayedJobWithRetryQueue
+  extend Resque::Plugins::Retry
+  @queue = :testing
+  @retry_delay = 1
+  @retry_job_class = JobRetryQueue
+
+  def self.perform(*args)
+    raise
+  end
+end
+
 class InheritTestJob < RetryDefaultsJob
 end
 
@@ -145,6 +174,58 @@ module RetryModuleDefaultsJob
   def self.perform(*args)
     raise
   end
+end
+
+class AsyncJob
+  extend Resque::Plugins::Retry
+
+  class << self
+    def perform(*opts)
+      process
+    end
+
+    def process
+      raise "Shouldn't be called"
+    end
+  end
+end
+
+class BaseJob < AsyncJob
+  @retry_limit = 0
+  @auto_retry_limit = 5
+  @retry_exceptions = []
+
+  retry_criteria_check do |exception, *args|
+    keep_trying?
+  end
+
+  class << self
+    def keep_trying?
+      retry_attempt < @auto_retry_limit
+    end
+
+    def inherited(subclass)
+      super
+      %w(@retry_exceptions @retry_delay @retry_limit @auto_retry_limit).each do |variable|
+        value = BaseJob.instance_variable_get(variable)
+        value = value.dup rescue value
+        subclass.instance_variable_set(variable, value)
+      end
+    end
+
+    def process
+      raise "Got called #{Time.now}"
+    end
+  end
+end
+
+class InheritedRetryJob < BaseJob
+  @queue = :testing
+end
+
+class InheritedJob < BaseJob
+  @queue = :testing
+  @retry_job_class = InheritedRetryJob
 end
 
 module RetryModuleCustomRetryCriteriaCheck

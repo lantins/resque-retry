@@ -149,7 +149,7 @@ module Resque
 
         # call user retry criteria check blocks.
         retry_criteria_checks.each do |criteria_check|
-          should_retry ||= !!criteria_check.call(exception, *args)
+          should_retry ||= !!instance_exec(exception, *args, &criteria_check)
         end
 
         should_retry
@@ -206,13 +206,16 @@ module Resque
         # we'll just check here to see whether it takes the additional exception class argument or not
         temp_retry_delay = ([-1, 1].include?(method(:retry_delay).arity) ? retry_delay(exception.class) : retry_delay)
 
+        retry_in_queue = @retry_job_class ? @retry_job_class : self
         if temp_retry_delay <= 0
           # If the delay is 0, no point passing it through the scheduler
-          Resque.enqueue(self, *args_for_retry(*args))
+          Resque.enqueue(retry_in_queue, *args_for_retry(*args))
         else
-          Resque.enqueue_in(temp_retry_delay, self, *args_for_retry(*args))
+          Resque.enqueue_in(temp_retry_delay, retry_in_queue, *args_for_retry(*args))
         end
         sleep(sleep_after_requeue) if sleep_after_requeue > 0
+
+        clean_retry_key(*args) if @retry_job_class
       end
 
       # Resque before_perform hook.
@@ -228,7 +231,7 @@ module Resque
       #
       # Deletes retry attempt count from Redis.
       def after_perform_retry(*args)
-        Resque.redis.del(redis_retry_key(*args))
+        clean_retry_key(*args)
       end
 
       # Resque on_failure hook.
@@ -239,8 +242,23 @@ module Resque
         if retry_criteria_valid?(exception, *args)
           try_again(exception, *args)
         else
-          Resque.redis.del(redis_retry_key(*args))
+          clean_retry_key(*args)
         end
+      end
+
+      def instance_exec(*args, &block)
+        mname = "__instance_exec_#{Thread.current.object_id.abs}"
+        class << self; self end.class_eval{ define_method(mname, &block) }
+        begin
+          ret = send(mname, *args)
+        ensure
+          class << self; self end.class_eval{ undef_method(mname) } rescue nil
+        end
+        ret
+      end
+
+      def clean_retry_key(*args)
+        Resque.redis.del(redis_retry_key(*args))
       end
 
     end
