@@ -16,9 +16,10 @@ end
 
 class FailingWithRetryJob
   extend Resque::Plugins::Retry
+
   @queue = :testing_failure
-  @retry_limit = 2
-  @retry_delay = 60
+  @retry_limit = 4
+  @retry_delay = 3
 
   def self.perform(*args)
     puts 'foooooooooooooooooooooooooooooo'

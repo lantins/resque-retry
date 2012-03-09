@@ -2,14 +2,13 @@
 
 * Bugfix: `Remove` button on retry web interface was not working.
 
-## 0.2.1 (2011-12-08)
+## 0.2.2 (2011-12-08)
 
 * Feature: Ability to set `retry_delay` per exception type. (Dave Benvenuti)
 
 ## 0.2.1 (2011-11-23)
 
-* Bugfix: Fixed error when we tried to parse a number/string as JSON on the
-  reque-retry web interface.
+* Bugfix: Fixed error when we tried to parse a number/string as JSON on the reque-retry web interface.
 
 ## 0.2.0 (2011-11-22)
 
@@ -19,10 +18,9 @@
     PREVIOUSLY: 0 == infinite retries.
            NOW: -1 == infinite retries; 0 == means never retry.
 
-* Bugfix: `#redis_retry_key` incorrectly built key when custom identifier
-  was used. (Bogdan Gusiev)
+* Bugfix: `#redis_retry_key` incorrectly built key when custom identifier was used. (Bogdan Gusiev)
 * Feature: Ability to sleep worker after re-queuing a job, may be used to bias
-  against the same worker from picking up the job again. (Michael Keirnan)
+           against the same worker from picking up the job again. (Michael Keirnan)
 * Feature: Ability to remove retry jobs using resque-web. (Thiago Morello)
 * Added example demo application.
 * Added Bundler `Gemfile`.
@@ -52,10 +50,8 @@
 ## 0.0.2 (2010-05-06)
 
 * Bugfix: Were calling non-existent method to delete redis key.
-* Delay no-longer falls back to `sleep`. resque-scheduler is a required
-  dependancy.
-* Redis key doesn't include ending colon `:` if no args were passed
-  to the job.
+* Delay no-longer falls back to `sleep`. resque-scheduler is a required dependancy.
+* Redis key doesn't include ending colon `:` if no args were passed to the job.
 
 ## 0.0.1 (2010-04-27)
 

@@ -12,9 +12,9 @@ spec = Gem::Specification.new do |s|
   s.files            += Dir.glob('{test/*,lib/**/*}')
   s.require_paths     = ['lib']
 
-  s.add_dependency('rake')
   s.add_dependency('resque', '>= 1.8.0')
   s.add_dependency('resque-scheduler', '>= 1.8.0')
+  s.add_development_dependency('rake')
   s.add_development_dependency('minitest')
   s.add_development_dependency('rack-test')
   s.add_development_dependency('yard')
