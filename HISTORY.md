@@ -1,5 +1,9 @@
 ## HEAD
 
+**INCLUDES NON-BACKWARDS COMPATIBLE CHANGES**
+
+* Web interface will work without needing to `require` your job code. (n.b. less details avaialble via web).
+* IMPORTANT: `#identifier` method has been namedspaced to `#retry_identifier`.
 * Bugfix: `Remove` button on retry web interface was not working.
 
 ## 0.2.2 (2011-12-08)

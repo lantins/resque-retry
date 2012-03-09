@@ -73,8 +73,8 @@ class MultipleFailureTest < MiniTest::Unit::TestCase
     assert_equal 5, MockFailureBackend.errors.size
   end
 
-  def test_custom_identifier_job
-    Resque.enqueue(CustomIdentifierFailingJob, 'qq', 2)
+  def test_custom_retry_identifier_job
+    Resque.enqueue(CustomRetryIdentifierFailingJob, 'qq', 2)
     4.times do
       perform_next_job(@worker)
     end

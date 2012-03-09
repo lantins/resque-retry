@@ -302,17 +302,17 @@ job arguments, to modify the arguments for the next retry attempt.
       end
     end
 
-### Job Identifier/Key
+### Job Retry Identifier/Key
 
 The retry attempt is incremented and stored in a Redis key. The key is
-built using the `identifier`. If you have a lot of arguments or really long
-ones, you should consider overriding `identifier` to define a more precise
-or loose custom identifier.
+built using the `retry_identifier`. If you have a lot of arguments or really long
+ones, you should consider overriding `retry_identifier` to define a more precise
+or loose custom retry identifier.
 
-The default identifier is just your job arguments joined with a dash `-`.
+The default retry identifier is just your job arguments joined with a dash `-`.
 
 By default the key uses this format: 
-`resque-retry:<job class name>:<identifier>`.
+`resque-retry:<job class name>:<retry_identifier>`.
 
 Or you can define the entire key by overriding `redis_retry_key`.
 
@@ -320,7 +320,7 @@ Or you can define the entire key by overriding `redis_retry_key`.
       extend Resque::Plugins::Retry
       @queue = :mt_messages
 
-      def self.identifier(mt_id, mobile_number, message)
+      def self.retry_identifier(mt_id, mobile_number, message)
         "#{mobile_number}:#{mt_id}"
       end
 

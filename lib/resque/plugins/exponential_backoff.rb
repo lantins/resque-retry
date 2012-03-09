@@ -25,7 +25,7 @@ module Resque
     #     @backoff_strategy = [0, 60]
     #
     #     # used to build redis key, for counting job attempts.
-    #     def self.identifier(mt_id, mobile_number, message)
+    #     def self.retry_identifier(mt_id, mobile_number, message)
     #       "#{mobile_number}:#{mt_id}"
     #     end
     #
