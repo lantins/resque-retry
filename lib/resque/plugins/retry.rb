@@ -255,8 +255,6 @@ module Resque
       def on_failure_retry(exception, *args)
         return if @on_failure_retry_hook_already_called
 
-        p '#on_failure_retry'
-
         if retry_criteria_valid?(exception, *args)
           try_again(exception, *args)
         else
