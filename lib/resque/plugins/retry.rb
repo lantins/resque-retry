@@ -249,7 +249,7 @@ module Resque
       # Checks if our retry criteria is valid, if it is we try again.
       # Otherwise the retry attempt count is deleted from Redis.
       #
-      # NOTE: This hook will only allow execution once per instance.
+      # NOTE: This hook will only allow execution once per job perform attempt.
       #       This was added because Resque v1.20.0 calls the hook twice.
       #       IMO; this isn't something resque-retry should have to worry about!
       def on_failure_retry(exception, *args)
