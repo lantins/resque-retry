@@ -25,22 +25,22 @@
     <% next unless job %>
     <tr>
       <td>
-        <form action="<%= url "retry/#{timestamp}/remove" %>" method="post">
+        <form action="<%= u "retry/#{timestamp}/remove" %>" method="post">
           <input type="submit" value="Remove">
         </form>
-        <form action="<%= url "/delayed/queue_now" %>" method="post">
+        <form action="<%= u "/delayed/queue_now" %>" method="post">
           <input type="hidden" name="timestamp" value="<%= timestamp.to_i %>">
           <input type="submit" value="Queue now">
         </form>
       </td>
-      <td><a href="<%= url "retry/#{timestamp}" %>"><%= format_time(Time.at(timestamp)) %></a></td>
+      <td><a href="<%= u "retry/#{timestamp}" %>"><%= format_time(Time.at(timestamp)) %></a></td>
       <td><%= delayed_timestamp_size = resque.delayed_timestamp_size(timestamp) %></td>
       <% if job && delayed_timestamp_size == 1 %>
         <td><%= h job['class'] %></td>
         <td><%= h job['args'].inspect %></td>
         <td><%= retry_attempts_for_job(job) || '<i>n/a</i>' %></td>
       <% else %>
-        <td><a href="<%= url "retry/#{timestamp}" %>">see details</a></td>
+        <td><a href="<%= u "retry/#{timestamp}" %>">see details</a></td>
         <td></td>
         <td></td>
       <% end %>

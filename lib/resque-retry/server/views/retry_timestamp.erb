@@ -51,7 +51,7 @@
         <% end %>
       <% end %>
       <td>
-        <form action="<%= url "retry/#{timestamp}/jobs/#{CGI.escape(Resque.encode(job))}/remove" %>" method="post">
+        <form action="<%= u "retry/#{timestamp}/jobs/#{CGI.escape(Resque.encode(job))}/remove" %>" method="post">
           <input type="hidden" name="timestamp" value="<%= timestamp.to_i %>">
           <input type="submit" value="Remove">
         </form>
