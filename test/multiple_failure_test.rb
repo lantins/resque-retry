@@ -8,13 +8,13 @@ class MultipleFailureTest < MiniTest::Unit::TestCase
 
     @old_failure_backend = Resque::Failure.backend
     MockFailureBackend.errors = []
-    Resque::Failure::MultipleWithRetrySuppression.classes = [MockFailureBackend]
+    Resque::Failure::MultipleWithRetrySuppression.classes = [ MockFailureBackend ]
     Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
   end
 
   def failure_key_for(klass)
     args = []
-    key = "failure_" + klass.redis_retry_key(args)
+    key = "failure-" + klass.redis_retry_key(args)
   end
 
   def test_last_failure_is_saved_in_redis_if_delay
@@ -27,20 +27,27 @@ class MultipleFailureTest < MiniTest::Unit::TestCase
   end
 
   def test_retry_key_splatting_args
-    RetryDefaultsJob.expects(:redis_retry_key).with({"a" => 1, "b" => 2}).times(3)
-    Resque.enqueue(RetryDefaultsJob, {"a" => 1, "b" => 2})
+    # were expecting this to be called twice:
+    # - once before the job is executed.
+    # - once by the failure backend.
+    RetryDefaultsJob.expects(:redis_retry_key).with({"a" => 1, "b" => 2}).times(2)
 
+    Resque.enqueue(RetryDefaultsJob, {"a" => 1, "b" => 2})
     perform_next_job(@worker)
   end
 
   def test_last_failure_removed_from_redis_after_error_limit
-    Resque.enqueue(LimitThreeJob)
     3.times do
+      Resque.enqueue(LimitThreeJobDelay1Hour)
       perform_next_job(@worker)
     end
 
-    key = failure_key_for(LimitThreeJob)
-    assert Resque.redis.exists(key)
+    key = failure_key_for(LimitThreeJobDelay1Hour)
+    assert Resque.redis.exists(key), 'key should still exist'
+
+    Resque.enqueue(LimitThreeJobDelay1Hour)
+    perform_next_job(@worker)
+    assert !Resque.redis.exists(key), 'key should have been removed.'
   end
 
   def test_last_failure_has_double_delay_redis_expiry_if_delay

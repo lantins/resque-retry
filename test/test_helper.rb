@@ -2,20 +2,19 @@ dir = File.dirname(File.expand_path(__FILE__))
 $LOAD_PATH.unshift dir + '/../lib'
 $TESTING = true
 
-gem 'minitest'
+require 'rubygems'
 require 'minitest/unit'
 require 'minitest/pride'
 require 'rack/test'
-require 'simplecov'
 require 'mocha'
+require 'simplecov'
 
 SimpleCov.start do
   add_filter "/test/"
-end
+end unless RUBY_PLATFORM == 'java'
 
 require 'resque-retry'
 require dir + '/test_jobs'
-
 
 # make sure we can run redis
 if !system("which redis-server")
@@ -30,7 +29,7 @@ end
 at_exit do
   next if $!
 
-  exit_code = Test::Unit::AutoRunner.run
+  exit_code = MiniTest::Unit.new.run(ARGV)
 
   pid = `ps -e -o pid,command | grep [r]edis-test`.split(" ")[0]
   puts "Killing test redis server..."

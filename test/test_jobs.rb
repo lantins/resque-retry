@@ -55,7 +55,7 @@ end
 class JobWithRetryQueue
   extend Resque::Plugins::Retry
   @queue = :testing
-  @retry_job_class = JobRetryQueue
+  @retry_job_delegate = JobRetryQueue
 
   def self.perform(*args)
     raise
@@ -66,7 +66,7 @@ class DelayedJobWithRetryQueue
   extend Resque::Plugins::Retry
   @queue = :testing
   @retry_delay = 1
-  @retry_job_class = JobRetryQueue
+  @retry_job_delegate = JobRetryQueue
 
   def self.perform(*args)
     raise
@@ -191,7 +191,7 @@ class AsyncJob
 end
 
 class BaseJob < AsyncJob
-  @retry_limit = 0
+  @retry_limit = -1
   @auto_retry_limit = 5
   @retry_exceptions = []
 
@@ -225,7 +225,7 @@ end
 
 class InheritedJob < BaseJob
   @queue = :testing
-  @retry_job_class = InheritedRetryJob
+  @retry_job_delegate = InheritedRetryJob
 end
 
 module RetryModuleCustomRetryCriteriaCheck
