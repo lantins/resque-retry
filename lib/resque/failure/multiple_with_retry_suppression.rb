@@ -25,7 +25,7 @@ module Resque
       # Store the lastest failure information in redis, used by the web
       # interface.
       def save
-        if ! (retryable? && retrying?)
+        if !(retryable? && retrying?)
           cleanup_retry_failure_log!
           super
         elsif retry_delay > 0
@@ -39,13 +39,13 @@ module Resque
             :queue     => queue
           }
 
-          redis.setex(failure_key, 2*retry_delay, Resque.encode(data))
+          redis.setex(failure_key, 2*retry_delay, encode(data))
         end
       end
 
       # Expose this for the hook's use.
       def self.failure_key(retry_key)
-        'failure_' + retry_key
+        'failure-' + retry_key
       end
 
       protected

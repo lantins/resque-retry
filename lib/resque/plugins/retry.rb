@@ -103,7 +103,11 @@ module Resque
       def sleep_after_requeue
         @sleep_after_requeue ||= 0
       end
-      
+
+      def retry_job_delegate
+        @retry_job_delegate ||= nil
+      end
+
       # @abstract
       # Modify the arguments used to retry the job. Use this to do something
       # other than try the exact same job again.
@@ -206,7 +210,7 @@ module Resque
         # we'll just check here to see whether it takes the additional exception class argument or not
         temp_retry_delay = ([-1, 1].include?(method(:retry_delay).arity) ? retry_delay(exception.class) : retry_delay)
 
-        retry_in_queue = @retry_job_class ? @retry_job_class : self
+        retry_in_queue = retry_job_delegate ? retry_job_delegate : self
         if temp_retry_delay <= 0
           # If the delay is 0, no point passing it through the scheduler
           Resque.enqueue(retry_in_queue, *args_for_retry(*args))
@@ -215,7 +219,7 @@ module Resque
         end
         sleep(sleep_after_requeue) if sleep_after_requeue > 0
 
-        clean_retry_key(*args) if @retry_job_class
+        clean_retry_key(*args) if retry_job_delegate
       end
 
       # Resque before_perform hook.
