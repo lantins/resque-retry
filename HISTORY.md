@@ -1,7 +1,9 @@
-## HEAD
+## HEAD - will become v1.0.0
 
 **INCLUDES NON-BACKWARDS COMPATIBLE CHANGES**
 
+* Fixed issues related to infinate job retries and v1.20.0 of resque.
+* Minimum gem dependency versions changed: resque >= 1.10.0, resque-scheduler >= 1.9.9
 * Feature: Setting `@retry_job_delegate` allows you to seperate the orignal job from a the retry job. (@tanob/@jniesen)
 * Web interface will work without needing to `require` your job code. (n.b. less details avaialble via web).
 * IMPORTANT: `#identifier` method has been namedspaced to `#retry_identifier`.
