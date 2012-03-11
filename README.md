@@ -1,7 +1,7 @@
 resque-retry
 ============
 
-A [Resque][rq] plugin. Requires Resque >= 1.8.0 & [resque-scheduler][rqs].
+A [Resque][rq] plugin. Requires Resque >= 1.10.0 & [resque-scheduler][rqs] >= 1.9.9.
 
 resque-retry provides retry, delay and exponential backoff support for
 resque jobs.
@@ -11,6 +11,8 @@ resque jobs.
   * Exponential backoff (varying the delay between retrys).
   * Multiple failure backend with retry suppression & resque-web tab.
   * Small & Extendable - plenty of places to override retry logic/settings.
+
+[![Build Status](https://secure.travis-ci.org/lantins/resque-retry.png?branch=master)](http://travis-ci.org/lantins/resque-retry)
 
 Install & Quick Start
 ---------------------
