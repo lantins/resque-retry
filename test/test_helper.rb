@@ -7,11 +7,13 @@ require 'minitest/unit'
 require 'minitest/pride'
 require 'rack/test'
 require 'mocha'
-require 'simplecov'
 
-SimpleCov.start do
-  add_filter "/test/"
-end unless RUBY_PLATFORM == 'java'
+if RUBY_VERSION >= '1.9'
+  require 'simplecov'
+  SimpleCov.start do
+    add_filter '/test/'
+  end
+end
 
 require 'resque-retry'
 require dir + '/test_jobs'
@@ -34,7 +36,7 @@ at_exit do
   pid = `ps -e -o pid,command | grep [r]edis-test`.split(" ")[0]
   puts "Killing test redis server..."
   `rm -f #{dir}/dump.rdb`
-  Process.kill("KILL", pid.to_i)
+  `kill -9 #{pid}`
   exit exit_code
 end
 
