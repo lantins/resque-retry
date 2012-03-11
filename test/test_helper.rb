@@ -8,7 +8,7 @@ require 'minitest/pride'
 require 'rack/test'
 require 'mocha'
 
-if RUBY_ENGINE == 'ruby' && RUBY_VERSION >= '1.9'
+if RUBY_VERSION >= '1.9' && RUBY_ENGINE == 'ruby'
   require 'simplecov'
   SimpleCov.start do
     add_filter '/test/'
