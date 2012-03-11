@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 
 class MultipleFailureTest < MiniTest::Unit::TestCase
+
   def setup
     Resque.redis.flushall
     @worker = Resque::Worker.new(:testing)
@@ -14,10 +15,11 @@ class MultipleFailureTest < MiniTest::Unit::TestCase
 
   def failure_key_for(klass)
     args = []
-    key = "failure-" + klass.redis_retry_key(args)
+    key = 'failure-' + klass.redis_retry_key(args)
   end
 
   def test_failure_is_passed_on_when_job_class_not_found
+    skip 'commit 7113b0df to `resque` gem means the failure backend is never called'
     new_job_class = Class.new(LimitThreeJob).tap { |klass| klass.send(:instance_variable_set, :@queue, LimitThreeJob.instance_variable_get(:@queue)) }
     Object.send(:const_set, 'LimitThreeJobTemp', new_job_class)
     Resque.enqueue(LimitThreeJobTemp)
@@ -25,8 +27,8 @@ class MultipleFailureTest < MiniTest::Unit::TestCase
     Object.send(:remove_const, 'LimitThreeJobTemp')
     perform_next_job(@worker)
 
-    assert_equal MockFailureBackend.errors.count, 1
-    assert MockFailureBackend.errors.first =~ /uninitialized constant LimitThreeJobTemp/
+    assert_equal 1, MockFailureBackend.errors.count, 'should have one error'
+    assert_match /uninitialized constant LimitThreeJobTemp/, MockFailureBackend.errors.first
   end
 
   def test_last_failure_is_saved_in_redis_if_delay
@@ -42,9 +44,9 @@ class MultipleFailureTest < MiniTest::Unit::TestCase
     # were expecting this to be called twice:
     # - once before the job is executed.
     # - once by the failure backend.
-    RetryDefaultsJob.expects(:redis_retry_key).with({"a" => 1, "b" => 2}).times(2)
+    RetryDefaultsJob.expects(:redis_retry_key).with({'a' => 1, 'b' => 2}).times(2)
 
-    Resque.enqueue(RetryDefaultsJob, {"a" => 1, "b" => 2})
+    Resque.enqueue(RetryDefaultsJob, {'a' => 1, 'b' => 2})
     perform_next_job(@worker)
   end
 

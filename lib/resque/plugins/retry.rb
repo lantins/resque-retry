@@ -217,15 +217,21 @@ module Resque
         else
           Resque.enqueue_in(temp_retry_delay, retry_in_queue, *args_for_retry(*args))
         end
-        sleep(sleep_after_requeue) if sleep_after_requeue > 0
 
+        # remove retry key from redis if we handed retry off to another queue.
         clean_retry_key(*args) if retry_job_delegate
+
+        # sleep after requeue if enabled.
+        sleep(sleep_after_requeue) if sleep_after_requeue > 0
       end
 
       # Resque before_perform hook.
       #
       # Increments and sets the `@retry_attempt` count.
       def before_perform_retry(*args)
+        @on_failure_retry_hook_already_called = false
+
+        # store number of retry attempts.
         retry_key = redis_retry_key(*args)
         Resque.redis.setnx(retry_key, -1)             # default to -1 if not set.
         @retry_attempt = Resque.redis.incr(retry_key) # increment by 1.
@@ -242,12 +248,20 @@ module Resque
       #
       # Checks if our retry criteria is valid, if it is we try again.
       # Otherwise the retry attempt count is deleted from Redis.
+      #
+      # NOTE: This hook will only allow execution once per job perform attempt.
+      #       This was added because Resque v1.20.0 calls the hook twice.
+      #       IMO; this isn't something resque-retry should have to worry about!
       def on_failure_retry(exception, *args)
+        return if @on_failure_retry_hook_already_called
+
         if retry_criteria_valid?(exception, *args)
           try_again(exception, *args)
         else
           clean_retry_key(*args)
         end
+
+        @on_failure_retry_hook_already_called = true
       end
 
       def instance_exec(*args, &block)
