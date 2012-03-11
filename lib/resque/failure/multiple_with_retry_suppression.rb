@@ -3,7 +3,7 @@ require 'resque/failure/multiple'
 module Resque
   module Failure
 
-    # A multiple failure backend, with retry suppression.
+    # A multiple failure backend, with retry suppression
     #
     # For example: if you had a job that could retry 5 times, your failure 
     # backends are not notified unless the _final_ retry attempt also fails.
@@ -19,11 +19,13 @@ module Resque
     class MultipleWithRetrySuppression < Multiple
       include Resque::Helpers
 
-      # Called when the job fails.
+      # Called when the job fails
       #
       # If the job will retry, suppress the failure from the other backends.
       # Store the lastest failure information in redis, used by the web
       # interface.
+      #
+      # @api private
       def save
         if !(retryable? && retrying?)
           cleanup_retry_failure_log!
@@ -43,12 +45,16 @@ module Resque
         end
       end
 
-      # Expose this for the hook's use.
+      # Expose this for the hook's use
+      #
+      # @api public
       def self.failure_key(retry_key)
         'failure-' + retry_key
       end
 
       protected
+
+      # Return the class/module of the failed job.
       def klass
         constantize(payload['class'])
       end

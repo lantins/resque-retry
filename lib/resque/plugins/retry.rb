@@ -35,6 +35,8 @@ module Resque
     module Retry
 
       # Copy retry criteria checks on inheritance.
+      #
+      # @api private
       def inherited(subclass)
         super(subclass)
         subclass.instance_variable_set("@retry_criteria_checks", retry_criteria_checks.dup)
@@ -45,10 +47,12 @@ module Resque
       #           are many/long or may not cleanly convert to strings.
       #
       # Builds a retry identifier using the job arguments. This identifier
-      # is used as part of the redis key.
+      # is used as part of the redis key
       #
       # @param [Array] args job arguments
       # @return [String] job identifier
+      #
+      # @api public
       def retry_identifier(*args)
         args_string = args.join('-')
         args_string.empty? ? nil : args_string
@@ -58,34 +62,42 @@ module Resque
       # attempts.
       #
       # @return [String] redis key
+      #
+      # @api public
       def redis_retry_key(*args)
         ['resque-retry', name, retry_identifier(*args)].compact.join(":").gsub(/\s/, '')
       end
 
-      # Maximum number of retrys we can attempt to successfully perform the job.
+      # Maximum number of retrys we can attempt to successfully perform the job
       #
       # A retry limit of 0 will *never* retry.
       # A retry limit of -1 or below will retry forever.
       #
       # @return [Fixnum]
+      #
+      # @api public
       def retry_limit
         @retry_limit ||= 1
       end
 
-      # Number of retry attempts used to try and perform the job.
+      # Number of retry attempts used to try and perform the job
       #
       # The real value is kept in Redis, it is accessed and incremented using
       # a before_perform hook.
       #
       # @return [Fixnum] number of attempts
+      #
+      # @api public
       def retry_attempt
         @retry_attempt ||= 0
       end
 
       # @abstract
-      # Number of seconds to delay until the job is retried.
-      # 
+      # Number of seconds to delay until the job is retried
+      #
       # @return [Number] number of seconds to delay
+      #
+      # @api public
       def retry_delay(exception_class = nil)
         if @retry_exceptions.is_a?(Hash)
           delay = @retry_exceptions[exception_class] || 0
@@ -100,37 +112,52 @@ module Resque
       # Number of seconds to sleep after job is requeued
       # 
       # @return [Number] number of seconds to sleep
+      #
+      # @api public
       def sleep_after_requeue
         @sleep_after_requeue ||= 0
       end
 
+      # @abstract
+      # Specify another resque job (module or class) to delegate retry duties
+      # to upon failure
+      #
+      # @return [Object, nil] class or module if delegate on failure, otherwise nil
+      #
+      # @api public
       def retry_job_delegate
         @retry_job_delegate ||= nil
       end
 
       # @abstract
       # Modify the arguments used to retry the job. Use this to do something
-      # other than try the exact same job again.
+      # other than try the exact same job again
       #
       # @return [Array] new job arguments
+      #
+      # @api public
       def args_for_retry(*args)
         args
       end
 
-      # Convenience method to test whether you may retry on a given exception.
+      # Convenience method to test whether you may retry on a given exception
       #
       # @return [Boolean]
+      #
+      # @api public
       def retry_exception?(exception)
         return true if retry_exceptions.nil?
         !! retry_exceptions.any? { |ex| ex >= exception }
       end
 
       # @abstract
-      # Controls what exceptions may be retried.
+      # Controls what exceptions may be retried
       #
       # Default: `nil` - this will retry all exceptions.
-      # 
+      #
       # @return [Array, nil]
+      #
+      # @api public
       def retry_exceptions
         if @retry_exceptions.is_a?(Hash)
           @retry_exceptions.keys
@@ -139,11 +166,13 @@ module Resque
         end
       end
 
-      # Test if the retry criteria is valid.
+      # Test if the retry criteria is valid
       #
       # @param [Exception] exception
       # @param [Array] args job arguments
       # @return [Boolean]
+      #
+      # @api public
       def retry_criteria_valid?(exception, *args)
         # if the retry limit was reached, dont bother checking anything else.
         return false if retry_limit_reached?
@@ -159,17 +188,20 @@ module Resque
         should_retry
       end
 
-      # Retry criteria checks.
+      # Retry criteria checks
       #
       # @return [Array]
+      #
+      # @api public
       def retry_criteria_checks
         @retry_criteria_checks ||= []
-        @retry_criteria_checks
       end
 
-      # Test if the retry limit has been reached.
+      # Test if the retry limit has been reached
       #
       # @return [Boolean]
+      #
+      # @api public
       def retry_limit_reached?
         if retry_limit == 0
           true
@@ -181,7 +213,7 @@ module Resque
       end
 
       # Register a retry criteria check callback to be run before retrying
-      # the job again.
+      # the job again
       #
       # If any callback returns `true`, the job will be retried.
       #
@@ -200,11 +232,15 @@ module Resque
       # @yieldparam exception [Exception] the exception that was raised
       # @yieldparam args [Array] job arguments
       # @yieldreturn [Boolean] false == dont retry, true = can retry
+      #
+      # @api public
       def retry_criteria_check(&block)
         retry_criteria_checks << block
       end
 
-      # Retries the job.
+      # Retries the job
+      #
+      # @api private
       def try_again(exception, *args)
         # some plugins define retry_delay and have it take no arguments, so rather than break those,
         # we'll just check here to see whether it takes the additional exception class argument or not
@@ -225,9 +261,11 @@ module Resque
         sleep(sleep_after_requeue) if sleep_after_requeue > 0
       end
 
-      # Resque before_perform hook.
+      # Resque before_perform hook
       #
       # Increments and sets the `@retry_attempt` count.
+      #
+      # @api private
       def before_perform_retry(*args)
         @on_failure_retry_hook_already_called = false
 
@@ -237,21 +275,25 @@ module Resque
         @retry_attempt = Resque.redis.incr(retry_key) # increment by 1.
       end
 
-      # Resque after_perform hook.
+      # Resque after_perform hook
       #
       # Deletes retry attempt count from Redis.
+      #
+      # @api private
       def after_perform_retry(*args)
         clean_retry_key(*args)
       end
 
-      # Resque on_failure hook.
+      # Resque on_failure hook
       #
       # Checks if our retry criteria is valid, if it is we try again.
       # Otherwise the retry attempt count is deleted from Redis.
       #
-      # NOTE: This hook will only allow execution once per job perform attempt.
+      # @note This hook will only allow execution once per job perform attempt.
       #       This was added because Resque v1.20.0 calls the hook twice.
       #       IMO; this isn't something resque-retry should have to worry about!
+      #
+      # @api private
       def on_failure_retry(exception, *args)
         return if @on_failure_retry_hook_already_called
 
@@ -264,6 +306,11 @@ module Resque
         @on_failure_retry_hook_already_called = true
       end
 
+      # Used to perform retry criteria check blocks under the job instance's context
+      #
+      # @return [Object] return value of the criteria check
+      #
+      # @api private
       def instance_exec(*args, &block)
         mname = "__instance_exec_#{Thread.current.object_id.abs}"
         class << self; self end.class_eval{ define_method(mname, &block) }
@@ -275,6 +322,9 @@ module Resque
         ret
       end
 
+      # Clean up retry state from redis once done
+      #
+      # @api private
       def clean_retry_key(*args)
         Resque.redis.del(redis_retry_key(*args))
       end

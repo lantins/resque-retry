@@ -37,24 +37,30 @@ module Resque
     module ExponentialBackoff
       include Resque::Plugins::Retry
 
-      # Defaults to the number of delays in the backoff strategy.
+      # Defaults to the number of delays in the backoff strategy
       #
       # @return [Number] maximum number of retries
+      #
+      # @api private
       def retry_limit
         @retry_limit ||= backoff_strategy.length
       end
 
-      # Selects the delay from the backoff strategy.
+      # Selects the delay from the backoff strategy
       #
       # @return [Number] seconds to delay until the next retry.
+      #
+      # @api private
       def retry_delay
         backoff_strategy[retry_attempt] || backoff_strategy.last
       end
 
       # @abstract
-      # The backoff strategy is used to vary the delay between retry attempts.
+      # The backoff strategy is used to vary the delay between retry attempts
       # 
       # @return [Array] array of delays. index = retry attempt
+      #
+      # @api public
       def backoff_strategy
         @backoff_strategy ||= [0, 60, 600, 3600, 10_800, 21_600]
       end

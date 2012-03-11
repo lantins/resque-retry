@@ -1,6 +1,8 @@
 .*.sw?
 .gem
 .idea
+.yardoc
 Gemfile.lock
-coverage/*
+coverage/
 examples/demo/tmp
+doc/

@@ -18,7 +18,7 @@ end
 # docs task.
 YARD::Rake::YardocTask.new :yardoc do |t|
     t.files   = ['lib/**/*.rb']
-    t.options = ['--output-dir', "doc/",
+    t.options = ['--output-dir', 'doc/',
                  '--files', 'LICENSE',
                  '--readme', 'README.md',
                  '--title', 'resque-retry documentation']

@@ -4,6 +4,9 @@ require 'cgi'
 module ResqueRetry
   module Server
 
+    # Adds `resque-retry` web interface elements to `resque-web`
+    #
+    # @api private
     def self.included(base)
       base.class_eval {
         helpers do
