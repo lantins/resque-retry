@@ -15,7 +15,7 @@ class RetryTest < MiniTest::Unit::TestCase
   def test_default_settings
     assert_equal 1, RetryDefaultSettingsJob.retry_limit, 'default retry limit'
     assert_equal 0, RetryDefaultSettingsJob.retry_attempt, 'default number of retry attempts'
-    assert_equal nil, RetryDefaultSettingsJob.retry_exceptions, 'default retry exceptions; nil = any'
+    assert_equal [], RetryDefaultSettingsJob.retry_exceptions, 'default retry exceptions; [] = any'
     assert_equal 0, RetryDefaultSettingsJob.retry_delay, 'default seconds until retry'
   end
 
@@ -116,6 +116,10 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_equal true, RetryCustomExceptionsJob.retry_exception?(CustomException), 'CustomException may retry'
     assert_equal true, RetryCustomExceptionsJob.retry_exception?(HierarchyCustomException), 'HierarchyCustomException may retry'
     assert_equal false, RetryCustomExceptionsJob.retry_exception?(AnotherCustomException), 'AnotherCustomException may not retry'
+
+    assert_equal true, RetryAllButIrrecoverableJob.retry_exception?(StandardError), 'StandardError may retry'
+    assert_equal true, RetryAllButIrrecoverableJob.retry_exception?(TryLaterException), 'TryLaterException may retry'
+    assert_equal false, RetryAllButIrrecoverableJob.retry_exception?(TryIn3000Exception), 'TryIn3000Exception may not retry'
   end
 
   def test_retry_if_failed_and_exception_may_retry
@@ -139,6 +143,28 @@ class RetryTest < MiniTest::Unit::TestCase
 
     assert_equal 2, Resque.info[:failed], 'failed jobs'
     assert_equal 2, Resque.info[:processed], 'processed job'
+    assert_equal 0, Resque.info[:pending], 'pending jobs'
+  end
+
+  def test_retry_if_failed_and_exception_type_is_not_ignored
+    Resque.enqueue(RetryAllButIrrecoverableJob, TryLaterException)
+    4.times do
+      perform_next_job(@worker)
+    end
+
+    assert_equal 4, Resque.info[:failed], 'failed jobs'
+    assert_equal 4, Resque.info[:processed], 'processed job'
+    assert_equal 1, Resque.info[:pending], 'pending jobs'
+  end
+
+  def test_retry_if_failed_and_exception_type_is_ignored
+    Resque.enqueue(RetryAllButIrrecoverableJob, TryIn3000Exception)
+    2.times do
+      perform_next_job(@worker)
+    end
+
+    assert_equal 1, Resque.info[:failed], 'failed jobs'
+    assert_equal 1, Resque.info[:processed], 'processed job'
     assert_equal 0, Resque.info[:pending], 'pending jobs'
   end
 

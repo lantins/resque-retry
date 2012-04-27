@@ -1,6 +1,8 @@
 CustomException = Class.new(StandardError)
 HierarchyCustomException = Class.new(CustomException)
 AnotherCustomException = Class.new(StandardError)
+TryLaterException = Class.new(StandardError)
+TryIn3000Exception = Class.new(TryLaterException)
 
 class NoRetryJob
   @queue = :testing
@@ -162,6 +164,22 @@ class RetryCustomExceptionsJob < RetryDefaultsJob
     when 'CustomException' then raise CustomException
     when 'HierarchyCustomException' then raise HierarchyCustomException
     when 'AnotherCustomException' then raise AnotherCustomException
+    else raise StandardError
+    end
+  end
+end
+
+class RetryAllButIrrecoverableJob < RetryDefaultsJob
+  @queue = :testing
+
+  @retry_limit = 5
+  @ignore_exceptions = [TryIn3000Exception]
+
+  def self.perform(exception)
+    case exception
+    when 'CustomException' then raise CustomException
+    when 'TryLaterException' then raise TryLaterException
+    when 'TryIn3000Exception' then raise TryIn3000Exception
     else raise StandardError
     end
   end
