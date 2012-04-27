@@ -168,6 +168,12 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_equal 0, Resque.info[:pending], 'pending jobs'
   end
 
+  def test_dont_allow_both_retry_and_ignore_exceptions
+    assert_raises Resque::Plugins::Retry::AmbiguousRetryExceptionError do
+      AmbiguousExceptionsJob.extend(Resque::Plugins::Retry)
+    end
+  end
+
   def test_retry_failed_jobs_in_separate_queue
     Resque.enqueue(JobWithRetryQueue, 'arg1')
 

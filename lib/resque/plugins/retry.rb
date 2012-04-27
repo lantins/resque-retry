@@ -33,6 +33,7 @@ module Resque
     #   end
     #
     module Retry
+      class AmbiguousRetryExceptionError < StandardError; end
 
       # Copy retry criteria checks on inheritance.
       #
@@ -40,6 +41,12 @@ module Resque
       def inherited(subclass)
         super(subclass)
         subclass.instance_variable_set("@retry_criteria_checks", retry_criteria_checks.dup)
+      end
+
+      def self.extended(base)
+        if base.instance_variable_get("@retry_exceptions") and base.instance_variable_get("@ignore_exceptions")
+          raise AmbiguousRetryExceptionError.new("You can't both define @retry_exceptions and @ignore_exceptions")
+        end
       end
 
       # @abstract You may override to implement a custom retry identifier,

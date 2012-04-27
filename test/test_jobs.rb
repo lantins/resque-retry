@@ -185,6 +185,13 @@ class RetryAllButIrrecoverableJob < RetryDefaultsJob
   end
 end
 
+class AmbiguousExceptionsJob
+  @queue = :testing
+
+  @retry_exceptions = [CustomException, HierarchyCustomException]
+  @ignore_exceptions = [TryIn3000Exception]
+end
+
 module RetryModuleDefaultsJob
   extend Resque::Plugins::Retry
   @queue = :testing
