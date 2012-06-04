@@ -21,7 +21,7 @@ To install:
 
     $ gem install resque-retry
 
-If your using [Bundler][bundler] to manage your dependencies, you should add `gem
+If you're using [Bundler][bundler] to manage your dependencies, you should add `gem
 'resque-retry'` to your projects `Gemfile`.
 
 Add this to your `Rakefile`:
@@ -63,7 +63,7 @@ For more explanation and examples, please see the remaining documentation.
 Failure Backend & Resque Web Additions
 --------------------------------------
 
-Lets say your using the Redis failure backend of resque (the default).
+Lets say you're using the Redis failure backend of resque (the default).
 Every time a job fails, the failure queue is populated with the job and
 exception details.
 
@@ -95,7 +95,7 @@ the Redis failed queue, like a normal failure *(without retry)* would.
 
 ### Resque Web Additions
 
-If your using the `MultipleWithRetrySuppression` failure backend, you should
+If you're using the `MultipleWithRetrySuppression` failure backend, you should
 also checkout the resque-web additions!
 
 The new Retry tab displays delayed jobs with retry information; the number of
