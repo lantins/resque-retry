@@ -3,6 +3,7 @@ $LOAD_PATH.unshift dir + '/../lib'
 $TESTING = true
 
 require 'rubygems'
+require 'timeout'
 require 'minitest/unit'
 require 'minitest/pride'
 require 'rack/test'
