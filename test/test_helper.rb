@@ -9,6 +9,7 @@ require 'minitest/pride'
 require 'rack/test'
 require 'mocha'
 
+# Run code coverage in MRI 1.9 only.
 if RUBY_VERSION >= '1.9' && RUBY_ENGINE == 'ruby'
   require 'simplecov'
   SimpleCov.start do
