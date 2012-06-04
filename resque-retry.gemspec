@@ -22,6 +22,7 @@ spec = Gem::Specification.new do |s|
   s.add_development_dependency('json')
   s.add_development_dependency('simplecov', '>= 0.3.0')
   s.add_development_dependency('mocha')
+  s.add_development_dependency('foreman')
   # for 1.8 use a better timer please.
   s.add_development_dependency('SystemTimer') if Gem.ruby_version < Gem::Version.new('1.9')
 
