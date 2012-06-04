@@ -12,6 +12,12 @@ resque jobs.
   * Multiple failure backend with retry suppression & resque-web tab.
   * Small & Extendable - plenty of places to override retry logic/settings.
 
+### Tested Rubies
+
+ruby-1.8.7-p358, ruby-1.9.2-p320, ruby-1.9.3-p0, jruby-1.6.7.2
+
+### CI Build Status
+
 [![Build Status](https://secure.travis-ci.org/lantins/resque-retry.png?branch=master)](http://travis-ci.org/lantins/resque-retry)
 
 Install & Quick Start

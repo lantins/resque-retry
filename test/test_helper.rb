@@ -18,44 +18,32 @@ end
 require 'resque-retry'
 require dir + '/test_jobs'
 
-# make sure we can run redis
-if !system("which redis-server")
-  puts '', "** can't find `redis-server` in your path"
-  puts "** try running `sudo rake install`"
+# make sure we can run redis-server
+if !system('which redis-server')
+  puts '', "** `redis-server` was not found in your PATH"
+  abort ''
+end
+
+# make sure we can shutdown the server using cli.
+if !system('which redis-cli')
+  puts '', "** `redis-cli` was not found in your PATH"
   abort ''
 end
 
 
-# start our own redis when the tests start,
-# kill it when they end
+
+# This code is run `at_exit` to setup everything before running the tests.
+# Redis server is started before this code block runs.
 at_exit do
   next if $!
 
   exit_code = MiniTest::Unit.new.run(ARGV)
-
-  pid = `ps -e -o pid,command | grep [r]edis-test`.split(" ")[0]
-  puts "Killing test redis server..."
-  `rm -f #{dir}/dump.rdb`
-  `kill -9 #{pid}`
-  exit exit_code
+  `redis-cli -p 9736 shutdown nosave`
 end
 
 puts "Starting redis for testing at localhost:9736..."
 `redis-server #{dir}/redis-test.conf`
 Resque.redis = '127.0.0.1:9736'
-
-# Mock failure backend for testing MultipleWithRetrySuppression
-class MockFailureBackend < Resque::Failure::Base
-  class << self
-    attr_accessor :errors
-  end
-
-  def save
-    self.class.errors << exception.to_s
-  end
-
-  self.errors = []
-end
 
 # Test helpers
 class MiniTest::Unit::TestCase

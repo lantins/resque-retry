@@ -9,7 +9,7 @@ spec = Gem::Specification.new do |s|
   s.has_rdoc          = false
 
   s.files             = %w(LICENSE Rakefile README.md HISTORY.md)
-  s.files            += Dir.glob('{test/*,lib/**/*}')
+  s.files            += Dir.glob('{bin/*,test/*,lib/**/*}')
   s.require_paths     = ['lib']
 
   s.add_dependency('resque', '>= 1.10.0')
@@ -22,6 +22,8 @@ spec = Gem::Specification.new do |s|
   s.add_development_dependency('json')
   s.add_development_dependency('simplecov', '>= 0.3.0')
   s.add_development_dependency('mocha')
+  # for 1.8 use a better timer please.
+  s.add_development_dependency('SystemTimer') if Gem.ruby_version < Gem::Version.new('1.9')
 
   s.description       = <<-EOL
   resque-retry provides retry, delay and exponential backoff support for

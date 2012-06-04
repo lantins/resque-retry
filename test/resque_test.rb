@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/test_helper')
+require 'test_helper'
 
 # make sure the worlds not fallen from beneith us.
 class ResqueTest < MiniTest::Unit::TestCase
