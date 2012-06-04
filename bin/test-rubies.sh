@@ -11,7 +11,7 @@ set -e
 # echo the commands we execute
 set -o verbose
 # ruby versions to test.
-TEST_RUBIES="ruby-1.8.7-p358,ruby-1.9.2-p320,ruby-1.9.3-p0,jruby-1.6.7.2"
+TEST_RUBIES="ruby-1.8.7-p358,ruby-1.9.2-p320,ruby-1.9.3-p0,jruby-1.6.7.2,rbx-2.0.testing"
 # install dependencies.
 rvm $TEST_RUBIES do bundle
 # run unit tests

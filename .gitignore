@@ -6,3 +6,4 @@ Gemfile.lock
 coverage/
 examples/demo/tmp
 doc/
+.rbx/
