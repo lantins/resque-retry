@@ -31,7 +31,7 @@ module ResqueRetry
 
           # gets the failure details hash for a job.
           def retry_failure_details(retry_key)
-            Resque.decode(Resque.redis.get("failure_#{retry_key}"))
+            Resque.decode(Resque.redis.get("failure-#{retry_key}"))
           end
 
           # reads a 'local' template file.
@@ -45,7 +45,7 @@ module ResqueRetry
             klass = Resque.constantize(job['class'])
             retry_key = retry_key_for_job(job)
             Resque.remove_delayed(klass, *job['args'])
-            Resque.redis.del("failure_#{retry_key}")
+            Resque.redis.del("failure-#{retry_key}")
             Resque.redis.del(retry_key)
           end
         end
