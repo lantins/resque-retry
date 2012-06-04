@@ -11,17 +11,17 @@ class ResqueRetryExampleApp < Sinatra::Base
   end
 
   post '/' do
-    Resque.enqueue(SuccessfulJob, Random.rand(10000))
+    Resque.enqueue(SuccessfulJob, rand(10000))
     redirect "/"
   end
   
   post '/failing' do 
-    Resque.enqueue(FailingJob, Random.rand(10000))
+    Resque.enqueue(FailingJob, rand(10000))
     redirect "/"
   end
 
   post '/failing-with-retry' do 
-    Resque.enqueue(FailingWithRetryJob, Random.rand(10000))
+    Resque.enqueue(FailingWithRetryJob, rand(10000))
     redirect "/"
   end
 end
