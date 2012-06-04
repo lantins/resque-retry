@@ -31,8 +31,6 @@ if !system('which redis-cli')
   abort ''
 end
 
-
-
 # This code is run `at_exit` to setup everything before running the tests.
 # Redis server is started before this code block runs.
 at_exit do
