@@ -410,9 +410,13 @@ module Resque
       # @api private
       def on_failure_retry(exception, *args)
         log_message 'on_failure_retry', args, exception
-        if @on_failure_retry_hook_already_called
+        if exception.is_a?(Resque::DirtyExit)
+          # This hook is called from a worker processes, not the job process
+          # that failed with a DirtyExit, so @retry_attempt wasn't set yet
+          @retry_attempt = Resque.redis.get(redis_retry_key(*args)).to_i
+        elsif @on_failure_retry_hook_already_called
           log_message 'on_failure_retry_hook_already_called', args, exception
-          return 
+          return
         end
 
         if retry_criteria_valid?(exception, *args)
