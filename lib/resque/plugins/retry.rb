@@ -33,6 +33,7 @@ module Resque
     #   end
     #
     module Retry
+      class AmbiguousRetryExceptionError < StandardError; end
 
       # Copy retry criteria checks on inheritance.
       #
@@ -40,6 +41,12 @@ module Resque
       def inherited(subclass)
         super(subclass)
         subclass.instance_variable_set("@retry_criteria_checks", retry_criteria_checks.dup)
+      end
+
+      def self.extended(base)
+        if base.instance_variable_get("@retry_exceptions") and base.instance_variable_get("@ignore_exceptions")
+          raise AmbiguousRetryExceptionError.new("You can't both define @retry_exceptions and @ignore_exceptions")
+        end
       end
 
       # @abstract You may override to implement a custom retry identifier,
@@ -110,7 +117,7 @@ module Resque
 
       # @abstract
       # Number of seconds to sleep after job is requeued
-      # 
+      #
       # @return [Number] number of seconds to sleep
       #
       # @api public
@@ -146,8 +153,13 @@ module Resque
       #
       # @api public
       def retry_exception?(exception)
-        return true if retry_exceptions.nil?
-        !! retry_exceptions.any? { |ex| ex >= exception }
+        if retry_exceptions.any?
+          !! retry_exceptions.any? { |ex| ex >= exception }
+        elsif ignore_exceptions.any?
+          ! ignore_exceptions.any? { |ex| ex >= exception }
+        else
+          true
+        end
       end
 
       # @abstract
@@ -162,8 +174,12 @@ module Resque
         if @retry_exceptions.is_a?(Hash)
           @retry_exceptions.keys
         else
-          @retry_exceptions ||= nil
+          @retry_exceptions ||= []
         end
+      end
+
+      def ignore_exceptions
+        @ignore_exceptions ||= []
       end
 
       # Test if the retry criteria is valid
