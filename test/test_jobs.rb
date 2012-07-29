@@ -1,4 +1,5 @@
 CustomException = Class.new(StandardError)
+CustomExceptionModule = Module.new
 HierarchyCustomException = Class.new(CustomException)
 AnotherCustomException = Class.new(StandardError)
 
@@ -155,12 +156,13 @@ class RetryCustomExceptionsJob < RetryDefaultsJob
   @queue = :testing
 
   @retry_limit = 5
-  @retry_exceptions = [CustomException, HierarchyCustomException]
+  @retry_exceptions = [CustomException, CustomExceptionModule, HierarchyCustomException]
 
   def self.perform(exception)
     case exception
     when 'CustomException' then raise CustomException
     when 'HierarchyCustomException' then raise HierarchyCustomException
+    when 'tagged CustomException' then raise AnotherCustomException.new.extend(CustomExceptionModule)
     when 'AnotherCustomException' then raise AnotherCustomException
     else raise StandardError
     end

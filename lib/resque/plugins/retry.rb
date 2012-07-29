@@ -140,14 +140,24 @@ module Resque
         args
       end
 
-      # Convenience method to test whether you may retry on a given exception
+      # Convenience method to test whether you may retry on a given
+      # exception
+      #
+      # @param [Exception] an instance of Exception. Deprecated: can
+      # also be a Class
       #
       # @return [Boolean]
       #
       # @api public
       def retry_exception?(exception)
         return true if retry_exceptions.nil?
-        !! retry_exceptions.any? { |ex| ex >= exception }
+        !! retry_exceptions.any? do |ex|
+          if exception.is_a?(Class)
+            ex >= exception
+          else
+            ex === exception
+          end
+        end
       end
 
       # @abstract
@@ -178,7 +188,7 @@ module Resque
         return false if retry_limit_reached?
 
         # We always want to retry if the exception matches.
-        should_retry = retry_exception?(exception.class)
+        should_retry = retry_exception?(exception)
 
         # call user retry criteria check blocks.
         retry_criteria_checks.each do |criteria_check|

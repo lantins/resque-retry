@@ -108,13 +108,17 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_equal 0, Resque.info[:pending], 'pending jobs'
   end
 
-  def test_can_determine_if_exception_may_be_retried
+  def test_can_determine_if_exception_may_be_retried_with_defaults
     assert_equal true, RetryDefaultsJob.retry_exception?(StandardError), 'StandardError may retry'
     assert_equal true, RetryDefaultsJob.retry_exception?(CustomException), 'CustomException may retry'
     assert_equal true, RetryDefaultsJob.retry_exception?(HierarchyCustomException), 'HierarchyCustomException may retry'
+  end
 
+  def test_can_determine_if_exception_may_be_retried_with_custom_retry_exceptions
+    assert_equal false, RetryCustomExceptionsJob.retry_exception?(StandardError), 'StandardError may not retry'
     assert_equal true, RetryCustomExceptionsJob.retry_exception?(CustomException), 'CustomException may retry'
     assert_equal true, RetryCustomExceptionsJob.retry_exception?(HierarchyCustomException), 'HierarchyCustomException may retry'
+    assert_equal true, RetryCustomExceptionsJob.retry_exception?(RuntimeError.new.extend(CustomExceptionModule)), 'Extended with CustomExceptionModule may retry'
     assert_equal false, RetryCustomExceptionsJob.retry_exception?(AnotherCustomException), 'AnotherCustomException may not retry'
   end
 
@@ -128,6 +132,17 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_equal 4, Resque.info[:failed], 'failed jobs'
     assert_equal 4, Resque.info[:processed], 'processed job'
     assert_equal 2, Resque.info[:pending], 'pending jobs'
+  end
+
+  def test_retry_if_failed_and_exception_may_retry_because_of_included_module
+    Resque.enqueue(RetryCustomExceptionsJob, 'tagged CustomException')
+    4.times do
+      perform_next_job(@worker)
+    end
+
+    assert_equal 4, Resque.info[:failed], 'failed jobs'
+    assert_equal 4, Resque.info[:processed], 'processed job'
+    assert_equal 1, Resque.info[:pending], 'pending jobs'
   end
 
   def test_do_not_retry_if_failed_and_exception_does_not_allow_retry
