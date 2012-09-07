@@ -76,7 +76,6 @@ module ResqueRetry
         Resque.redis.del(retry_key)
       end
     end
-    
 
   end
 end
