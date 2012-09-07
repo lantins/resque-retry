@@ -1,6 +1,6 @@
-## HEAD - will become v1.0.0
+## 1.0.0 (2012-09-07)
 
-**INCLUDES NON-BACKWARDS COMPATIBLE CHANGES**
+** !!! WARNING !!! INCLUDES NON-BACKWARDS COMPATIBLE CHANGES **
 
 * Fixed issues related to infinate job retries and v1.20.0 of resque.
 * Minimum gem dependency versions changed: resque >= 1.10.0, resque-scheduler >= 1.9.9
