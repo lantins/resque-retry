@@ -312,4 +312,22 @@ class RetryTest < MiniTest::Unit::TestCase
       perform_next_job(@worker)
     end
   end
+
+  if Process.respond_to?(:fork) && Gem::Version.new(Resque::VERSION) >= Gem::Version.new('1.20.0')
+    def test_retry_on_dirty_exit
+      Resque.enqueue(RetryKilledJob)
+      RetryKilledJob.expects(:clean_retry_key).once
+      2.times do
+        job = @worker.reserve
+        child = fork do
+          Resque.redis.client.reconnect
+          job.perform
+        end
+        Process.waitpid(child)
+        job.fail(Resque::DirtyExit.new)
+      end
+
+      assert_equal nil, @worker.reserve
+    end
+  end
 end
