@@ -1,3 +1,5 @@
+require 'digest/sha1'
+
 module Resque
   module Plugins
 
@@ -55,7 +57,7 @@ module Resque
       # @api public
       def retry_identifier(*args)
         args_string = args.join('-')
-        args_string.empty? ? nil : args_string
+        args_string.empty? ? nil : Digest::SHA1.hexdigest(args_string)
       end
 
       # Builds the redis key to be used for keeping state of the job
