@@ -1,5 +1,7 @@
 require 'test_helper'
 
+require 'digest/sha1'
+
 class RetryTest < MiniTest::Unit::TestCase
   def setup
     Resque.redis.flushall
@@ -211,13 +213,18 @@ class RetryTest < MiniTest::Unit::TestCase
   end
 
   def test_job_without_args_has_no_ending_colon_in_redis_key
-    assert_equal 'resque-retry:GoodJob:yarrrr', GoodJob.redis_retry_key('yarrrr')
-    assert_equal 'resque-retry:GoodJob:foo', GoodJob.redis_retry_key('foo')
+    assert_equal 'resque-retry:GoodJob:' << Digest::SHA1.hexdigest('yarrrr'), GoodJob.redis_retry_key('yarrrr')
+    assert_equal 'resque-retry:GoodJob:' << Digest::SHA1.hexdigest('foo'), GoodJob.redis_retry_key('foo')
     assert_equal 'resque-retry:GoodJob', GoodJob.redis_retry_key
   end
 
-  def test_redis_retry_key_removes_whitespace
-    assert_equal 'resque-retry:GoodJob:arg1-removespace', GoodJob.redis_retry_key('arg1', 'remove space')
+  def test_redis_retry_key_removes_whitespace_for_custom_retry_identifier
+    klass = Class.new(GoodJob) do
+      def self.retry_identifier(*args)
+        args.join(' ')
+      end
+    end
+    assert_equal 'resque-retry:abc', klass.redis_retry_key('a', 'b', 'c')
   end
 
   def test_retry_delay
