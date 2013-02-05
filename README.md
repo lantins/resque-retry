@@ -207,12 +207,18 @@ Use this if you wish to vary the delay between retry attempts:
 
                   no delay, 1m, 10m,   1h,    3h,    6h
     @backoff_strategy = [0, 60, 600, 3600, 10800, 21600]
+    @add_random_quotient = nil
+    @random_quotient_range = 3.0
 
 The first delay will be 0 seconds, the 2nd will be 60 seconds, etc...
 Again, tweak to your own needs.
 
 The number of retries is equal to the size of the `backoff_strategy`
 array, unless you set `retry_limit` yourself.
+
+If `add_random_quotient` is true, your delay values will be multiplied by a random number between
+[1.0, `random_quotient_range`]. This is useful if you have a lot of jobs fail at the same time
+(e.g., due to connectivity issues) and you don't want them all retried on the same retry schedule.
 
 ### Retry Specific Exceptions
 
