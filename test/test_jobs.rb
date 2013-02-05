@@ -27,6 +27,26 @@ class RetryDefaultSettingsJob
   end
 end
 
+class MockResqueStatusJob
+  extend Resque::Plugins::Retry
+  @queue = :testing
+  # Set a retry_limit > 1 so we can ensure that multiple retry calls get scheduled accordingly
+  @retry_limit = 3
+
+  def self.create(opts = {})
+    Resque.enqueue(self, "hash", opts)
+  end
+
+  def self.perform(*args)
+    opts = args.last
+    # We need to ensure that the parameters are and processed correctly through resque-status
+    if opts["foo"] == "bar"
+      $resque_status_params_passed += 1
+    end
+    raise
+  end
+end
+
 class RetryDefaultsJob
   extend Resque::Plugins::Retry
   @queue = :testing
