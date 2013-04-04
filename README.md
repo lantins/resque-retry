@@ -13,6 +13,7 @@ resque jobs.
   * Small & Extendable - plenty of places to override retry logic/settings.
 
 [![Build Status](https://secure.travis-ci.org/lantins/resque-retry.png?branch=master)](http://travis-ci.org/lantins/resque-retry)
+[![Dependency Status](https://gemnasium.com/lantins/resque-retry.png)](https://gemnasium.com/lantins/resque-retry)
 
 Install & Quick Start
 ---------------------
