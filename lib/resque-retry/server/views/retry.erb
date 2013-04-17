@@ -12,7 +12,7 @@
 
 <table>
   <tr>
-    <th></th>
+    <th colspan=2></th>
     <th>Timestamp</th>
     <th>Job count</th>
     <th>Class</th>
@@ -28,6 +28,8 @@
         <form action="<%= u "retry/#{timestamp}/remove" %>" method="post">
           <input type="submit" value="Remove">
         </form>
+      </td>
+      <td>
         <form action="<%= u "/delayed/queue_now" %>" method="post">
           <input type="hidden" name="timestamp" value="<%= timestamp.to_i %>">
           <input type="submit" value="Queue now">
