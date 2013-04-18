@@ -6,7 +6,6 @@ spec = Gem::Specification.new do |s|
   s.homepage          = 'http://github.com/lantins/resque-retry'
   s.authors           = ['Luke Antins', 'Ryan Carver']
   s.email             = 'luke@lividpenguin.com'
-  s.has_rdoc          = false
 
   s.files             = %w(LICENSE Rakefile README.md HISTORY.md)
   s.files            += Dir.glob('{bin/*,test/*,lib/**/*}')
