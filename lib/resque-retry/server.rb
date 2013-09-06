@@ -42,7 +42,7 @@ module ResqueRetry
         begin
           klass = Resque.constantize(job['class'])
           if klass.respond_to?(:redis_retry_key)
-            klass.redis_retry_key(job['args'])
+            klass.redis_retry_key(*job['args'])
           else
             nil
           end
