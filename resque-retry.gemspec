@@ -15,7 +15,7 @@ spec = Gem::Specification.new do |s|
   s.add_dependency('resque', '>= 1.10.0')
   s.add_dependency('resque-scheduler', '>= 1.9.9')
   s.add_development_dependency('rake')
-  s.add_development_dependency('minitest')
+  s.add_development_dependency('minitest', '~> 4.0')
   s.add_development_dependency('rack-test')
   s.add_development_dependency('yard')
   s.add_development_dependency('rdiscount') unless RUBY_PLATFORM == 'java'
