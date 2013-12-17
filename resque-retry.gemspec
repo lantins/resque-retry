@@ -1,4 +1,4 @@
-spec = Gem::Specification.new do |s|
+Gem::Specification.new do |s|
   s.name              = 'resque-retry'
   s.version           = '1.0.0'
   s.date              = Time.now.strftime('%Y-%m-%d')
@@ -12,7 +12,7 @@ spec = Gem::Specification.new do |s|
   s.files            += Dir.glob('{bin/*,test/*,lib/**/*}')
   s.require_paths     = ['lib']
 
-  s.add_dependency('resque', '>= 1.10.0')
+  s.add_dependency('resque', '>= 1.25.1')
   s.add_dependency('resque-scheduler', '>= 1.9.9')
   s.add_development_dependency('rake')
   s.add_development_dependency('minitest', '~> 4.0')

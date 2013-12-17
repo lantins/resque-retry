@@ -17,8 +17,6 @@ module Resque
     #   Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
     #
     class MultipleWithRetrySuppression < Multiple
-      include Resque::Helpers
-
       # Called when the job fails
       #
       # If the job will retry, suppress the failure from the other backends.
@@ -41,7 +39,7 @@ module Resque
             :queue     => queue
           }
 
-          redis.setex(failure_key, 2*retry_delay, encode(data))
+          Resque.redis.setex(failure_key, 2*retry_delay, Resque.encode(data))
         end
       end
 
@@ -56,7 +54,7 @@ module Resque
 
       # Return the class/module of the failed job.
       def klass
-        constantize(payload['class'])
+        Resque::Job.new(nil, nil).constantize payload['class']
       end
 
       def retry_delay
@@ -78,11 +76,11 @@ module Resque
       end
 
       def retrying?
-        redis.exists(retry_key)
+        Resque.redis.exists(retry_key)
       end
 
       def cleanup_retry_failure_log!
-        redis.del(failure_key) if retryable?
+        Resque.redis.del(failure_key) if retryable?
       end
     end
   end
