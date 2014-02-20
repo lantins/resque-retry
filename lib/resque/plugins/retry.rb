@@ -313,6 +313,7 @@ module Resque
           try_again(exception, *args)
         else
           clean_retry_key(*args)
+          do_final_failure_callbacks(exception, *args)
         end
 
         @on_failure_retry_hook_already_called = true
@@ -341,6 +342,70 @@ module Resque
         Resque.redis.del(redis_retry_key(*args))
       end
 
+      # After final failure callback blocks
+      #
+      # @return [Array] the blocks to call after the final retry fails
+      #
+      # @api private
+      def after_final_callback_blocks
+        @after_final_callback_blocks ||= []
+      end
+
+      # After final failure callback methods
+      #
+      # @return [Array] the methods to call after the final retry fails
+      #
+      # @api private
+      def after_final_callback_methods
+        @after_final_callback_methods ||= []
+      end
+
+      # Register an after final failure callback to be run after the final
+      # retry has run and failed.
+      #
+      # @example Using an after final retry callback block
+      #
+      #   after_final_failure do |exception, company_id|
+      #     mark_as_failed(company_id)
+      #   end
+      # @example Using an after final retry callback method
+      #
+      #   after_final_retry :notify_user_of_failure
+      #
+      #   def self.notify_user_of_failure(exception, user_id)
+      #     UserMailer.processing_failed_email(user_id).deliver
+      #   end
+      #
+      # @api public
+      def after_final_failure(*methods, &block)
+        after_final_callback_methods.concat(methods)
+        after_final_callback_blocks << block
+      end
+
+      # Notify final failure callback methods and blocks
+      #
+      # @note Return values returned from, and exceptions raised by, callback blocks
+      #       and methods are silently swallowed. If your callback doesn't seem to
+      #       be being called, consider it could be raising an exception. Similarly,
+      #       check your argument count.
+      # @api private
+      def do_final_failure_callbacks(exception, *args)
+        after_final_callback_methods.each do |callback_method|
+          begin
+            self.send(callback_method, exception, args)
+          rescue StandardError
+            # no-op
+          end
+
+        end
+        after_final_callback_blocks.each do |callback_block|
+          begin
+            instance_exec(exception, *args, &callback_block)
+          rescue StandardError
+            # no-op
+          end
+        end
+      end
     end
   end
 end

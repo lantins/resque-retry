@@ -212,6 +212,23 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_equal 0, Resque.info[:pending], 'pending jobs'
   end
 
+  def test_callbacks_after_final_failed_retry
+    Resque.enqueue(FailCallbackJob, 'yarrrr')
+    FailCallbackJob.instance_variable_set('@after_final_retry_block_called', false)
+    FailCallbackJob.instance_variable_set('@after_final_retry_method_called', false)
+
+    3.times do
+      perform_next_job(@worker)
+      assert_equal false, FailCallbackJob.instance_variable_get('@after_final_retry_block_called'), 'callback block should not have been called'
+      assert_equal false, FailCallbackJob.instance_variable_get('@after_final_retry_method_called'), 'callback method should not have been called'
+    end
+
+    # Now comes the final retry
+    perform_next_job(@worker)
+    assert_equal true, FailCallbackJob.instance_variable_get('@after_final_retry_block_called'), 'callback block was called'
+    assert_equal true, FailCallbackJob.instance_variable_get('@after_final_retry_method_called'), 'callback method was called'
+  end
+
   def test_job_without_args_has_no_ending_colon_in_redis_key
     assert_equal 'resque-retry:GoodJob:' << Digest::SHA1.hexdigest('yarrrr'), GoodJob.redis_retry_key('yarrrr')
     assert_equal 'resque-retry:GoodJob:' << Digest::SHA1.hexdigest('foo'), GoodJob.redis_retry_key('foo')

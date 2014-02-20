@@ -135,6 +135,27 @@ class FailFiveTimesJob < RetryDefaultsJob
   end
 end
 
+class FailCallbackJob < RetryDefaultsJob
+  @queue = :testing
+  @retry_limit = 3
+
+  @after_final_retry_block_called = false
+  @after_final_retry_method_called = false
+
+  after_final_failure do |exc, args|
+    @after_final_retry_block_called = true
+  end
+  after_final_failure :indicate_method_called
+
+  def self.perform(*args)
+    raise ArgumentError, "custom message"
+  end
+
+  def self.indicate_method_called(exception, *args)
+    self.instance_variable_set('@after_final_retry_method_called', true)
+  end
+end
+
 class ExponentialBackoffJob < RetryDefaultsJob
   extend Resque::Plugins::ExponentialBackoff
   @queue = :testing

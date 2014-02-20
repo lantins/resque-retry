@@ -7,7 +7,7 @@ require 'timeout'
 require 'minitest/unit'
 require 'minitest/pride'
 require 'rack/test'
-require 'mocha'
+require 'mocha/mini_test'
 
 # Run code coverage in MRI 1.9 only.
 if RUBY_VERSION >= '1.9' && RUBY_ENGINE == 'ruby'
