@@ -331,6 +331,28 @@ Or you can define the entire key by overriding `redis_retry_key`.
       end
     end
 
+### After Final Failure Callbacks
+
+If you find you need to perform some logic after all the retries have failed, you can define an after final failure callback:
+
+    class WidgetProcessor
+      extend Resque::Plugins::Retry
+      @queue
+      
+      after_final_failure do |exception, widget_id|
+        mark_as_processing_failed(widget_id)
+      end
+      after_final_failure :notify_owner_of_failure
+      
+      def self.perform(widget_id)
+        heavy_lifting
+      end
+      
+      def self.notify_owner_of_failure(exception, widget_id)
+        OwnerMailer.failed_email(widget_id).send
+      end
+    end
+
 Contributing/Pull Requests
 --------------------------
 
