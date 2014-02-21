@@ -56,8 +56,27 @@ module Resque
       #
       # @api public
       def retry_identifier(*args)
-        args_string = args.join('-')
+        params = get_retry_args(*args)
+        args_string = params.join('-')
         args_string.empty? ? nil : Digest::SHA1.hexdigest(args_string)
+      end
+
+      # @abstract Returns the arguments to be used for a retry job. Resque-status jobs are enqueued with a UUID
+      #           hash as the first argument, followed by an options hash of parameters. When running in resque-status
+      #           jobs, we need to strip the hash off. Otherwise, the job will fail to enqueue again. You can also
+      #           get into an infinite retry loop because the UUID changes each time the job is enqueued, meaning that
+      #           the redis_retry_key would be incorrect by default.
+      # @api private
+      def get_retry_args(*args)
+        # If we are a Resque status job, we need to remove the hash from the args
+        is_resque_status_job = respond_to?(:create)
+        params = is_resque_status_job && args[0].kind_of?(String) ? args[1] : args
+        # The parameters from this method are going to get splatted; as such, we should enforce an array, otherwise a
+        # splat on a hash converts it to an array of [key, value] which breaks multiple retries.
+        if !params.kind_of?(Array)
+          params = [params]
+        end
+        params
       end
 
       # Builds the redis key to be used for keeping state of the job
@@ -112,7 +131,7 @@ module Resque
 
       # @abstract
       # Number of seconds to sleep after job is requeued
-      # 
+      #
       # @return [Number] number of seconds to sleep
       #
       # @api public
@@ -139,8 +158,8 @@ module Resque
       #
       # @api public
       def args_for_retry(*args)
-        args
-      end
+        get_retry_args(*args)
+     end
 
       # Convenience method to test whether you may retry on a given
       # exception

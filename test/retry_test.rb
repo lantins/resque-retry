@@ -32,6 +32,16 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_equal 2, Resque.info[:processed], 'processed job'
   end
 
+  def test_retry_resque_status_jobs
+    $resque_status_params_passed = 0
+    MockResqueStatusJob.create("foo" => "bar")
+    5.times do
+      perform_next_job(@worker)
+    end
+
+    assert_equal 4, $resque_status_params_passed
+  end
+
   def test_module_retry_defaults
     Resque.enqueue(RetryModuleDefaultsJob)
     3.times do
