@@ -1,10 +1,11 @@
 .*.sw?
+.bundle
 .gem
 .idea
+.rbx/
 .yardoc
 Gemfile.lock
 coverage/
 examples/demo/tmp
 doc/
-.rbx/
 stdout

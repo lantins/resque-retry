@@ -17,13 +17,10 @@ Gem::Specification.new do |s|
   s.add_development_dependency('rake')
   s.add_development_dependency('minitest', '~> 4.0')
   s.add_development_dependency('rack-test')
-  s.add_development_dependency('yard')
-  s.add_development_dependency('rdiscount') unless RUBY_PLATFORM == 'java'
+  s.add_development_dependency('yard', '~> 0.8')
   s.add_development_dependency('json')
-  s.add_development_dependency('simplecov', '>= 0.3.0')
+  s.add_development_dependency('simplecov', '~> 0.7.1')
   s.add_development_dependency('mocha')
-  # for 1.8 use a better timer please.
-  s.add_development_dependency('SystemTimer') if Gem.ruby_version < Gem::Version.new('1.9')
 
   s.description       = <<-EOL
   resque-retry provides retry, delay and exponential backoff support for
