@@ -1,3 +1,7 @@
+## HEAD
+
+* Remove dependence on `Resque::Helpers`, will be removed in Resque 2.0
+
 ## 1.0.0 (2012-09-07)
 
 ** !!! WARNING !!! INCLUDES NON-BACKWARDS COMPATIBLE CHANGES **
