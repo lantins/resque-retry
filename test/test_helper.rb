@@ -48,18 +48,15 @@ Resque.redis = '127.0.0.1:9736'
 # Test helpers
 class MiniTest::Unit::TestCase
   def perform_next_job(worker, &block)
-    return unless job = @worker.reserve
-    @worker.perform(job, &block)
-    @worker.done_working
+    return unless job = worker.reserve
+    worker.perform(job, &block)
+    worker.done_working
   end
 
   def clean_perform_job(klass, *args)
     Resque.redis.flushall
     Resque.enqueue(klass, *args)
-
     worker = Resque::Worker.new(:testing)
-    return false unless job = worker.reserve
-    worker.perform(job)
-    worker.done_working
+    perform_next_job(worker)
   end
 end
