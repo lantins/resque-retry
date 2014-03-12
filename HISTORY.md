@@ -1,6 +1,10 @@
 ## HEAD
 
+## 1.1.0 (2014-03-12)
+
 * Remove dependence on `Resque::Helpers`, will be removed in Resque 2.0
+* Use SHA1 for default `#retry_identifier` to prevents issues with long args gobbling space.
+* Minimum version of Resque is now ~> 1.25
 
 ## 1.0.0 (2012-09-07)
 
