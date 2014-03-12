@@ -1,7 +1,7 @@
 resque-retry
 ============
 
-A [Resque][rq] plugin. Requires Resque >= 1.10.0 & [resque-scheduler][rqs] >= 1.9.9.
+A [Resque][rq] plugin. Requires Resque ~> 1.25 & [resque-scheduler][rqs] ~> 2.5.
 
 resque-retry provides retry, delay and exponential backoff support for
 resque jobs.
