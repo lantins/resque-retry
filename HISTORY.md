@@ -1,5 +1,9 @@
 ## HEAD
 
+## 1.1.1 (2014-03-12)
+
+* Adjust gem dependency `resque-scheduler`.
+
 ## 1.1.0 (2014-03-12)
 
 * Remove dependence on `Resque::Helpers`, will be removed in Resque 2.0
