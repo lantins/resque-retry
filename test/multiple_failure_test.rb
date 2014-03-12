@@ -32,7 +32,7 @@ class MultipleFailureTest < MiniTest::Unit::TestCase
   end
 
   def test_failure_is_passed_on_when_job_class_not_found
-    skip 'commit 7113b0df to `resque` gem means the failure backend is never called. effects resque v1.20.0'
+    #skip 'commit 7113b0df to `resque` gem means the failure backend is never called. effects resque v1.20.0'
     new_job_class = Class.new(LimitThreeJob).tap { |klass| klass.send(:instance_variable_set, :@queue, LimitThreeJob.instance_variable_get(:@queue)) }
     Object.send(:const_set, 'LimitThreeJobTemp', new_job_class)
     Resque.enqueue(LimitThreeJobTemp)
