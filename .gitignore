@@ -9,3 +9,6 @@ coverage/
 examples/demo/tmp
 doc/
 stdout
+tags
+tags.*
+*.gem
