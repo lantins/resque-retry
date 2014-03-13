@@ -36,6 +36,20 @@ module Resque
     #
     module Retry
 
+      # Raised if the retry-strategy cannot be determined or has conflicts
+      #
+      # @api public
+      class AmbiguousRetryStrategyException < StandardError; end
+
+      # Fail fast, when extended, if the "receiver" is misconfigured
+      #
+      # @api private
+      def self.extended(receiver)
+        if receiver.instance_variable_get("@fatal_exceptions") && receiver.instance_variable_get("@retry_exceptions")
+          raise AmbiguousRetryStrategyException.new(%{You can't define both "@fatal_exceptions" and "@retry_exceptions"})
+        end
+      end
+
       # Copy retry criteria checks on inheritance.
       #
       # @api private
@@ -152,15 +166,44 @@ module Resque
       #
       # @api public
       def retry_exception?(exception)
-        return true if retry_exceptions.nil?
-        !! retry_exceptions.any? do |ex|
-          if exception.is_a?(Class)
-            ex >= exception
-          else
-            ex === exception
+        # If both "fatal_exceptions" and "retry_exceptions" are undefined we are
+        # done (we should retry the exception)
+        #
+        # It is intentional that we check "retry_exceptions" first since it is
+        # more likely that it will be defined (over "fatal_exceptions") as it
+        # has been part of the API for quite a while
+        return true if retry_exceptions.nil? && fatal_exceptions.nil?
+
+        # If "fatal_exceptions" is undefined interrogate "retry_exceptions"
+        if fatal_exceptions.nil?
+          retry_exceptions.any? do |ex|
+            if exception.is_a?(Class)
+              ex >= exception
+            else
+              ex === exception
+            end
+          end
+        # It is safe to assume we need to check "fatal_exceptions" at this point
+        else
+          fatal_exceptions.none? do |ex|
+            if exception.is_a?(Class)
+              ex >= exception
+            else
+              ex === exception
+            end
           end
         end
       end
+
+      # @abstract
+      # Controls what exceptions may not be retried
+      #
+      # Default: `nil` - this will retry all exceptions.
+      #
+      # @return [Array, nil]
+      #
+      # @api public
+      attr_reader :fatal_exceptions
 
       # @abstract
       # Controls what exceptions may be retried

@@ -256,6 +256,26 @@ In the above example, Resque would retry any `DeliverSMS` jobs which throw a
 will be retried 30 seconds later, if it throws `SystemCallError` it will first
 retry 120 seconds later then subsequent retry attempts 240 seconds later.
 
+### Fail Fast For Specific Exceptions
+
+The default will allow a retry for any type of exception. You may change
+it so specific exceptions fail immediately by using `fatal_exceptions`:
+
+    class DeliverSMS
+      extend Resque::Plugins::Retry
+      @queue = :mt_divisions
+
+      @fatal_exceptions = [NetworkError]
+
+      def self.perform(mt_id, mobile_number, message)
+        heavy_lifting
+      end
+    end
+
+In the above example, Resque would retry any `DeliverSMS` jobs that throw any
+type of error other than `NetworkError`. If the job throws a `NetworkError` it
+will be marked as "failed" immediately.
+
 ### Custom Retry Criteria Check Callbacks
 
 You may define custom retry criteria callbacks:

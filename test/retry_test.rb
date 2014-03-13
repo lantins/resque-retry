@@ -17,6 +17,7 @@ class RetryTest < MiniTest::Unit::TestCase
   def test_default_settings
     assert_equal 1, RetryDefaultSettingsJob.retry_limit, 'default retry limit'
     assert_equal 0, RetryDefaultSettingsJob.retry_attempt, 'default number of retry attempts'
+    assert_equal nil, RetryDefaultSettingsJob.fatal_exceptions, 'default fatal exceptions; nil = none'
     assert_equal nil, RetryDefaultSettingsJob.retry_exceptions, 'default retry exceptions; nil = any'
     assert_equal 0, RetryDefaultSettingsJob.retry_delay, 'default seconds until retry'
   end
@@ -157,6 +158,36 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_equal 2, Resque.info[:failed], 'failed jobs'
     assert_equal 2, Resque.info[:processed], 'processed job'
     assert_equal 0, Resque.info[:pending], 'pending jobs'
+  end
+
+  def test_dont_allow_both_retry_and_ignore_exceptions
+    assert_raises Resque::Plugins::Retry::AmbiguousRetryStrategyException do
+      AmbiguousRetryStrategyJob.extend(Resque::Plugins::Retry)
+    end
+  end
+
+  def test_will_fail_immediately_if_exception_type_does_not_allow_retry
+    Resque.enqueue(FailOnCustomExceptionJob)
+
+    3.times do
+      perform_next_job(@worker)
+    end
+
+    assert_equal 0, Resque.info[:pending], 'pending jobs'
+    assert_equal 1, Resque.info[:failed], 'failed jobs'
+    assert_equal 1, Resque.info[:processed], 'processed job'
+  end
+
+  def test_will_retry_if_a_non_fatal_exception_is_raised
+    Resque.enqueue(FailOnCustomExceptionButRaiseStandardErrorJob)
+
+    3.times do
+      perform_next_job(@worker)
+    end
+
+    assert_equal 0, Resque.info[:pending], 'pending jobs'
+    assert_equal 2, Resque.info[:failed], 'failed jobs'
+    assert_equal 2, Resque.info[:processed], 'processed job'
   end
 
   def test_retry_failed_jobs_in_separate_queue
