@@ -135,6 +135,12 @@ class FailFiveTimesJob < RetryDefaultsJob
   end
 end
 
+class ExponentialBackoffJobWithRandomness < RetryDefaultsJob
+  extend Resque::Plugins::ExponentialBackoff
+  @queue = :testing
+  @add_random_quotient = true
+end
+
 class ExponentialBackoffJob < RetryDefaultsJob
   extend Resque::Plugins::ExponentialBackoff
   @queue = :testing
