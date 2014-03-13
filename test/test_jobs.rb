@@ -169,6 +169,35 @@ class RetryCustomExceptionsJob < RetryDefaultsJob
   end
 end
 
+class AmbiguousRetryStrategyJob
+  @queue = :testing
+
+  @fatal_exceptions = [CustomException]
+  @retry_exceptions = [AnotherCustomException]
+end
+
+class FailOnCustomExceptionJob
+  extend Resque::Plugins::Retry
+  @queue = :testing
+
+  @fatal_exceptions = [CustomException]
+
+  def self.perform(*args)
+    raise CustomException
+  end
+end
+
+class FailOnCustomExceptionButRaiseStandardErrorJob
+  extend Resque::Plugins::Retry
+  @queue = :testing
+
+  @fatal_exceptions = [CustomException]
+
+  def self.perform(*args)
+    raise StandardError
+  end
+end
+
 module RetryModuleDefaultsJob
   extend Resque::Plugins::Retry
   @queue = :testing
