@@ -159,6 +159,22 @@ class ExponentialBackoffWithRetryDelayMultiplicandMinAndMaxJob < RetryDefaultsJo
   @retry_delay_multiplicand_max = 3.0
 end
 
+class InvalidRetryDelayMaxConfigurationJob
+  @queue = :testing
+  @retry_delay_multiplicand_max = 0.9
+end
+
+class InvalidRetryDelayMinConfigurationJob
+  @queue = :testing
+  @retry_delay_multiplicand_min = 1.1
+end
+
+class InvalidRetryDelayMinAndMaxConfigurationJob
+  @queue = :testing
+  @retry_delay_multiplicand_min = 3.0
+  @retry_delay_multiplicand_max = 0.5
+end
+
 class CustomExponentialBackoffJob
   extend Resque::Plugins::ExponentialBackoff
   @queue = :testing

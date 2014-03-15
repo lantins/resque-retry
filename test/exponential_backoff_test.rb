@@ -41,6 +41,20 @@ class ExponentialBackoffTest < MiniTest::Unit::TestCase
     assert_in_delta (start_time + 21_600),  delayed[4], 1.00, '6th delay'
   end
 
+  def test_dont_allow_both_retry_and_ignore_exceptions
+    job_types = [
+      InvalidRetryDelayMaxConfigurationJob,
+      InvalidRetryDelayMinAndMaxConfigurationJob,
+      InvalidRetryDelayMinConfigurationJob,
+    ]
+
+    job_types.each do |job_type|
+      assert_raises Resque::Plugins::ExponentialBackoff::InvalidRetryDelayMultiplicandConfigurationException do
+        job_type.extend(Resque::Plugins::ExponentialBackoff)
+      end
+    end
+  end
+
   def test_default_backoff_strategy_with_retry_delay_multiplicands
     job_types = [
       ExponentialBackoffWithRetryDelayMultiplicandMaxJob,
