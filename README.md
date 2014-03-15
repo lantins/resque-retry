@@ -208,12 +208,21 @@ Use this if you wish to vary the delay between retry attempts:
 
                   no delay, 1m, 10m,   1h,    3h,    6h
     @backoff_strategy = [0, 60, 600, 3600, 10800, 21600]
+    @retry_delay_multiplicand_min = 1.0
+    @retry_delay_multiplicand_max = 1.0
 
 The first delay will be 0 seconds, the 2nd will be 60 seconds, etc...
 Again, tweak to your own needs.
 
 The number of retries is equal to the size of the `backoff_strategy`
 array, unless you set `retry_limit` yourself.
+
+The delay values will be multiplied by a random `Float` value between
+`retry_delay_multiplicand_min` and `retry_delay_multiplicand_max` (both have a
+default of `1.0`). The product (`delay_multiplicand`) is recalculated on every
+attempt. This feature can be useful if you have a lot of jobs fail at the same
+time (e.g. rate-limiting/throttling or connectivity issues) and you don't want
+them all retried on the same schedule.
 
 ### Retry Specific Exceptions
 

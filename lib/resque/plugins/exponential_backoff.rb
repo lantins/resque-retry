@@ -52,7 +52,32 @@ module Resque
       #
       # @api private
       def retry_delay
-        backoff_strategy[retry_attempt] || backoff_strategy.last
+        delay = backoff_strategy[retry_attempt] || backoff_strategy.last
+        delay_multiplicand = \
+          rand(retry_delay_multiplicand_min..retry_delay_multiplicand_max)
+        (delay * delay_multiplicand).to_i
+      end
+
+      # @abstract
+      # The minimum value (lower-bound) for the range that is is used in
+      # calculating the retry-delay product
+      #
+      # @return [Float]
+      #
+      # @api public
+      def retry_delay_multiplicand_min
+        @retry_delay_multiplicand_min ||= 1.0
+      end
+
+      # @abstract
+      # The maximum value (upper-bound) for the range that is is used in
+      # calculating the retry-delay product
+      #
+      # @return [Float]
+      #
+      # @api public
+      def retry_delay_multiplicand_max
+        @retry_delay_multiplicand_max ||= 1.0
       end
 
       # @abstract
