@@ -37,6 +37,34 @@ module Resque
     module ExponentialBackoff
       include Resque::Plugins::Retry
 
+      # Raised if the min/max retry-delay multiplicand configuration is invalid
+      #
+      # @api public
+      class InvalidRetryDelayMultiplicandConfigurationException < StandardError; end
+
+      # Constants
+      #
+      # @api public
+      DEFAULT_RETRY_DELAY_MULTIPLICAND_MIN = 1.0
+      DEFAULT_RETRY_DELAY_MULTIPLICAND_MAX = 1.0
+
+      # Fail fast, when extended, if the "receiver" is misconfigured
+      #
+      # @api private
+      def self.extended(receiver)
+        retry_delay_multiplicand_min = \
+          receiver.instance_variable_get("@retry_delay_multiplicand_min") || \
+            DEFAULT_RETRY_DELAY_MULTIPLICAND_MIN
+        retry_delay_multiplicand_max = \
+          receiver.instance_variable_get("@retry_delay_multiplicand_max") || \
+            DEFAULT_RETRY_DELAY_MULTIPLICAND_MAX
+        if retry_delay_multiplicand_min > retry_delay_multiplicand_max
+          raise InvalidRetryDelayMultiplicandConfigurationException.new(
+            %{"@retry_delay_multiplicand_min" must be less than or equal to "@retry_delay_multiplicand_max"}
+          )
+        end
+      end
+
       # Defaults to the number of delays in the backoff strategy
       #
       # @return [Number] maximum number of retries
@@ -66,7 +94,7 @@ module Resque
       #
       # @api public
       def retry_delay_multiplicand_min
-        @retry_delay_multiplicand_min ||= 1.0
+        @retry_delay_multiplicand_min ||= DEFAULT_RETRY_DELAY_MULTIPLICAND_MIN
       end
 
       # @abstract
@@ -77,7 +105,7 @@ module Resque
       #
       # @api public
       def retry_delay_multiplicand_max
-        @retry_delay_multiplicand_max ||= 1.0
+        @retry_delay_multiplicand_max ||= DEFAULT_RETRY_DELAY_MULTIPLICAND_MAX
       end
 
       # @abstract
