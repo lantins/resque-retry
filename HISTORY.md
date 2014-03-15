@@ -1,5 +1,8 @@
 ## HEAD
 
+* Feature: Allow `@fatal_exceptions` as inverse of `@retry_exceptions`, when fatal exception is raised the job will be immediately fail.
+* Feature: Allow a random retry delay (within a range) when using exponential backoff strategy.
+
 ## 1.1.1 (2014-03-12)
 
 * Adjust gem dependency `resque-scheduler`.
