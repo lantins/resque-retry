@@ -41,6 +41,61 @@ class ExponentialBackoffTest < MiniTest::Unit::TestCase
     assert_in_delta (start_time + 21_600),  delayed[4], 1.00, '6th delay'
   end
 
+  def test_default_backoff_strategy_with_retry_delay_multiplicands
+    job_types = [
+      ExponentialBackoffWithRetryDelayMultiplicandMaxJob,
+      ExponentialBackoffWithRetryDelayMultiplicandMinJob,
+      ExponentialBackoffWithRetryDelayMultiplicandMinAndMaxJob,
+    ]
+
+    job_types.each do |job_type|
+      # all of these values are used heavily in assertions below
+      start_time = Time.now.to_i
+      multiplicand_min = job_type.public_send(:retry_delay_multiplicand_min)
+      multiplicand_max = job_type.public_send(:retry_delay_multiplicand_max)
+
+      Resque.enqueue(job_type)
+
+      # first attempt, failed but never retried
+      perform_next_job(@worker)
+      assert_equal 1, Resque.info[:pending]
+      assert_equal 1, Resque.info[:processed]
+      assert_equal 1, Resque.info[:failed]
+
+      # second attempt, first retry, should fail again
+      perform_next_job(@worker)
+      assert_equal 0, Resque.info[:pending]
+      assert_equal 2, Resque.info[:processed]
+      assert_equal 2, Resque.info[:failed]
+
+      # second delay
+      delayed = Resque.delayed_queue_peek(0, 1)
+      assert_in_delta(
+        start_time + 60 * multiplicand_min,
+        delayed[0],
+        60 * multiplicand_max
+      )
+
+      5.times do
+        Resque.enqueue(job_type)
+        perform_next_job(@worker)
+      end
+
+      # third through sixth delays
+      delayed = Resque.delayed_queue_peek(1, 5)
+      [600, 3600, 10_800, 21_600].each_with_index do |delay, index|
+        assert_in_delta(
+          start_time + delay * multiplicand_min,
+          delayed[index],
+          delay * multiplicand_max
+        )
+      end
+
+      # always reset the state before the next test case is run
+      Resque.redis.flushall
+    end
+  end
+
   def test_custom_backoff_strategy
     start_time = Time.now.to_i
     4.times do
