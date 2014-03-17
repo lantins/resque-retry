@@ -21,7 +21,7 @@ class FailingWithRetryJob
 
   @queue = :testing_failure
   @retry_limit = 4
-  @retry_delay = 3
+  @retry_delay = 20
 
   # Perform that raises an exception, but we will retry the job on failure
   def self.perform(*args)
