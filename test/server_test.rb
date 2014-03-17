@@ -7,6 +7,12 @@ ENV['RACK_ENV'] = 'test'
 class ServerTest < MiniTest::Unit::TestCase
   include Rack::Test::Methods
 
+  def setup
+    Resque.redis.flushall
+    @worker = Resque::Worker.new(:testing)
+    @worker.register_worker
+  end
+
   def app
     Resque::Server
   end
@@ -20,6 +26,20 @@ class ServerTest < MiniTest::Unit::TestCase
   def test_should_include_retry_tab
     get '/overview'
     assert last_response.body.include?('/retry')
+  end
+
+  def test_display_retry_job
+    # to begin with, we should have no retry jobs listed.
+    get '/retry'
+    assert last_response.body.include?('<b>0</b> timestamps'), 'should have 0 retry jobs'
+
+    # queue failing job that will retry.
+    Resque.enqueue(LimitThreeJobDelay1Hour)
+    perform_next_job(@worker)
+
+    # we should now have the retry job listed.
+    get '/retry'
+    assert last_response.body.include?('<b>1</b> timestamps'), 'should have 1 retry jobs'
   end
 
 end

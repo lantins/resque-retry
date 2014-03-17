@@ -39,14 +39,10 @@ module ResqueRetry
     module Helpers
       # builds a retry key for the specified job.
       def retry_key_for_job(job)
-        begin
-          klass = Resque.constantize(job['class'])
-          if klass.respond_to?(:redis_retry_key)
-            klass.redis_retry_key(job['args'])
-          else
-            nil
-          end
-        rescue NameError
+        klass = Resque::Job.new(nil, nil).constantize(job['class'])
+        if klass.respond_to?(:redis_retry_key)
+          klass.redis_retry_key(job['args'])
+        else
           nil
         end
       end

@@ -54,7 +54,7 @@ module Resque
 
       # Return the class/module of the failed job.
       def klass
-        Resque::Job.new(nil, nil).constantize payload['class']
+        Resque::Job.new(nil, nil).constantize(payload['class'])
       end
 
       def retry_delay
