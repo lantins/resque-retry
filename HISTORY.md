@@ -1,5 +1,7 @@
 ## HEAD
 
+## 1.1.4 (2014-03-17)
+
 * Fixed displaying retry information in resque web interface, caused by `Resque::Helpers` being deprecated.
 * Feature: Allow `@fatal_exceptions` as inverse of `@retry_exceptions`, when fatal exception is raised the job will be immediately fail.
 * Feature: Allow a random retry delay (within a range) when using exponential backoff strategy.
