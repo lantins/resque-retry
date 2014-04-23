@@ -265,4 +265,9 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_equal 13, PerExceptionClassRetryCountJob.retry_delay(Timeout::Error)
   end
 
+  def test_expire_key_set
+    Resque.redis.expects(:expire).once.with(GoodJob.redis_retry_key('expiry_test'), 3600)
+    Resque.enqueue(GoodJob, 'expiry_test')
+    perform_next_job(@worker)
+  end
 end

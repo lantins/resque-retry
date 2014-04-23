@@ -14,6 +14,7 @@ end
 class GoodJob
   extend Resque::Plugins::Retry
   @queue = :testing
+  @expire_retry_key_after = 60 * 60
 
   def self.perform(*args)
   end
@@ -129,6 +130,16 @@ end
 class FailFiveTimesJob < RetryDefaultsJob
   @queue = :testing
   @retry_limit = 6
+
+  def self.perform(*args)
+    raise if retry_attempt <= 4
+  end
+end
+
+class FailFiveTimesWithExpiryJob < RetryDefaultsJob
+  @queue = :testing
+  @retry_limit = 6
+  @expire_retry_key_after = 60 * 60
 
   def self.perform(*args)
     raise if retry_attempt <= 4
