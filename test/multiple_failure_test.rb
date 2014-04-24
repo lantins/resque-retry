@@ -130,6 +130,16 @@ class MultipleFailureTest < MiniTest::Unit::TestCase
     assert_equal 1, MockFailureBackend.errors.size
   end
 
+  def test_failure_with_retry_bumps_key_expire
+    Resque.enqueue(FailFiveTimesWithExpiryJob, 'foo')
+    retry_key = FailFiveTimesWithExpiryJob.redis_retry_key('foo')
+
+    Resque.redis.expects(:expire).times(4).with(retry_key, 3600)
+    4.times do
+      perform_next_job(@worker)
+    end
+  end
+
   def teardown
     Resque::Failure.backend = @old_failure_backend
   end

@@ -328,6 +328,7 @@ module Resque
         retry_key = redis_retry_key(*args)
         Resque.redis.setnx(retry_key, -1)             # default to -1 if not set.
         @retry_attempt = Resque.redis.incr(retry_key) # increment by 1.
+        Resque.redis.expire(retry_key, @retry_delay.to_i + @expire_retry_key_after.to_i) if @expire_retry_key_after
       end
 
       # Resque after_perform hook
