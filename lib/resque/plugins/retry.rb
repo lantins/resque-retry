@@ -415,6 +415,8 @@ module Resque
       # message:: message to log
       # args:: args of the resque job in context
       # exception:: the exception that might be causing a retry
+      #
+      # @api private
       def log(message, args, exception=nil)
         # Resque::Worker will handle interpeting LOGGER, VERBOSE, and VVERBOSE
         # since everyone is sharing Resque.logger.
