@@ -408,7 +408,7 @@ module Resque
       end
 
       # Log messages through the Resque logger.  Generally not for appication
-      # logging-just for interworkings of Resque and plugins.
+      # logging-just for inner-workings of Resque and plugins.
       #
       # Requires that RESQUE_RETRY_LOGGING be set to the string "true" in the environment.
       #
