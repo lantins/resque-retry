@@ -231,14 +231,14 @@ module Resque
       def retry_criteria_valid?(exception, *args)
         # if the retry limit was reached, dont bother checking anything else.
         if retry_limit_reached?
-          log 'retry limit reached',args,exception
+          log 'retry limit reached', args, exception
           return false 
         end
 
         # We always want to retry if the exception matches.
         retry_based_on_exception = retry_exception?(exception)
 
-        log "#{retry_based_on_exception ? 'Retrying' : 'NOT Retrying'} based on exception",args,exception
+        log "#{retry_based_on_exception ? 'Retrying' : 'NOT Retrying'} based on exception", args, exception
 
         retry_based_on_criteria = false
         unless retry_based_on_exception
@@ -248,7 +248,7 @@ module Resque
           end
         end
 
-        log "#{retry_based_on_criteria ? 'Retrying' : 'NOT Retrying'} based on criteria",args,exception
+        log "#{retry_based_on_criteria ? 'Retrying' : 'NOT Retrying'} based on criteria", args, exception
 
         retry_based_on_exception || retry_based_on_criteria
       end
@@ -307,13 +307,13 @@ module Resque
       #
       # @api private
       def try_again(exception, *args)
-        log "trying again",args,exception
+        log "trying again", args, exception
         # some plugins define retry_delay and have it take no arguments, so rather than break those,
         # we'll just check here to see whether it takes the additional exception class argument or not
         temp_retry_delay = ([-1, 1].include?(method(:retry_delay).arity) ? retry_delay(exception.class) : retry_delay)
 
         retry_in_queue = retry_job_delegate ? retry_job_delegate : self
-        log "retry delay: #{temp_retry_delay} for queue #{retry_in_queue}", args,exception
+        log "retry delay: #{temp_retry_delay} for queue #{retry_in_queue}", args, exception
 
         if temp_retry_delay <= 0
           # If the delay is 0, no point passing it through the scheduler
@@ -367,7 +367,7 @@ module Resque
       #
       # @api private
       def on_failure_retry(exception, *args)
-        log "on_failure_retry", args,exception
+        log "on_failure_retry", args, exception
         if @on_failure_retry_hook_already_called
           log 'on_failure_retry_hook_already_called', args, exception
           return 
@@ -403,7 +403,7 @@ module Resque
       #
       # @api private
       def clean_retry_key(*args)
-        log "Clearing retry key",args
+        log "Clearing retry key", args
         Resque.redis.del(redis_retry_key(*args))
       end
 
