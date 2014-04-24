@@ -14,6 +14,14 @@ end
 class GoodJob
   extend Resque::Plugins::Retry
   @queue = :testing
+
+  def self.perform(*args)
+  end
+end
+
+class ExpiringJob
+  extend Resque::Plugins::Retry
+  @queue = :testing
   @expire_retry_key_after = 60 * 60
 
   def self.perform(*args)
