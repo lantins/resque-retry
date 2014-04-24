@@ -45,7 +45,7 @@ module Resque
       #
       # @api private
       def self.extended(receiver)
-        if receiver.instance_variable_get("@fatal_exceptions") && receiver.instance_variable_get("@retry_exceptions")
+        if receiver.instance_variable_get('@fatal_exceptions') && receiver.instance_variable_get('@retry_exceptions')
           raise AmbiguousRetryStrategyException.new(%{You can't define both "@fatal_exceptions" and "@retry_exceptions"})
         end
       end
@@ -55,7 +55,7 @@ module Resque
       # @api private
       def inherited(subclass)
         super(subclass)
-        subclass.instance_variable_set("@retry_criteria_checks", retry_criteria_checks.dup)
+        subclass.instance_variable_set('@retry_criteria_checks', retry_criteria_checks.dup)
       end
 
       # @abstract You may override to implement a custom retry identifier,
@@ -81,7 +81,7 @@ module Resque
       #
       # @api public
       def redis_retry_key(*args)
-        ['resque-retry', name, retry_identifier(*args)].compact.join(":").gsub(/\s/, '')
+        ['resque-retry', name, retry_identifier(*args)].compact.join(':').gsub(/\s/, '')
       end
 
       # Maximum number of retrys we can attempt to successfully perform the job
@@ -307,7 +307,7 @@ module Resque
       #
       # @api private
       def try_again(exception, *args)
-        log "trying again", args, exception
+        log 'trying again', args, exception
         # some plugins define retry_delay and have it take no arguments, so rather than break those,
         # we'll just check here to see whether it takes the additional exception class argument or not
         temp_retry_delay = ([-1, 1].include?(method(:retry_delay).arity) ? retry_delay(exception.class) : retry_delay)
@@ -367,7 +367,7 @@ module Resque
       #
       # @api private
       def on_failure_retry(exception, *args)
-        log "on_failure_retry", args, exception
+        log 'on_failure_retry', args, exception
         if @on_failure_retry_hook_already_called
           log 'on_failure_retry_hook_already_called', args, exception
           return 
@@ -403,7 +403,7 @@ module Resque
       #
       # @api private
       def clean_retry_key(*args)
-        log "Clearing retry key", args
+        log 'Clearing retry key', args
         Resque.redis.del(redis_retry_key(*args))
       end
 
