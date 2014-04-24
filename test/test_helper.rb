@@ -45,6 +45,9 @@ puts "Starting redis for testing at localhost:9736..."
 `redis-server #{dir}/redis-test.conf`
 Resque.redis = '127.0.0.1:9736'
 
+# Ensure that log message code is executed and doesn't blow up.
+ENV['RESQUE_RETRY_LOGGING'] = 'true'
+
 # Test helpers
 class MiniTest::Unit::TestCase
   def perform_next_job(worker, &block)

@@ -361,6 +361,34 @@ Or you can define the entire key by overriding `redis_retry_key`.
       end
     end
 
+### Debugging
+
+By default, resque-retry doesn't log anything, however if you are having trouble understanding why your jobs
+are, or are not, retrying, you can turn logging on.
+
+1. Ensure that `VERBOSE` or `VVERBOSE` are set in your environment.  This will enable log formatters that generate log output.
+2. Ensure that `RESQUE_RETRY_LOGGING` is set to "true" in your environment.  This will enable log messages within resque-retry to be sent to Resque's logger
+
+This will show what resque-retry is doing, and when, as well as your job args and the exception that initiated the retry process.
+
+Example output:
+
+```
+** [09:09:38 2014-04-24] 86961: got: (Job{fire_item_event} | FireItemEventJob | [-2000, "foobar"])
+** [09:09:38 2014-04-24] 86961: Running before_fork hooks with [(Job{fire_item_event} | FireItemEventJob | [-2000, "foobar"])]
+** [09:09:38 2014-04-24] 87285: Running after_fork hooks with [(Job{fire_item_event} | FireItemEventJob | [-2000, "foobar"])]
+** [09:09:38 2014-04-24] 87285: [-2000, "foobar"]: before_perform_retry
+** [09:09:38 2014-04-24] 87285: [-2000, "foobar"]: Attempt 11 set in Redis
+** [09:09:39 2014-04-24] 87285: [-2000, "foobar"] [ActiveRecord::RecordNotFound/No Foobar with id -2000]: on_failure_retry
+** [09:09:39 2014-04-24] 87285: [-2000, "foobar"] [ActiveRecord::RecordNotFound/No Foobar with id -2000]: Retrying based on exception
+** [09:09:39 2014-04-24] 87285: [-2000, "foobar"] [ActiveRecord::RecordNotFound/No Foobar with id -2000]: NOT Retrying based on criteria
+** [09:09:39 2014-04-24] 87285: [-2000, "foobar"] [ActiveRecord::RecordNotFound/No Foobar with id -2000]: retry criteria valid, trying again
+** [09:09:39 2014-04-24] 87285: [-2000, "foobar"] [ActiveRecord::RecordNotFound/No Foobar with id -2000]: trying again
+** [09:09:39 2014-04-24] 87285: [-2000, "foobar"] [ActiveRecord::RecordNotFound/No Foobar with id -2000]: retry delay: 5 for queue FireItemEventJob
+** [09:09:39 2014-04-24] 87285: (Job{fire_item_event} | FireItemEventJob | [-2000, "foobar"]) failed: #<ActiveRecord::RecordNotFound: No Foobar with id -2000>
+```
+
+
 Contributing/Pull Requests
 --------------------------
 
