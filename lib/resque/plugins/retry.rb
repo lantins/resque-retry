@@ -421,7 +421,7 @@ module Resque
         if Resque.logger && ENV['RESQUE_RETRY_LOGGING'] == 'true'
           exception_portion = exception.nil? ? '' : " [#{exception.class}/#{exception}]"
           message = "#{args.inspect}#{exception_portion}: #{message}"
-          Resque.logger.info message if Resque.logger
+          Resque.logger.info message
         end
       end
     end
