@@ -1,5 +1,5 @@
 require 'digest/sha1'
-require 'resque/plugins/retry/logging'
+require 'resque/plugins/retry/log_formatting'
 
 module Resque
   module Plugins
@@ -36,7 +36,7 @@ module Resque
     #   end
     #
     module Retry
-      include Resque::Plugins::Retry::Logging
+      include Resque::Plugins::Retry::LogFormatting
 
       # Raised if the retry-strategy cannot be determined or has conflicts
       #

@@ -1,5 +1,5 @@
 require 'resque/failure/multiple'
-require 'resque/plugins/retry/logging'
+require 'resque/plugins/retry/log_formatting'
 
 module Resque
   module Failure
@@ -18,7 +18,7 @@ module Resque
     #   Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
     #
     class MultipleWithRetrySuppression < Multiple
-      include Resque::Plugins::Retry::Logging
+      include Resque::Plugins::Retry::LogFormatting
       # Called when the job fails
       #
       # If the job will retry, suppress the failure from the other backends.
