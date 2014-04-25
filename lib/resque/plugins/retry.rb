@@ -1,4 +1,5 @@
 require 'digest/sha1'
+require 'resque/plugins/retry/logging'
 
 module Resque
   module Plugins
@@ -35,6 +36,7 @@ module Resque
     #   end
     #
     module Retry
+      include Resque::Plugins::Retry::Logging
 
       # Raised if the retry-strategy cannot be determined or has conflicts
       #
@@ -420,11 +422,7 @@ module Resque
       def log(message, args, exception=nil)
         # Resque::Worker will handle interpeting LOGGER, VERBOSE, and VVERBOSE
         # since everyone is sharing Resque.logger.
-        if Resque.logger && ENV['RESQUE_RETRY_LOGGING'] == 'true'
-          exception_portion = exception.nil? ? '' : " [#{exception.class}/#{exception}]"
-          message = "#{args.inspect}#{exception_portion}: #{message}"
-          Resque.logger.info message
-        end
+        Resque.logger.info format_message(message,args,exception) if Resque.logger
       end
     end
   end

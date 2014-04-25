@@ -1,4 +1,5 @@
 require 'resque/failure/multiple'
+require 'resque/plugins/retry/logging'
 
 module Resque
   module Failure
@@ -17,6 +18,7 @@ module Resque
     #   Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
     #
     class MultipleWithRetrySuppression < Multiple
+      include Resque::Plugins::Retry::Logging
       # Called when the job fails
       #
       # If the job will retry, suppress the failure from the other backends.
@@ -25,10 +27,14 @@ module Resque
       #
       # @api private
       def save
+        log "save", payload, exception
+
         if !(retryable? && retrying?)
+          log "!(#{retryable?} && #{retryable? && retrying?}) - sending failure to superclass", payload, exception
           cleanup_retry_failure_log!
           super
         elsif retry_delay > 0
+          log "retry_delay: #{retry_delay} > 0 - saving details for resque-web", payload, exception
           data = {
             :failed_at => Time.now.strftime("%Y/%m/%d %H:%M:%S"),
             :payload   => payload,
@@ -40,6 +46,8 @@ module Resque
           }
 
           Resque.redis.setex(failure_key, 2*retry_delay, Resque.encode(data))
+        else
+          log "retry_delay: #{retry_delay} <= 0 - ignoring", payload, exception
         end
       end
 
@@ -81,6 +89,15 @@ module Resque
 
       def cleanup_retry_failure_log!
         Resque.redis.del(failure_key) if retryable?
+      end
+
+      def log(message,payload=nil,exception=nil)
+        if Resque.logger
+          args = (payload || {})['args']
+          Resque.logger.info format_message(message,args,exception)
+        else
+          super(message)
+        end
       end
     end
   end
