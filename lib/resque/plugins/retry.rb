@@ -239,8 +239,7 @@ module Resque
 
         # We always want to retry if the exception matches.
         retry_based_on_exception = retry_exception?(exception)
-
-        log "#{retry_based_on_exception ? 'Retrying' : 'NOT Retrying'} based on exception", args, exception
+        log "Exception is #{retry_based_on_exception ? '' : 'not '}sufficient for a retry", args, exception
 
         retry_based_on_criteria = false
         unless retry_based_on_exception
@@ -249,8 +248,7 @@ module Resque
             retry_based_on_criteria ||= !!instance_exec(exception, *args, &criteria_check)
           end
         end
-
-        log "#{retry_based_on_criteria ? 'Retrying' : 'NOT Retrying'} based on criteria", args, exception
+        log "user retry criteria is #{retry_based_on_criteria ? '' : 'not '}sufficient for a retry", args, exception
 
         retry_based_on_exception || retry_based_on_criteria
       end
@@ -309,13 +307,13 @@ module Resque
       #
       # @api private
       def try_again(exception, *args)
-        log 'trying again', args, exception
+        log 'try_again', args, exception
         # some plugins define retry_delay and have it take no arguments, so rather than break those,
         # we'll just check here to see whether it takes the additional exception class argument or not
         temp_retry_delay = ([-1, 1].include?(method(:retry_delay).arity) ? retry_delay(exception.class) : retry_delay)
 
         retry_in_queue = retry_job_delegate ? retry_job_delegate : self
-        log "retry delay: #{temp_retry_delay} for queue #{retry_in_queue}", args, exception
+        log "retry delay: #{temp_retry_delay} for class: #{retry_in_queue}", args, exception
 
         if temp_retry_delay <= 0
           # If the delay is 0, no point passing it through the scheduler
@@ -344,7 +342,7 @@ module Resque
         retry_key = redis_retry_key(*args)
         Resque.redis.setnx(retry_key, -1)             # default to -1 if not set.
         @retry_attempt = Resque.redis.incr(retry_key) # increment by 1.
-        log "attempt #{@retry_attempt} set in Redis", args
+        log "attempt: #{@retry_attempt} set in Redis", args
         @retry_attempt
       end
 
@@ -405,14 +403,12 @@ module Resque
       #
       # @api private
       def clean_retry_key(*args)
-        log 'Clearing retry key', args
+        log 'clean_retry_key', args
         Resque.redis.del(redis_retry_key(*args))
       end
 
       # Log messages through the Resque logger.  Generally not for appication
       # logging-just for inner-workings of Resque and plugins.
-      #
-      # Requires that RESQUE_RETRY_LOGGING be set to the string "true" in the environment.
       #
       # message:: message to log
       # args:: args of the resque job in context

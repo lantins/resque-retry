@@ -27,7 +27,7 @@ module Resque
       #
       # @api private
       def save
-        log "save", payload, exception
+        log 'failure backend save', payload, exception
 
         if !(retryable? && retrying?)
           log "!(#{retryable?} && #{retryable? && retrying?}) - sending failure to superclass", payload, exception
