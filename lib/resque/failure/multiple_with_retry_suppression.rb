@@ -29,12 +29,15 @@ module Resque
       def save
         log_message 'failure backend save', args_from(payload), exception
 
-        if !(retryable? && retrying?)
-          log_message "!(#{retryable?} && #{retryable? && retrying?}) - sending failure to superclass", args_from(payload), exception
+        retryable = retryable?
+        job_being_retried = retryable && retrying?
+
+        if !job_being_retried
+          log_message "#{retryable ? '' : 'non-'}retriable job is not being retried - sending failure to superclass", args_from(payload), exception
           cleanup_retry_failure_log!
           super
         elsif retry_delay > 0
-          log_message "retry_delay: #{retry_delay} > 0 - saving details for resque-web", args_from(payload), exception
+          log_message "retry_delay: #{retry_delay} > 0 - saving details in Redis", args_from(payload), exception
           data = {
             :failed_at => Time.now.strftime("%Y/%m/%d %H:%M:%S"),
             :payload   => payload,
