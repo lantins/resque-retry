@@ -2,7 +2,7 @@ module Resque
   module Plugins
     module Retry
       module Logging
-        # Log messages through the Resque logger.  Generally not for appication
+        # Log messages through the Resque logger.  Generally not for application
         # logging-just for inner-workings of Resque and plugins.
         #
         # message:: message to log
