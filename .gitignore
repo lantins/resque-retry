@@ -12,3 +12,5 @@ stdout
 tags
 tags.*
 *.gem
+.ruby-version
+.ruby-gemset

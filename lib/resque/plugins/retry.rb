@@ -1,4 +1,5 @@
 require 'digest/sha1'
+require 'resque/plugins/retry/logging'
 
 module Resque
   module Plugins
@@ -35,6 +36,7 @@ module Resque
     #   end
     #
     module Retry
+      include Resque::Plugins::Retry::Logging
 
       # Raised if the retry-strategy cannot be determined or has conflicts
       #
@@ -45,7 +47,7 @@ module Resque
       #
       # @api private
       def self.extended(receiver)
-        if receiver.instance_variable_get("@fatal_exceptions") && receiver.instance_variable_get("@retry_exceptions")
+        if receiver.instance_variable_get('@fatal_exceptions') && receiver.instance_variable_get('@retry_exceptions')
           raise AmbiguousRetryStrategyException.new(%{You can't define both "@fatal_exceptions" and "@retry_exceptions"})
         end
       end
@@ -55,7 +57,7 @@ module Resque
       # @api private
       def inherited(subclass)
         super(subclass)
-        subclass.instance_variable_set("@retry_criteria_checks", retry_criteria_checks.dup)
+        subclass.instance_variable_set('@retry_criteria_checks', retry_criteria_checks.dup)
       end
 
       # @abstract You may override to implement a custom retry identifier,
@@ -81,7 +83,7 @@ module Resque
       #
       # @api public
       def redis_retry_key(*args)
-        ['resque-retry', name, retry_identifier(*args)].compact.join(":").gsub(/\s/, '')
+        ['resque-retry', name, retry_identifier(*args)].compact.join(':').gsub(/\s/, '')
       end
 
       # Maximum number of retrys we can attempt to successfully perform the job
@@ -230,17 +232,25 @@ module Resque
       # @api public
       def retry_criteria_valid?(exception, *args)
         # if the retry limit was reached, dont bother checking anything else.
-        return false if retry_limit_reached?
-
-        # We always want to retry if the exception matches.
-        should_retry = retry_exception?(exception)
-
-        # call user retry criteria check blocks.
-        retry_criteria_checks.each do |criteria_check|
-          should_retry ||= !!instance_exec(exception, *args, &criteria_check)
+        if retry_limit_reached?
+          log_message 'retry limit reached', args, exception
+          return false 
         end
 
-        should_retry
+        # We always want to retry if the exception matches.
+        retry_based_on_exception = retry_exception?(exception)
+        log_message "Exception is #{retry_based_on_exception ? '' : 'not '}sufficient for a retry", args, exception
+
+        retry_based_on_criteria = false
+        unless retry_based_on_exception
+          # call user retry criteria check blocks.
+          retry_criteria_checks.each do |criteria_check|
+            retry_based_on_criteria ||= !!instance_exec(exception, *args, &criteria_check)
+          end
+        end
+        log_message "user retry criteria is #{retry_based_on_criteria ? '' : 'not '}sufficient for a retry", args, exception
+
+        retry_based_on_exception || retry_based_on_criteria
       end
 
       # Retry criteria checks
@@ -297,11 +307,14 @@ module Resque
       #
       # @api private
       def try_again(exception, *args)
+        log_message 'try_again', args, exception
         # some plugins define retry_delay and have it take no arguments, so rather than break those,
         # we'll just check here to see whether it takes the additional exception class argument or not
         temp_retry_delay = ([-1, 1].include?(method(:retry_delay).arity) ? retry_delay(exception.class) : retry_delay)
 
         retry_in_queue = retry_job_delegate ? retry_job_delegate : self
+        log_message "retry delay: #{temp_retry_delay} for class: #{retry_in_queue}", args, exception
+
         if temp_retry_delay <= 0
           # If the delay is 0, no point passing it through the scheduler
           Resque.enqueue(retry_in_queue, *args_for_retry(*args))
@@ -322,12 +335,14 @@ module Resque
       #
       # @api private
       def before_perform_retry(*args)
+        log_message 'before_perform_retry', args
         @on_failure_retry_hook_already_called = false
 
         # store number of retry attempts.
         retry_key = redis_retry_key(*args)
         Resque.redis.setnx(retry_key, -1)             # default to -1 if not set.
         @retry_attempt = Resque.redis.incr(retry_key) # increment by 1.
+        log_message "attempt: #{@retry_attempt} set in Redis", args
         Resque.redis.expire(retry_key, @retry_delay.to_i + @expire_retry_key_after.to_i) if @expire_retry_key_after
       end
 
@@ -337,6 +352,7 @@ module Resque
       #
       # @api private
       def after_perform_retry(*args)
+        log_message 'after_perform_retry, clearing retry key', args
         clean_retry_key(*args)
       end
 
@@ -351,11 +367,16 @@ module Resque
       #
       # @api private
       def on_failure_retry(exception, *args)
-        return if @on_failure_retry_hook_already_called
+        log_message 'on_failure_retry', args, exception
+        if @on_failure_retry_hook_already_called
+          log_message 'on_failure_retry_hook_already_called', args, exception
+          return 
+        end
 
         if retry_criteria_valid?(exception, *args)
           try_again(exception, *args)
         else
+          log_message 'retry criteria not sufficient for retry', args, exception
           clean_retry_key(*args)
         end
 
@@ -382,9 +403,9 @@ module Resque
       #
       # @api private
       def clean_retry_key(*args)
+        log_message 'clean_retry_key', args
         Resque.redis.del(redis_retry_key(*args))
       end
-
     end
   end
 end
