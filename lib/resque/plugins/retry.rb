@@ -343,7 +343,7 @@ module Resque
         Resque.redis.setnx(retry_key, -1)             # default to -1 if not set.
         @retry_attempt = Resque.redis.incr(retry_key) # increment by 1.
         log_message "attempt: #{@retry_attempt} set in Redis", args
-        @retry_attempt
+        Resque.redis.expire(retry_key, @retry_delay.to_i + @expire_retry_key_after.to_i) if @expire_retry_key_after
       end
 
       # Resque after_perform hook
