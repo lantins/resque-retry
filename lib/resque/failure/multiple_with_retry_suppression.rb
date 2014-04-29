@@ -19,6 +19,7 @@ module Resque
     #
     class MultipleWithRetrySuppression < Multiple
       include Resque::Plugins::Retry::Logging
+
       # Called when the job fails
       #
       # If the job will retry, suppress the failure from the other backends.
