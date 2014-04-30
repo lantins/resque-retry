@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.name = 'resque-retry'
   s.version = ResqueRetry::VERSION
   s.date = Time.now.strftime('%Y-%m-%d')
-  s.authors = ['Luke Antins', 'Ryan Carver']
+  s.authors = ['Luke Antins', 'Ryan Carver', 'Jonathan W. Zaleski']
   s.email = ['luke@lividpenguin.com']
   s.summary = 'A resque plugin; provides retry, delay and exponential backoff support for resque jobs.'
   s.description = <<-EOL
