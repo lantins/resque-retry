@@ -76,6 +76,7 @@ class RetryTest < MiniTest::Unit::TestCase
   end
 
   def test_failure_before_perform_does_not_requeue_AND_fail_the_job
+    ENV['RESQUE_RETRY_SET_RETRY_KEY_IN_TRY_AGAIN'] = 'true'
     Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
     Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
 
