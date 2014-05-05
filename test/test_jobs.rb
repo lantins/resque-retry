@@ -467,3 +467,4 @@ class PerExceptionClassRetryCountArrayJob
     raise RuntimeError, 'I always fail with a RuntimeError'
   end
 end
+

@@ -1,5 +1,5 @@
 require 'test_helper'
-
+require 'resque/failure/redis'
 require 'digest/sha1'
 
 class RetryTest < MiniTest::Unit::TestCase
@@ -7,7 +7,9 @@ class RetryTest < MiniTest::Unit::TestCase
     Resque.redis.flushall
     @worker = Resque::Worker.new(:testing)
     @worker.register_worker
+    Resque::Failure.backend = Resque::Failure::Redis
   end
+
 
   def test_resque_plugin_lint
     # will raise exception if were not a good plugin.
@@ -71,6 +73,21 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_equal 1, Resque.info[:pending], 'pending jobs'
     assert_equal 10, Resque.info[:failed], 'failed jobs'
     assert_equal 10, Resque.info[:processed], 'processed job'
+  end
+
+  def test_failure_before_perform_does_not_requeue_AND_fail_the_job
+    Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
+    Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
+
+    Resque.enqueue(LimitThreeJobDelay1Hour)
+
+    perform_next_job_fail_on_reconnect(@worker)
+
+    assert_equal 1, Resque.info[:processed], 'processed job'
+    assert_equal 0, Resque.info[:failed], 'should not be any failed jobs: ' + Resque::Failure.all(0,100).inspect
+    assert_equal 0, Resque.info[:pending], 'should not yet be any pending jobs'
+
+    assert_equal 1, delayed_jobs.size, 'should be a delayed job'
   end
 
   def test_retry_never_retry

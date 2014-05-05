@@ -315,6 +315,9 @@ module Resque
         retry_in_queue = retry_job_delegate ? retry_job_delegate : self
         log_message "retry delay: #{temp_retry_delay} for class: #{retry_in_queue}", args, exception
 
+        retry_key = redis_retry_key(*args)
+        Resque.redis.setnx(retry_key, -1)
+
         if temp_retry_delay <= 0
           # If the delay is 0, no point passing it through the scheduler
           Resque.enqueue(retry_in_queue, *args_for_retry(*args))
