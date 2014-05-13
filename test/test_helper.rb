@@ -77,9 +77,7 @@ class MiniTest::Unit::TestCase
       Resque.redis.lrange("resque:delayed:#{timestamp}",0,-1) + Resque.redis.lrange("delayed:#{timestamp}",0,-1)
     end.flatten
 
-    delayed_jobs_as_json.map { |json|
-      JSON.parse(json)
-    }
+    delayed_jobs_as_json.map { |json| JSON.parse(json) }
   end
 
   def clean_perform_job(klass, *args)
