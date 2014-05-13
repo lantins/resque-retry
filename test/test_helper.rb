@@ -57,31 +57,29 @@ class MiniTest::Unit::TestCase
     raise "No work for #{worker}" unless job = worker.reserve
     worker.working_on job
 
-    # Similar to resque's Worker.work method
+    # Similar to resque's Worker.work and Worker.process methods
     begin
-      raise 'error'
+      raise 'error from perform_next_job_fail_on_reconnect'
       worker.perform(job, &block)
     rescue Exception => exception
       worker.report_failed_job(job,exception)
+    ensure
+      worker.done_working
     end
-    worker.done_working
   end
 
   def delayed_jobs
     # The double-checks here are so that we won't blow up if the config stops using redis-namespace
-    timestamps = (Array(Resque.redis.zrange("resque:delayed_queue_schedule",0,-1)) + 
-                  Array(Resque.redis.zrange("delayed_queue_schedule",0,-1)))
+    timestamps = (Resque.redis.zrange("resque:delayed_queue_schedule",0,-1) + 
+                  Resque.redis.zrange("delayed_queue_schedule",0,-1))
 
-    (timestamps || []).map { |timestamp|
-      [
-        Array(Resque.redis.lrange("resque:delayed:#{timestamp}",0,-1)) + Array(Resque.redis.lrange("delayed:#{timestamp}",0,-1)),
-        timestamp,
-      ]
-    }.map { |(job_strings,timestamp)|
-      job_strings.map { |job_string|
-        JSON.parse(job_string)
-      }
-    }.flatten
+    delayed_jobs_as_json = timestamps.map do |timestamp|
+      Resque.redis.lrange("resque:delayed:#{timestamp}",0,-1) + Resque.redis.lrange("delayed:#{timestamp}",0,-1)
+    end.flatten
+
+    delayed_jobs_as_json.map { |json|
+      JSON.parse(json)
+    }
   end
 
   def clean_perform_job(klass, *args)

@@ -10,7 +10,6 @@ class RetryTest < MiniTest::Unit::TestCase
     Resque::Failure.backend = Resque::Failure::Redis
   end
 
-
   def test_resque_plugin_lint
     # will raise exception if were not a good plugin.
     assert Resque::Plugin.lint(Resque::Plugins::Retry)
@@ -75,19 +74,18 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_equal 10, Resque.info[:processed], 'processed job'
   end
 
-  def test_failure_before_perform_does_not_requeue_AND_fail_the_job
-    ENV['RESQUE_RETRY_SET_RETRY_KEY_IN_TRY_AGAIN'] = 'true'
+  def test_failure_before_perform_does_not_both_requeue_and_fail_the_job
     Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
     Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
+    LimitThreeJobDelay1Hour.instance_variable_set("@on_failure_retry_hook_already_called",false)
 
     Resque.enqueue(LimitThreeJobDelay1Hour)
 
     perform_next_job_fail_on_reconnect(@worker)
 
     assert_equal 1, Resque.info[:processed], 'processed job'
-    assert_equal 0, Resque.info[:failed], 'should not be any failed jobs: ' + Resque::Failure.all(0,100).inspect
+    assert_equal 0, Resque.info[:failed], "should not be any failed jobs: #{Resque::Failure.all(0,100)}"
     assert_equal 0, Resque.info[:pending], 'should not yet be any pending jobs'
-
     assert_equal 1, delayed_jobs.size, 'should be a delayed job'
   end
 
