@@ -62,7 +62,7 @@ class MiniTest::Unit::TestCase
       raise 'error from perform_next_job_fail_on_reconnect'
       worker.perform(job, &block)
     rescue Exception => exception
-      worker.report_failed_job(job,exception)
+      worker.report_failed_job(job, exception)
     ensure
       worker.done_working
     end
@@ -70,11 +70,11 @@ class MiniTest::Unit::TestCase
 
   def delayed_jobs
     # The double-checks here are so that we won't blow up if the config stops using redis-namespace
-    timestamps = (Resque.redis.zrange("resque:delayed_queue_schedule",0,-1) + 
-                  Resque.redis.zrange("delayed_queue_schedule",0,-1))
+    timestamps = (Resque.redis.zrange("resque:delayed_queue_schedule", 0, -1) + 
+                  Resque.redis.zrange("delayed_queue_schedule", 0, -1))
 
     delayed_jobs_as_json = timestamps.map do |timestamp|
-      Resque.redis.lrange("resque:delayed:#{timestamp}",0,-1) + Resque.redis.lrange("delayed:#{timestamp}",0,-1)
+      Resque.redis.lrange("resque:delayed:#{timestamp}", 0, -1) + Resque.redis.lrange("delayed:#{timestamp}", 0, -1)
     end.flatten
 
     delayed_jobs_as_json.map { |json| JSON.parse(json) }
