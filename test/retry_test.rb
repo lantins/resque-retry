@@ -77,14 +77,13 @@ class RetryTest < MiniTest::Unit::TestCase
   def test_failure_before_perform_does_not_both_requeue_and_fail_the_job
     Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
     Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
-    LimitThreeJobDelay1Hour.instance_variable_set("@on_failure_retry_hook_already_called",false)
 
-    Resque.enqueue(LimitThreeJobDelay1Hour)
+    Resque.enqueue(FailsDuringConnectJob)
 
     perform_next_job_fail_on_reconnect(@worker)
 
     assert_equal 1, Resque.info[:processed], 'processed job'
-    assert_equal 0, Resque.info[:failed], "should not be any failed jobs: #{Resque::Failure.all(0,100)}"
+    assert_equal 0, Resque.info[:failed], "should not be any failed jobs: #{Resque::Failure.all(0, 100)}"
     assert_equal 0, Resque.info[:pending], 'should not yet be any pending jobs'
     assert_equal 1, delayed_jobs.size, 'should be a delayed job'
   end
