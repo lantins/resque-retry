@@ -34,13 +34,11 @@ require 'resque_scheduler/tasks'
 The delay between retry attempts is provided by [resque-scheduler][rqs].
 You'll want to run the scheduler process, otherwise delayed retry attempts
 will never perform:
-
 ```
 $ rake resque:scheduler
 ```
 
 Use the plugin:
-
 ```ruby
 require 'resque-retry'
 
