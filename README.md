@@ -26,35 +26,41 @@ If you're using [Bundler][bundler] to manage your dependencies, you should add `
 'resque-retry'` to your projects `Gemfile`.
 
 Add this to your `Rakefile`:
-
-    require 'resque/tasks'
-    require 'resque_scheduler/tasks'
+```ruby
+require 'resque/tasks'
+require 'resque_scheduler/tasks'
+```
 
 The delay between retry attempts is provided by [resque-scheduler][rqs].
 You'll want to run the scheduler process, otherwise delayed retry attempts
 will never perform:
 
-    $ rake resque:scheduler
+```
+$ rake resque:scheduler
+```
 
 Use the plugin:
 
-    require 'resque-retry'
+```ruby
+require 'resque-retry'
 
-    class ExampleRetryJob
-      extend Resque::Plugins::Retry
-      @queue = :example_queue
+class ExampleRetryJob
+  extend Resque::Plugins::Retry
+  @queue = :example_queue
 
-      @retry_limit = 3
-      @retry_delay = 60
+  @retry_limit = 3
+  @retry_delay = 60
 
-      def self.perform(*args)
-        # your magic/heavy lifting goes here.
-      end
-    end
+  def self.perform(*args)
+    # your magic/heavy lifting goes here.
+  end
+end
+```
 
 Then start up a resque worker as normal:
-
-    $ QUEUE=* rake resque:work
+```
+$ QUEUE=* rake resque:work
+```
 
 Now if you ExampleRetryJob fails, it will be retried 3 times, with a 60 second
 delay between attempts.
@@ -79,14 +85,15 @@ actually completed successfully just by just using the resque-web interface.
 `MultipleWithRetrySuppression` is a multiple failure backend, with retry suppression.
 
 Here's an example, using the Redis failure backend:
+```ruby
+require 'resque-retry'
+require 'resque/failure/redis'
 
-    require 'resque-retry'
-    require 'resque/failure/redis'
+# require your jobs & application code.
 
-    # require your jobs & application code.
-
-    Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
-    Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
+Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
+Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
+```
 
 If a job fails, but **can and will** retry, the failure details wont be
 logged in the Redis failed queue *(visible via resque-web)*.
@@ -103,13 +110,14 @@ The new Retry tab displays delayed jobs with retry information; the number of
 attempts and the exception details from the last failure.
 
 Make sure you include this in your `config.ru` or similar file:
+```ruby
+require 'resque-retry'
+require 'resque-retry/server'
 
-    require 'resque-retry'
-    require 'resque-retry/server'
+# require your jobs & application code.
 
-    # require your jobs & application code.
-
-    run Resque::Server.new
+run Resque::Server.new
+```
 
 Retry Options & Logic
 ---------------------
@@ -123,35 +131,37 @@ some ideas =), adapt for your own usage and feel free to pick and mix!
 ### Retry Defaults
 
 Retry the job **once** on failure, with zero delay.
+```ruby
+require 'resque-retry'
 
-    require 'resque-retry'
+class DeliverWebHook
+  extend Resque::Plugins::Retry
+  @queue = :web_hooks
 
-    class DeliverWebHook
-      extend Resque::Plugins::Retry
-      @queue = :web_hooks
-
-      def self.perform(url, hook_id, hmac_key)
-        heavy_lifting
-      end
-    end
+  def self.perform(url, hook_id, hmac_key)
+    heavy_lifting
+  end
+end
+```
 
 When a job runs, the number of retry attempts is checked and incremented
 in Redis. If your job fails, the number of retry attempts is used to
 determine if we can requeue the job for another go.
 
 ### Custom Retry
+```ruby
+class DeliverWebHook
+  extend Resque::Plugins::Retry
+  @queue = :web_hooks
 
-    class DeliverWebHook
-      extend Resque::Plugins::Retry
-      @queue = :web_hooks
+  @retry_limit = 10
+  @retry_delay = 120
 
-      @retry_limit = 10
-      @retry_delay = 120
-
-      def self.perform(url, hook_id, hmac_key)
-        heavy_lifting
-      end
-    end
+  def self.perform(url, hook_id, hmac_key)
+    heavy_lifting
+  end
+end
+```
 
 The above modification will allow your job to retry up to 10 times, with
 a delay of 120 seconds, or 2 minutes between retry attempts.
@@ -164,17 +174,18 @@ more special.
 Sometimes it is useful to delay the worker that failed a job attempt, but
 still requeue the job for immediate processing by other workers. This can be
 done with `@sleep_after_requeue`:
+```ruby
+class DeliverWebHook
+  extend Resque::Plugins::Retry
+  @queue = :web_hooks
 
-    class DeliverWebHook
-      extend Resque::Plugins::Retry
-      @queue = :web_hooks
+  @sleep_after_requeue = 5
 
-      @sleep_after_requeue = 5
-
-      def self.perform(url, hook_id, hmac_key)
-        heavy_lifting
-      end
-    end
+  def self.perform(url, hook_id, hmac_key)
+    heavy_lifting
+  end
+end
+```
 
 This retries the job once and causes the worker that failed to sleep for 5
 seconds after requeuing the job. If there are multiple workers in the system
@@ -192,24 +203,26 @@ dynamically.
 ### Exponential Backoff
 
 Use this if you wish to vary the delay between retry attempts:
+```ruby
+class DeliverSMS
+  extend Resque::Plugins::ExponentialBackoff
+  @queue = :mt_messages
 
-    class DeliverSMS
-      extend Resque::Plugins::ExponentialBackoff
-      @queue = :mt_messages
-
-      def self.perform(mt_id, mobile_number, message)
-        heavy_lifting
-      end
-    end
+  def self.perform(mt_id, mobile_number, message)
+    heavy_lifting
+  end
+end
+```
 
 **Default Settings**
+```
+key: m = minutes, h = hours
 
-    key: m = minutes, h = hours
-
-                  no delay, 1m, 10m,   1h,    3h,    6h
-    @backoff_strategy = [0, 60, 600, 3600, 10800, 21600]
-    @retry_delay_multiplicand_min = 1.0
-    @retry_delay_multiplicand_max = 1.0
+              no delay, 1m, 10m,   1h,    3h,    6h
+@backoff_strategy = [0, 60, 600, 3600, 10800, 21600]
+@retry_delay_multiplicand_min = 1.0
+@retry_delay_multiplicand_max = 1.0
+```
 
 The first delay will be 0 seconds, the 2nd will be 60 seconds, etc...
 Again, tweak to your own needs.
@@ -228,17 +241,18 @@ them all retried on the same schedule.
 
 The default will allow a retry for any type of exception. You may change
 it so only specific exceptions are retried using `retry_exceptions`:
+```ruby
+class DeliverSMS
+  extend Resque::Plugins::Retry
+  @queue = :mt_messages
 
-    class DeliverSMS
-      extend Resque::Plugins::Retry
-      @queue = :mt_messages
+  @retry_exceptions = [NetworkError]
 
-      @retry_exceptions = [NetworkError]
-
-      def self.perform(mt_id, mobile_number, message)
-        heavy_lifting
-      end
-    end
+  def self.perform(mt_id, mobile_number, message)
+    heavy_lifting
+  end
+end
+```
 
 The above modification will **only** retry if a `NetworkError` (or subclass)
 exception is thrown.
@@ -248,17 +262,18 @@ types. You may optionally set `@retry_exceptions` to a hash where the keys are
 your specific exception classes to retry on, and the values are your retry
 delays in seconds or an array of retry delays to be used similar to
 exponential backoff.
+```ruby
+class DeliverSMS
+  extend Resque::Plugins::Retry
+  @queue = :mt_messages
 
-    class DeliverSMS
-      extend Resque::Plugins::Retry
-      @queue = :mt_messages
+  @retry_exceptions = { NetworkError => 30, SystemCallError => [120, 240] }
 
-      @retry_exceptions = { NetworkError => 30, SystemCallError => [120, 240] }
-
-      def self.perform(mt_id, mobile_number, message)
-        heavy_lifting
-      end
-    end
+  def self.perform(mt_id, mobile_number, message)
+    heavy_lifting
+  end
+end
+```
 
 In the above example, Resque would retry any `DeliverSMS` jobs which throw a
 `NetworkError` or `SystemCallError`. If the job throws a `NetworkError` it
@@ -269,17 +284,18 @@ retry 120 seconds later then subsequent retry attempts 240 seconds later.
 
 The default will allow a retry for any type of exception. You may change
 it so specific exceptions fail immediately by using `fatal_exceptions`:
+```ruby
+class DeliverSMS
+  extend Resque::Plugins::Retry
+  @queue = :mt_divisions
 
-    class DeliverSMS
-      extend Resque::Plugins::Retry
-      @queue = :mt_divisions
+  @fatal_exceptions = [NetworkError]
 
-      @fatal_exceptions = [NetworkError]
-
-      def self.perform(mt_id, mobile_number, message)
-        heavy_lifting
-      end
-    end
+  def self.perform(mt_id, mobile_number, message)
+    heavy_lifting
+  end
+end
+```
 
 In the above example, Resque would retry any `DeliverSMS` jobs that throw any
 type of error other than `NetworkError`. If the job throws a `NetworkError` it
@@ -288,25 +304,26 @@ will be marked as "failed" immediately.
 ### Custom Retry Criteria Check Callbacks
 
 You may define custom retry criteria callbacks:
+```ruby
+class TurkWorker
+  extend Resque::Plugins::Retry
+  @queue = :turk_job_processor
 
-    class TurkWorker
-      extend Resque::Plugins::Retry
-      @queue = :turk_job_processor
+  @retry_exceptions = [NetworkError]
 
-      @retry_exceptions = [NetworkError]
-
-      retry_criteria_check do |exception, *args|
-        if exception.message =~ /InvalidJobId/
-          false # don't retry if we got passed a invalid job id.
-        else
-          true  # its okay for a retry attempt to continue.
-        end
-      end
-
-      def self.perform(job_id)
-        heavy_lifting
-      end
+  retry_criteria_check do |exception, *args|
+    if exception.message =~ /InvalidJobId/
+      false # don't retry if we got passed a invalid job id.
+    else
+      true  # its okay for a retry attempt to continue.
     end
+  end
+
+  def self.perform(job_id)
+    heavy_lifting
+  end
+end
+```
 
 Similar to the previous example, this job will retry if either a
 `NetworkError` (or subclass) exception is thrown **or** any of the callbacks
@@ -319,20 +336,21 @@ job should retry.
 
 You may override `args_for_retry`, which is passed the current
 job arguments, to modify the arguments for the next retry attempt.
+```ruby
+class DeliverViaSMSC
+  extend Resque::Plugins::Retry
+  @queue = :mt_smsc_messages
 
-    class DeliverViaSMSC
-      extend Resque::Plugins::Retry
-      @queue = :mt_smsc_messages
+  # retry using the emergency SMSC.
+  def self.args_for_retry(smsc_id, mt_message)
+    [999, mt_message]
+  end
 
-      # retry using the emergency SMSC.
-      def self.args_for_retry(smsc_id, mt_message)
-        [999, mt_message]
-      end
-
-      self.perform(smsc_id, mt_message)
-        heavy_lifting
-      end
-    end
+  self.perform(smsc_id, mt_message)
+    heavy_lifting
+  end
+end
+```
 
 ### Job Retry Identifier/Key
 
@@ -347,19 +365,20 @@ By default the key uses this format:
 `resque-retry:<job class name>:<retry_identifier>`.
 
 Or you can define the entire key by overriding `redis_retry_key`.
+```ruby
+class DeliverSMS
+  extend Resque::Plugins::Retry
+  @queue = :mt_messages
 
-    class DeliverSMS
-      extend Resque::Plugins::Retry
-      @queue = :mt_messages
+  def self.retry_identifier(mt_id, mobile_number, message)
+    "#{mobile_number}:#{mt_id}"
+  end
 
-      def self.retry_identifier(mt_id, mobile_number, message)
-        "#{mobile_number}:#{mt_id}"
-      end
-
-      self.perform(mt_id, mobile_number, message)
-        heavy_lifting
-      end
-    end
+  self.perform(mt_id, mobile_number, message)
+    heavy_lifting
+  end
+end
+```
 
 Contributing/Pull Requests
 --------------------------
