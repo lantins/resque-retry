@@ -467,3 +467,10 @@ class PerExceptionClassRetryCountArrayJob
     raise RuntimeError, 'I always fail with a RuntimeError'
   end
 end
+
+# We can't design a job to fail during connect, see perform_next_job_fail_on_reconnect
+class FailsDuringConnectJob < RetryDefaultsJob
+  @queue = :testing
+  @retry_limit = 3
+  @retry_delay = 10
+end

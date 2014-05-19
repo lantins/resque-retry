@@ -54,10 +54,11 @@ class MultipleFailureTest < MiniTest::Unit::TestCase
   end
 
   def test_retry_key_splatting_args
-    # were expecting this to be called twice:
+    # were expecting this to be called three times:
+    # - once when we queue the job to try again
     # - once before the job is executed.
     # - once by the failure backend.
-    RetryDefaultsJob.expects(:redis_retry_key).with({'a' => 1, 'b' => 2}).times(2)
+    RetryDefaultsJob.expects(:redis_retry_key).with({'a' => 1, 'b' => 2}).times(3)
 
     Resque.enqueue(RetryDefaultsJob, {'a' => 1, 'b' => 2})
     perform_next_job(@worker)

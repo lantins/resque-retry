@@ -315,6 +315,13 @@ module Resque
         retry_in_queue = retry_job_delegate ? retry_job_delegate : self
         log_message "retry delay: #{temp_retry_delay} for class: #{retry_in_queue}", args, exception
 
+        # remember that this job is now being retried. before_perform_retry will increment
+        # this so it represents the retry count, and MultipleWithRetrySuppression uses
+        # the existence of this to determine if the job should be sent to the 
+        # parent failure backend (e.g. failed queue) or not.  Removing this means
+        # jobs that fail before ::perform will be both retried and sent to the failed queue.
+        Resque.redis.setnx(redis_retry_key(*args), -1)
+
         if temp_retry_delay <= 0
           # If the delay is 0, no point passing it through the scheduler
           Resque.enqueue(retry_in_queue, *args_for_retry(*args))
