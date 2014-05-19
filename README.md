@@ -401,10 +401,6 @@ This saves you from having to run a "house cleaning" or "errand" job.
 The expiary timeout is "pushed forward" or "touched" after each failure to
 ensure its not expired too soon.
 
-* Feature: Optional `@expire_retry_key_after` settings; expires retry counters from redis to save you cleaning up stale state.
-* Feature: Expose inner-workings of plugin through debug messages using `Resque.logger` (when logging level is Logger:DEBUG).
-
-
 ### Debug Plugging Logging
 
 The inner-workings of the plugin are output to the Resque [Logger](https://github.com/resque/resque/wiki/Logging)
