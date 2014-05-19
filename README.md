@@ -378,6 +378,38 @@ class DeliverSMS
 end
 ```
 
+### Expire Retry Counters From Redis
+
+Allow the Redis to expire stale retry counters from the database by setting
+`@expire_retry_key_after`:
+
+```ruby
+class DeliverSMS
+  extend Resque::Plugins::Retry
+  @queue = :mt_messages
+  @expire_retry_key_after = 3600 # expire key after `retry_delay` plus 1 hour
+
+  self.perform(mt_id, mobile_number, message)
+    heavy_lifting
+  end
+end
+
+```
+
+This saves you from having to run a "house cleaning" or "errand" job.
+
+The expiary timeout is "pushed forward" or "touched" after each failure to
+ensure its not expired too soon.
+
+* Feature: Optional `@expire_retry_key_after` settings; expires retry counters from redis to save you cleaning up stale state.
+* Feature: Expose inner-workings of plugin through debug messages using `Resque.logger` (when logging level is Logger:DEBUG).
+
+
+### Debug Plugging Logging
+
+The inner-workings of the plugin are output to the Resque [Logger](https://github.com/resque/resque/wiki/Logging)
+when `Resque.logger.level` is set to `Logger::DEBUG`.
+
 Contributing/Pull Requests
 --------------------------
 

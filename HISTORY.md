@@ -1,5 +1,9 @@
 ## HEAD
 
+* Fixed scenario where job does not get retried correctly when `perform` is not called as expected.
+* Feature: Optional `@expire_retry_key_after` settings; expires retry counters from redis to save you cleaning up stale state.
+* Feature: Expose inner-workings of plugin through debug messages using `Resque.logger` (when logging level is Logger:DEBUG).
+
 ## 1.1.4 (2014-03-17)
 
 * Fixed displaying retry information in resque web interface, caused by `Resque::Helpers` being deprecated.
