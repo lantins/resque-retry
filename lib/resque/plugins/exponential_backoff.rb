@@ -58,9 +58,9 @@ module Resque
         retry_delay_multiplicand_max = \
           receiver.instance_variable_get("@retry_delay_multiplicand_max") || \
             DEFAULT_RETRY_DELAY_MULTIPLICAND_MAX
-        if retry_delay_multiplicand_min > retry_delay_multiplicand_max
+        if retry_delay_multiplicand_min >= retry_delay_multiplicand_max
           raise InvalidRetryDelayMultiplicandConfigurationException.new(
-            %{"@retry_delay_multiplicand_min" must be less than or equal to "@retry_delay_multiplicand_max"}
+            %{"@retry_delay_multiplicand_min" must be less than "@retry_delay_multiplicand_max"}
           )
         end
       end
