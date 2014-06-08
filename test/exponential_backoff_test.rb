@@ -27,7 +27,7 @@ class ExponentialBackoffTest < MiniTest::Unit::TestCase
     assert_equal 0, Resque.info[:pending],    '0 pending jobs, it should be in the delayed queue'
 
     delayed = Resque.delayed_queue_peek(0, 1)
-    assert_in_delta (start_time + 60), delayed[0], 1.00, '2nd delay' # the first had a zero delay.
+    assert_in_delta (start_time + 60*1.1), delayed[0], 7.00, '2nd delay' # the first had a zero delay.
 
     5.times do
       Resque.enqueue(ExponentialBackoffJob)
@@ -35,10 +35,10 @@ class ExponentialBackoffTest < MiniTest::Unit::TestCase
     end
 
     delayed = Resque.delayed_queue_peek(0, 5)
-    assert_in_delta (start_time + 600),     delayed[1], 1.00, '3rd delay'
-    assert_in_delta (start_time + 3600),    delayed[2], 1.00, '4th delay'
-    assert_in_delta (start_time + 10_800),  delayed[3], 1.00, '5th delay'
-    assert_in_delta (start_time + 21_600),  delayed[4], 1.00, '6th delay'
+    assert_in_delta (start_time + 600*1.1),     delayed[1], 61.00, '3rd delay'
+    assert_in_delta (start_time + 3600*1.1),    delayed[2], 361.00, '4th delay'
+    assert_in_delta (start_time + 10_800*1.1),  delayed[3], 1081.00, '5th delay'
+    assert_in_delta (start_time + 21_600*1.1),  delayed[4], 2161.00, '6th delay'
   end
 
   def test_dont_allow_both_retry_and_ignore_exceptions
@@ -118,11 +118,10 @@ class ExponentialBackoffTest < MiniTest::Unit::TestCase
     end
 
     delayed = Resque.delayed_queue_peek(0, 3)
-    assert_in_delta (start_time + 10), delayed[0], 1.00, '1st delay'
-    assert_in_delta (start_time + 20), delayed[1], 1.00, '2nd delay'
-    assert_in_delta (start_time + 30), delayed[2], 1.00, '3rd delay'
-
-    assert_equal 2, Resque.delayed_timestamp_size(delayed[2]), '4th delay should share delay with 3rd'
+    assert_in_delta (start_time + 10*1.1), delayed[0], 2.00, '1st delay'
+    assert_in_delta (start_time + 20*1.1), delayed[1], 3.00, '2nd delay'
+    assert_in_delta (start_time + 30*1.1), delayed[2], 4.00, '3rd delay'
+    assert_in_delta (start_time + 30*1.1), delayed[3], 4.00, '4th delay should share delay with 3rd'
 
     assert_equal 4, Resque.info[:processed],  'processed jobs'
     assert_equal 4, Resque.info[:failed],     'failed jobs'

@@ -41,7 +41,7 @@ class MultipleFailureTest < MiniTest::Unit::TestCase
     perform_next_job(@worker)
 
     assert_equal 1, MockFailureBackend.errors.count, 'should have one error'
-    assert_match /uninitialized constant LimitThreeJobTemp/, MockFailureBackend.errors.first
+    assert_match /uninitialized constant:? LimitThreeJobTemp/, MockFailureBackend.errors.first
   end
 
   def test_last_failure_is_saved_in_redis_if_delay
