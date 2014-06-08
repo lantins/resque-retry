@@ -46,7 +46,7 @@ module Resque
       #
       # @api public
       DEFAULT_RETRY_DELAY_MULTIPLICAND_MIN = 1.0
-      DEFAULT_RETRY_DELAY_MULTIPLICAND_MAX = 1.0
+      DEFAULT_RETRY_DELAY_MULTIPLICAND_MAX = 1.1 # diff must be >0 to avoid Kernel.rand error in rbx
 
       # Fail fast, when extended, if the "receiver" is misconfigured
       #
