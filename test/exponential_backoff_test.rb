@@ -118,11 +118,10 @@ class ExponentialBackoffTest < MiniTest::Unit::TestCase
     end
 
     delayed = Resque.delayed_queue_peek(0, 3)
-    assert_in_delta (start_time + 10), delayed[0], 1.00, '1st delay'
-    assert_in_delta (start_time + 20), delayed[1], 1.00, '2nd delay'
-    assert_in_delta (start_time + 30), delayed[2], 1.00, '3rd delay'
-
-    assert_equal 2, Resque.delayed_timestamp_size(delayed[2]), '4th delay should share delay with 3rd'
+    assert_in_delta (start_time + 10*1.1), delayed[0], 2.00, '1st delay'
+    assert_in_delta (start_time + 20*1.1), delayed[1], 3.00, '2nd delay'
+    assert_in_delta (start_time + 30*1.1), delayed[2], 4.00, '3rd delay'
+    assert_in_delta (start_time + 30*1.1), delayed[3], 4.00, '4th delay should share delay with 3rd'
 
     assert_equal 4, Resque.info[:processed],  'processed jobs'
     assert_equal 4, Resque.info[:failed],     'failed jobs'
