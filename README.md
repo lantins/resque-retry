@@ -413,9 +413,9 @@ Contributing/Pull Requests
   * Fork the project.
   * Make your feature addition or bug fix.
   * Add tests for it.
-  * Commit.
-  * Send me a pull request. Bonus points for topic branches.
-  * If you edit the gemspec/version etc, do it in another commit please.
+  * In a seperate commit, update the HISTORY.md file please.
+  * Send us a pull request. Bonus points for topic branches.
+  * If you edit the gemspec/version etc, please do so in another commit.
 
 [god]: http://github.com/mojombo/god
 [rq]: http://github.com/defunkt/resque
