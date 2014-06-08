@@ -27,7 +27,7 @@ class ExponentialBackoffTest < MiniTest::Unit::TestCase
     assert_equal 0, Resque.info[:pending],    '0 pending jobs, it should be in the delayed queue'
 
     delayed = Resque.delayed_queue_peek(0, 1)
-    assert_in_delta (start_time + 60*1.1), delayed[0], 1.00, '2nd delay' # the first had a zero delay.
+    assert_in_delta (start_time + 60*1.1), delayed[0], 7.00, '2nd delay' # the first had a zero delay.
 
     5.times do
       Resque.enqueue(ExponentialBackoffJob)
@@ -35,10 +35,10 @@ class ExponentialBackoffTest < MiniTest::Unit::TestCase
     end
 
     delayed = Resque.delayed_queue_peek(0, 5)
-    assert_in_delta (start_time + 600*1.1),     delayed[1], 1.00, '3rd delay'
-    assert_in_delta (start_time + 3600*1.1),    delayed[2], 1.00, '4th delay'
-    assert_in_delta (start_time + 10_800*1.1),  delayed[3], 1.00, '5th delay'
-    assert_in_delta (start_time + 21_600*1.1),  delayed[4], 1.00, '6th delay'
+    assert_in_delta (start_time + 600*1.1),     delayed[1], 61.00, '3rd delay'
+    assert_in_delta (start_time + 3600*1.1),    delayed[2], 361.00, '4th delay'
+    assert_in_delta (start_time + 10_800*1.1),  delayed[3], 1081.00, '5th delay'
+    assert_in_delta (start_time + 21_600*1.1),  delayed[4], 2161.00, '6th delay'
   end
 
   def test_dont_allow_both_retry_and_ignore_exceptions
