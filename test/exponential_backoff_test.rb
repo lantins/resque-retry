@@ -117,7 +117,7 @@ class ExponentialBackoffTest < MiniTest::Unit::TestCase
       perform_next_job @worker
     end
 
-    delayed = Resque.delayed_queue_peek(0, 3)
+    delayed = Resque.delayed_queue_peek(0, 4)
     assert_in_delta (start_time + 10*1.1), delayed[0], 2.00, '1st delay'
     assert_in_delta (start_time + 20*1.1), delayed[1], 3.00, '2nd delay'
     assert_in_delta (start_time + 30*1.1), delayed[2], 4.00, '3rd delay'
