@@ -1,5 +1,9 @@
 ## HEAD
 
+## 1.2.1 (TBD)
+
+* Fixed Rubinius (rbx) Kernel.rand "invalid argument - 0.0 (ArgumentError)" error with ExponentialBackoff when `retry_delay_multiplicand_min >= retry_delay_multiplicand_max` by making defaults 1.0 & 1.1 respectively (Sai)
+
 ## 1.2.0 (2014-05-19)
 
 * Fixed scenario where job does not get retried correctly when `perform` is not called as expected.
