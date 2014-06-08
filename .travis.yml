@@ -1,9 +1,5 @@
 language: ruby
 
-matrix:
-  allow_failures:
-    - rvm: rbx
-    
 matrix: # via https://github.com/rubinius/travis-canary/blob/master/.travis.yml
   include:
     - rvm: rbx-2.2.7
