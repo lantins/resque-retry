@@ -2,9 +2,18 @@ language: ruby
 
 matrix:
   allow_failures:
-    - rvm: jruby-19mode
-    - rvm: jruby-20mode
     - rvm: rbx
+    
+matrix: # via https://github.com/rubinius/travis-canary/blob/master/.travis.yml
+  include:
+    - rvm: rbx-2.2.7
+      env: RBX_RUBY_COMPAT=2.1.0 RBX_VERSION=2.2.7
+    - rvm: rbx-2.2
+      env: RBX_RUBY_COMPAT=2.1.0 RBX_VERSION=2.2.7
+    - rvm: rbx-2
+      env: RBX_RUBY_COMPAT=2.1.0 RBX_VERSION=2.2.7
+    - rvm: rbx-2.1.1
+      env: RBX_RUBY_COMPAT=2.1.0 RBX_VERSION=2.1.1
 
 rvm:
   - 1.9.3
@@ -12,5 +21,4 @@ rvm:
   - 2.1.0
   - 2.1.1
   - jruby-19mode
-  - jruby-20mode
-  - rbx
+  - jruby
