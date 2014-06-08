@@ -1,18 +1,11 @@
 language: ruby
 
-matrix: # via https://github.com/rubinius/travis-canary/blob/master/.travis.yml
-  include:
-    - rvm: rbx-2.2.7
-      env: RBX_RUBY_COMPAT=2.1.0 RBX_VERSION=2.2.7
-    - rvm: rbx-2.2
-      env: RBX_RUBY_COMPAT=2.1.0 RBX_VERSION=2.2.7
-    - rvm: rbx-2
-      env: RBX_RUBY_COMPAT=2.1.0 RBX_VERSION=2.2.7
-    - rvm: rbx-2.1.1
-      env: RBX_RUBY_COMPAT=2.1.0 RBX_VERSION=2.1.1
-    - rvm: 1.9.3
-    - rvm: 2.0.0
-    - rvm: 2.1.0
-    - rvm: 2.1.1
-    - rvm: jruby-19mode
-    - rvm: jruby
+rvm:
+  - 1.9.3
+  - 2.0.0
+  - 2.1.0
+  - 2.1.1
+  - jruby-19mode
+  - jruby
+  - rbx-2.1.1
+  - rbx-2
