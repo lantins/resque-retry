@@ -81,8 +81,14 @@ module Resque
       # @api private
       def retry_delay
         delay = backoff_strategy[retry_attempt] || backoff_strategy.last
-        delay_multiplicand = \
-          rand(retry_delay_multiplicand_min..retry_delay_multiplicand_max)
+        # if the values are the same don't bother generating a random number, if
+        # the delta is zero, some platforms will raise an error
+        if retry_delay_multiplicand_min == retry_delay_multiplicand_max
+          delay_multiplicand = retry_delay_multiplicand_max
+        else
+          delay_multiplicand = \
+            rand(retry_delay_multiplicand_min..retry_delay_multiplicand_max)
+        end
         (delay * delay_multiplicand).to_i
       end
 
