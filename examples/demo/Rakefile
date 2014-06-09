@@ -12,7 +12,7 @@ require 'resque/failure/redis'
 
 # Require Rakefile related resque things.
 require 'resque/tasks'
-require 'resque_scheduler/tasks'
+require 'resque/scheduler/tasks'
 
 # Enable resque-retry failure backend.
 Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
