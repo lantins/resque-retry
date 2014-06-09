@@ -1,5 +1,9 @@
 ## HEAD
 
+## 1.2.1 (2014-06-09)
+
+* Fixed Kernel.rand: "invalid argument - 0.0 (ArgumentError)" error with "ExponentialBackoff" (on "Rubinius") when `retry_delay_multiplicand_min` and `retry_delay_multiplicand_max` were the same value (@saizai)
+
 ## 1.2.0 (2014-05-19)
 
 * Fixed scenario where job does not get retried correctly when `perform` is not called as expected.
