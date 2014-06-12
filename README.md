@@ -120,8 +120,8 @@ run Resque::Server.new
 Retry Options & Logic
 ---------------------
 
-Please take a look at the yardoc/code for more details on methods you may
-wish to override.
+Please take a look at the [yardoc](http://rubydoc.info/gems/resque-retry)/code
+for more details on methods you may wish to override.
 
 Customisation is pretty easy, the below examples should give you
 some ideas =), adapt for your own usage and feel free to pick and mix!
@@ -401,7 +401,7 @@ This saves you from having to run a "house cleaning" or "errand" job.
 The expiary timeout is "pushed forward" or "touched" after each failure to
 ensure its not expired too soon.
 
-### Debug Plugging Logging
+### Debug Plugin Logging
 
 The inner-workings of the plugin are output to the Resque [Logger](https://github.com/resque/resque/wiki/Logging)
 when `Resque.logger.level` is set to `Logger::DEBUG`.
