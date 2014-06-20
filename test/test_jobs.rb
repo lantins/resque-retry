@@ -154,6 +154,19 @@ class FailFiveTimesWithExpiryJob < RetryDefaultsJob
   end
 end
 
+class FailFiveTimesWithCustomExpiryJob < RetryDefaultsJob
+  @queue = :testing
+  @retry_limit = 6
+
+  def self.expire_retry_key_after
+    retry_attempt + 100
+  end
+
+  def self.perform(*args)
+    raise if retry_attempt <= 4
+  end
+end
+
 class ExponentialBackoffJob < RetryDefaultsJob
   extend Resque::Plugins::ExponentialBackoff
   @queue = :testing
