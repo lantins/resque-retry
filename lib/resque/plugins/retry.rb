@@ -158,6 +158,17 @@ module Resque
         args
       end
 
+      # @abstract
+      # Modify the arguments used to retry the job based on the exception.
+      # Use this to do something other than try the exact same job again.
+      #
+      # @return [Array] new job arguments
+      #
+      # @api public
+      def retry_args_for_exception(exception, *args)
+        args_for_retry(*args)
+      end
+
       # Convenience method to test whether you may retry on a given
       # exception
       #
@@ -322,11 +333,13 @@ module Resque
         # jobs that fail before ::perform will be both retried and sent to the failed queue.
         Resque.redis.setnx(redis_retry_key(*args), -1)
 
+        retry_args = retry_args_for_exception(exception, *args)
+
         if temp_retry_delay <= 0
           # If the delay is 0, no point passing it through the scheduler
-          Resque.enqueue(retry_in_queue, *args_for_retry(*args))
+          Resque.enqueue(retry_in_queue, *retry_args)
         else
-          Resque.enqueue_in(temp_retry_delay, retry_in_queue, *args_for_retry(*args))
+          Resque.enqueue_in(temp_retry_delay, retry_in_queue, *retry_args)
         end
 
         # remove retry key from redis if we handed retry off to another queue.

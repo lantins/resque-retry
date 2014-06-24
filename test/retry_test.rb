@@ -63,6 +63,14 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_equal ['foobar', 'barbar'], job['args']
   end
 
+  def test_job_args_may_be_exception_based
+    Resque.enqueue(RetryWithExceptionBasedArgsJob, 'foo', 'bar')
+    perform_next_job(@worker)
+
+    assert job = Resque.pop(:testing)
+    assert_equal ['fooerror', 'barerror'], job['args']
+  end
+
   def test_retry_never_give_up
     Resque.enqueue(NeverGiveUpJob)
     10.times do
