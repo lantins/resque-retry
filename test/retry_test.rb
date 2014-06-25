@@ -285,4 +285,17 @@ class RetryTest < MiniTest::Unit::TestCase
     Resque.enqueue(ExpiringJob, 'expiry_test')
     perform_next_job(@worker)
   end
+
+  def test_expire_key_setting_on_the_fly
+    Resque.redis.expects(:expire).with("resque-retry:FailFiveTimesWithCustomExpiryJob", 100)
+    .then.with("resque-retry:FailFiveTimesWithCustomExpiryJob", 101)
+    .then.with("resque-retry:FailFiveTimesWithCustomExpiryJob", 102)
+    .then.with("resque-retry:FailFiveTimesWithCustomExpiryJob", 103)
+    .then.with("resque-retry:FailFiveTimesWithCustomExpiryJob", 104)
+
+    Resque.enqueue(FailFiveTimesWithCustomExpiryJob)
+    5.times do
+      perform_next_job(@worker)
+    end
+  end
 end
