@@ -350,6 +350,25 @@ class DeliverViaSMSC
 end
 ```
 
+Alternatively, if you require finer control of the args based on the
+exception thrown, you may override `retry_args_for_exception`, which is passed
+the exception and the current job arguments, to modify the arguments for the
+next retry attempt.
+```ruby
+class DeliverViaSMSC
+  extend Resque::Plugins::Retry
+  @queue = :mt_smsc_messages
+
+  # retry using the emergency SMSC.
+  def self.retry_args_for_exception(exception, smsc_id, mt_message)
+    [999, mt_message + exception.message]
+  end
+
+  self.perform(smsc_id, mt_message)
+    heavy_lifting
+  end
+end
+```
 ### Job Retry Identifier/Key
 
 The retry attempt is incremented and stored in a Redis key. The key is

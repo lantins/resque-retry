@@ -41,7 +41,7 @@ class RetryDefaultsJob
   @queue = :testing
 
   def self.perform(*args)
-    raise
+    raise 'error'
   end
 end
 
@@ -107,6 +107,14 @@ class RetryWithModifiedArgsJob < RetryDefaultsJob
 
   def self.args_for_retry(*args)
     args.each { |arg| arg << 'bar' }
+  end
+end
+
+class RetryWithExceptionBasedArgsJob < RetryDefaultsJob
+  @queue = :testing
+
+  def self.retry_args_for_exception(exception, *args)
+    args.each { |arg| arg << exception.message }
   end
 end
 
