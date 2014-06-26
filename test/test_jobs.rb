@@ -105,7 +105,7 @@ end
 class RetryWithModifiedArgsJob < RetryDefaultsJob
   @queue = :testing
 
-  def self.args_for_retry(*args)
+  def self.retry_args(*args)
     args.each { |arg| arg << 'bar' }
   end
 end

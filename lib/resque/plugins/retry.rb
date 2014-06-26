@@ -154,7 +154,7 @@ module Resque
       # @return [Array] new job arguments
       #
       # @api public
-      def args_for_retry(*args)
+      def retry_args(*args)
         args
       end
 
@@ -166,7 +166,7 @@ module Resque
       #
       # @api public
       def retry_args_for_exception(exception, *args)
-        args_for_retry(*args)
+        retry_args(*args)
       end
 
       # Convenience method to test whether you may retry on a given

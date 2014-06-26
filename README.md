@@ -332,7 +332,7 @@ job should retry.
 
 ### Retry Arguments
 
-You may override `args_for_retry`, which is passed the current
+You may override `retry_args`, which is passed the current
 job arguments, to modify the arguments for the next retry attempt.
 ```ruby
 class DeliverViaSMSC
@@ -340,7 +340,7 @@ class DeliverViaSMSC
   @queue = :mt_smsc_messages
 
   # retry using the emergency SMSC.
-  def self.args_for_retry(smsc_id, mt_message)
+  def self.retry_args(smsc_id, mt_message)
     [999, mt_message]
   end
 
