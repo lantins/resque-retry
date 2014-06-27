@@ -55,20 +55,23 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_equal test_args, job['args']
   end
 
-  def test_job_args_may_be_modified
-    Resque.enqueue(RetryWithModifiedArgsJob, 'foo', 'bar')
+  def test_job_args_can_be_modified_by_overriding_args_for_retry
+    Resque.enqueue(DeprecatedRetryWithModifiedArgsJob)
+    DeprecatedRetryWithModifiedArgsJob.expects(:warn)
+    DeprecatedRetryWithModifiedArgsJob.expects(:args_for_retry)
     perform_next_job(@worker)
-
-    assert job = Resque.pop(:testing)
-    assert_equal ['foobar', 'barbar'], job['args']
   end
 
-  def test_job_args_may_be_exception_based
-    Resque.enqueue(RetryWithExceptionBasedArgsJob, 'foo', 'bar')
+  def test_job_args_can_be_modified_by_overriding_retry_args
+    Resque.enqueue(RetryWithModifiedArgsJob)
+    RetryWithModifiedArgsJob.expects(:retry_args)
     perform_next_job(@worker)
+  end
 
-    assert job = Resque.pop(:testing)
-    assert_equal ['fooerror', 'barerror'], job['args']
+  def test_job_args_can_be_modified_by_overriding_retry_args_for_exception
+    Resque.enqueue(RetryWithExceptionBasedArgsJob)
+    RetryWithExceptionBasedArgsJob.expects(:retry_args_for_exception)
+    perform_next_job(@worker)
   end
 
   def test_retry_never_give_up

@@ -155,7 +155,14 @@ module Resque
       #
       # @api public
       def retry_args(*args)
-        args
+        # Here for backwards compatibility. If an "args_for_retry" method exists
+        # invoke it, but warn that it is deprecated
+        if respond_to?(:args_for_retry)
+          warn '[DEPRECATION] `args_for_retry` is deprecated, use `retry_args`'
+          args_for_retry(*args)
+        else
+          args
+        end
       end
 
       # @abstract
