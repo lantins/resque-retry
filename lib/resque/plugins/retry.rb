@@ -158,7 +158,7 @@ module Resque
         # Here for backwards compatibility. If an "args_for_retry" method exists
         # invoke it, but warn that it is deprecated
         if respond_to?(:args_for_retry)
-          warn '[DEPRECATION] `args_for_retry` is deprecated, use `retry_args`'
+          warn "`Resque::Plugins::Retry#args_for_retry` is deprecated, use `Resque::Plugins::Retry#retry_args` instead."
           args_for_retry(*args)
         else
           args
