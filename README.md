@@ -1,7 +1,7 @@
 resque-retry
 ============
 
-A [Resque][rq] plugin. Requires Resque ~> 1.25 & [resque-scheduler][rqs] ~> 2.5.
+A [Resque][rq] plugin. Requires Resque ~> 1.25 & [resque-scheduler][rqs] ~> 3.0.
 
 resque-retry provides retry, delay and exponential backoff support for
 resque jobs.
@@ -28,7 +28,7 @@ If you're using [Bundler][bundler] to manage your dependencies, you should add `
 Add this to your `Rakefile`:
 ```ruby
 require 'resque/tasks'
-require 'resque_scheduler/tasks'
+require 'resque/scheduler/tasks'
 ```
 
 The delay between retry attempts is provided by [resque-scheduler][rqs].
