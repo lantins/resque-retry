@@ -1,9 +1,9 @@
 ## HEAD
 
-## 1.2.5 (2014-07-25)
+## 1.3.0 (2014-07-25)
 
 * Adjust gem dependency on `resque-scheduler` to ~> 3.0
-* Depricate: `args_for_retry` is favour of `retry_args`, will outpit deprecation warnings if your using the older method.
+* Deprecated: `args_for_retry` in favor of `retry_args` (will output deprecation warnings if your using the older method).
 * Feature: Allow changing the args for a given exception using `retry_args_for_exception` (@jonp)
 * Feature: Allow setting `@expire_retry_key_after` on the fly (@orenmazor)
 
