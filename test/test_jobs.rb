@@ -503,3 +503,12 @@ class FailsDuringConnectJob < RetryDefaultsJob
   @retry_limit = 3
   @retry_delay = 10
 end
+
+class RetryKilledJob
+  extend Resque::Plugins::Retry
+  @queue = :testing
+
+  def self.perform(*args)
+    Process.kill("KILL", Process.pid)
+  end
+end
