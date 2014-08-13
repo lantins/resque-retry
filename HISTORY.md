@@ -1,5 +1,9 @@
 ## HEAD
 
+## 1.3.1 (2014-08-13)
+
+* Fixed: Job would infinitely retry if DirtyExit exception was always raised.
+
 ## 1.3.0 (2014-07-25)
 
 * Adjust gem dependency on `resque-scheduler` to ~> 3.0
