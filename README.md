@@ -140,14 +140,22 @@ bundle exec rackup -p 9292 config.ru
 Another alternative is to use resque's built-in 'resque-web' command with
 the additional resque-retry tabs. In order to do this, you must first create
 a configuration file. For the sake of this example we'll create the configuration
-file in a 'config' directory, but you could place it anywhere in your project. 
-Here are the example steps: 
-1. Create a configuration file for resque-web
-```touch [app_dir]/config/resque-web.rb```
-2. Add the following line into the file
-```require 'resque-retry'```
-3. Then pass the configuration file to the resque-web command as a parameter
-```% resque-web [app_dir]/config/resque-web.rb```
+file in a 'config' directory, and name it 'resque_web_config.rb'. In practice 
+you could rename this configuration file to anything you'd like and place in your
+project in any directory of your choosing. The contents of the configuration file
+would look like this:
+
+```ruby
+# [app_dir]/config/resque_web_config.rb
+require 'resque-retry'
+```
+
+Once you have the configuration file ready, you can pass the configuration file
+to the resque-web command as a parameter, like so:
+
+```
+resque-web [app_dir]/config/resque_web_config.rb
+```
 
 
 Retry Options & Logic
