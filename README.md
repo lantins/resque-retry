@@ -141,10 +141,13 @@ Another alternative is to use resque's built-in 'resque-web' command with
 the additional resque-retry tabs. In order to do this, you must first create
 a configuration file. For the sake of this example we'll create the configuration
 file in a 'config' directory, but you could place it anywhere in your project. 
-Here are the example steps: <br/><br/>
-1. Create a configuration file for resque-web</br>```touch [app_dir]/config/resque-web.rb```<br/>
-2. Add the following line into the file</br>```require 'resque-retry'```<br/>
-3. Then pass the configuration file to the resque-web command as a parameter</br>```% resque-web [app_dir]/config/resque-web.rb```
+Here are the example steps: 
+1. Create a configuration file for resque-web
+```touch [app_dir]/config/resque-web.rb```
+2. Add the following line into the file
+```require 'resque-retry'```
+3. Then pass the configuration file to the resque-web command as a parameter
+```% resque-web [app_dir]/config/resque-web.rb```
 
 
 Retry Options & Logic
