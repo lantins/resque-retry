@@ -107,7 +107,27 @@ also checkout the resque-web additions!
 The new Retry tab displays delayed jobs with retry information; the number of
 attempts and the exception details from the last failure.
 
-Make sure you include this in your `config.ru` or similar file:
+
+### Configuring and running the Resque-Web Interface
+
+#### Using the resque-web command with a configuration file:
+
+If you'd like to use the built-in resque-web command with the additional
+resque-retry tabs visible, you must first create a configuration file. Here
+is an example step: <br/><br/>
+1. Create a configuration file for resque-web:<br/>
+```touch [app_dir]/config/resque-web.rb```<br/><br/>
+2. Add the following line into the file:<br/>
+```require 'resque-retry'```<br/><br/>
+3. Then pass the configuration file to the resque-web command as a parameter:<br/>
+```% resque-web [app_dir]/config/resque-web.rb```<br/>
+
+#### Using a Rack configuration: 
+
+Alternatively, if you don't want to use the resque-web command, and would rather
+use a rack configuration file, make sure you include this in your `config.ru` 
+or similar file:
+
 ```ruby
 require 'resque-retry'
 require 'resque-retry/server'
@@ -115,6 +135,11 @@ require 'resque-retry/server'
 # require your jobs & application code.
 
 run Resque::Server.new
+```
+
+As an example, you could run this server using bundler, with the following command:
+```
+bundle exec rackup -p 9292 config.ru 
 ```
 
 Retry Options & Logic
