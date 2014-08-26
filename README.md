@@ -150,6 +150,11 @@ would look like this:
 ```ruby
 # [app_dir]/config/resque_web_config.rb
 require 'resque-retry'
+require 'resque-retry/server'
+
+# Make sure to require your workers & application code below this line:
+# require '[path]/[to]/[jobs]/your_worker.rb' 
+
 ```
 
 Once you have the configuration file ready, you can pass the configuration file
