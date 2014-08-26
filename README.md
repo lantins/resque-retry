@@ -119,8 +119,10 @@ sure you include this in your `config.ru` or similar file:
 require 'resque-retry'
 require 'resque-retry/server'
 
-# require your jobs & application code.
+# Make sure to require your workers & application code below this line:
+# require '[path]/[to]/[jobs]/your_worker.rb' 
 
+# Run the server
 run Resque::Server.new
 ```
 
