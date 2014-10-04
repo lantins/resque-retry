@@ -2,7 +2,7 @@ resque-retry
 ============
 
 A [Resque][rq] plugin. Requires Resque ~> 1.25 & [resque-scheduler][rqs] ~> 3.0.
-
+pat
 resque-retry provides retry, delay and exponential backoff support for
 resque jobs.
 
@@ -120,7 +120,7 @@ require 'resque-retry'
 require 'resque-retry/server'
 
 # Make sure to require your workers & application code below this line:
-# require '[path]/[to]/[jobs]/your_worker.rb' 
+# require '[path]/[to]/[jobs]/your_worker' 
 
 # Run the server
 run Resque::Server.new
@@ -153,7 +153,7 @@ require 'resque-retry'
 require 'resque-retry/server'
 
 # Make sure to require your workers & application code below this line:
-# require '[path]/[to]/[jobs]/your_worker.rb' 
+# require '[path]/[to]/[jobs]/your_worker' 
 
 ```
 
