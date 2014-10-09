@@ -1,5 +1,9 @@
 ## HEAD
 
+## 1.3.2 (2014-10-09)
+
+* Fixed: Ensure `#constantize` is called on `Job` instance.
+
 ## 1.3.1 (2014-08-13)
 
 * Fixed: Job would infinitely retry if DirtyExit exception was always raised.
