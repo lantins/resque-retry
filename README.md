@@ -2,7 +2,7 @@ resque-retry
 ============
 
 A [Resque][rq] plugin. Requires Resque ~> 1.25 & [resque-scheduler][rqs] ~> 3.0.
-
+pat
 resque-retry provides retry, delay and exponential backoff support for
 resque jobs.
 
@@ -107,15 +107,63 @@ also checkout the resque-web additions!
 The new Retry tab displays delayed jobs with retry information; the number of
 attempts and the exception details from the last failure.
 
-Make sure you include this in your `config.ru` or similar file:
+
+### Configuring and running the Resque-Web Interface
+
+#### Using a Rack configuration: 
+
+One alternative is to use a rack configuration file. To use this, make 
+sure you include this in your `config.ru` or similar file:
+
 ```ruby
 require 'resque-retry'
 require 'resque-retry/server'
 
-# require your jobs & application code.
+# Make sure to require your workers & application code below this line:
+# require '[path]/[to]/[jobs]/your_worker' 
 
+# Run the server
 run Resque::Server.new
 ```
+
+As an example, you could run this server with the following command:
+```
+rackup -p 9292 config.ru
+```
+
+When using bundler, you can also run the server like this:
+```
+bundle exec rackup -p 9292 config.ru 
+```
+
+
+#### Using the 'resque-web' command with a configuration file:
+
+Another alternative is to use resque's built-in 'resque-web' command with
+the additional resque-retry tabs. In order to do this, you must first create
+a configuration file. For the sake of this example we'll create the configuration
+file in a 'config' directory, and name it 'resque_web_config.rb'. In practice 
+you could rename this configuration file to anything you'd like and place in your
+project in any directory of your choosing. The contents of the configuration file
+would look like this:
+
+```ruby
+# [app_dir]/config/resque_web_config.rb
+require 'resque-retry'
+require 'resque-retry/server'
+
+# Make sure to require your workers & application code below this line:
+# require '[path]/[to]/[jobs]/your_worker' 
+
+```
+
+Once you have the configuration file ready, you can pass the configuration file
+to the resque-web command as a parameter, like so:
+
+```
+resque-web [app_dir]/config/resque_web_config.rb
+```
+
 
 Retry Options & Logic
 ---------------------
