@@ -32,11 +32,11 @@ Gem::Specification.new do |s|
   s.add_dependency('resque', '~> 1.25')
   s.add_dependency('resque-scheduler', '~> 4.0')
 
-  s.add_development_dependency('rake', '~> 10.1')
+  s.add_development_dependency('rake', '~> 10.3')
   s.add_development_dependency('minitest', '~> 4.0')
   s.add_development_dependency('rack-test', '~> 0.6')
   s.add_development_dependency('yard', '~> 0.8')
   s.add_development_dependency('json', '~> 1.8')
-  s.add_development_dependency('simplecov', '~> 0.7')
-  s.add_development_dependency('mocha', '~> 1.0')
+  s.add_development_dependency('simplecov', '~> 0.9')
+  s.add_development_dependency('mocha', '~> 1.1')
 end
