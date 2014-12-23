@@ -1,7 +1,7 @@
 resque-retry
 ============
 
-A [Resque][rq] plugin. Requires Resque ~> 1.25 & [resque-scheduler][rqs] ~> 3.0.
+A [Resque][rq] plugin. Requires Resque ~> 1.25 & [resque-scheduler][rqs] ~> 4.0.
 pat
 resque-retry provides retry, delay and exponential backoff support for
 resque jobs.
@@ -485,7 +485,6 @@ Contributing/Pull Requests
   * If you edit the gemspec/version etc, please do so in another commit.
 
 [god]: http://github.com/mojombo/god
-[rq]: http://github.com/defunkt/resque
-[rqs]: http://github.com/bvandenbos/resque-scheduler
-[bundler]: http://gembundler.com/
-
+[rq]: http://github.com/resque/resque
+[rqs]: http://github.com/resque/resque-scheduler
+[bundler]: http://bundler.io
