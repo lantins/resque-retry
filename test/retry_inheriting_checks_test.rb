@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class RetryInheritingChecksTest < MiniTest::Unit::TestCase
+class RetryInheritingChecksTest < Minitest::Test
   def setup
     Resque.redis.flushall
     @worker = Resque::Worker.new(:testing)

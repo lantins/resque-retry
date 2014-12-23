@@ -4,7 +4,7 @@ $TESTING = true
 
 require 'rubygems'
 require 'timeout'
-require 'minitest/unit'
+require 'minitest/autorun'
 require 'minitest/pride'
 require 'rack/test'
 require 'mocha/setup'
@@ -32,21 +32,16 @@ if !system('which redis-cli')
   abort ''
 end
 
-# This code is run `at_exit` to setup everything before running the tests.
-# Redis server is started before this code block runs.
-at_exit do
-  next if $!
-
-  exit_code = MiniTest::Unit.new.run(ARGV)
-  `redis-cli -p 9736 shutdown nosave`
-end
+# This code is run after all the tests have finished running to ensure that the
+# Redis server is shutdowa
+Minitest.after_run { `redis-cli -p 9736 shutdown nosave` }
 
 puts "Starting redis for testing at localhost:9736..."
 `redis-server #{dir}/redis-test.conf`
 Resque.redis = '127.0.0.1:9736'
 
 # Test helpers
-class MiniTest::Unit::TestCase
+class Minitest::Test
   def perform_next_job(worker, &block)
     return unless job = worker.reserve
     worker.perform(job, &block)

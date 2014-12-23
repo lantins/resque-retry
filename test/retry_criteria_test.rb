@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class RetryCriteriaTest < MiniTest::Unit::TestCase
+class RetryCriteriaTest < Minitest::Test
   def setup
     Resque.redis.flushall
     @worker = Resque::Worker.new(:testing)

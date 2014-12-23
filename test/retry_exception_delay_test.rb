@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class RetryTest < MiniTest::Unit::TestCase
+class RetryTest < Minitest::Test
   def setup
     Resque.redis.flushall
     @worker = Resque::Worker.new(:testing)
@@ -43,5 +43,4 @@ class RetryTest < MiniTest::Unit::TestCase
     assert_in_delta (start_time + 10), delayed[1], 1.00, '2nd retry delay timestamp'
     assert_in_delta (start_time + 15), delayed[2], 1.00, '3rd retry delay timestamp'
   end
-
 end

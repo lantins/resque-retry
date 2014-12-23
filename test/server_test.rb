@@ -1,10 +1,10 @@
 require 'test_helper'
-
 require 'resque-retry/server'
-ENV['RACK_ENV'] = 'test'
+
+ENV['RACK_ENV'] = ENV['RAILS_ENV']
 
 # Testing the Resque web interface additions.
-class ServerTest < MiniTest::Unit::TestCase
+class ServerTest < MiniTest::Test
   include Rack::Test::Methods
 
   def setup
@@ -41,5 +41,4 @@ class ServerTest < MiniTest::Unit::TestCase
     get '/retry'
     assert last_response.body.include?('<b>1</b> timestamps'), 'should have 1 retry jobs'
   end
-
 end

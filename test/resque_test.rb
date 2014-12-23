@@ -1,7 +1,7 @@
 require 'test_helper'
 
 # make sure the worlds not fallen from beneith us.
-class ResqueTest < MiniTest::Unit::TestCase
+class ResqueTest < Minitest::Test
   def test_resque_version
     major, minor, patch = Resque::Version.split('.')
     assert_equal 1, major.to_i, 'major version does not match'

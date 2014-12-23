@@ -1,10 +1,8 @@
 require 'test_helper'
-
 require 'resque'
 require 'resque-retry/server'
 
-class ServerHelpersTest < MiniTest::Unit::TestCase
-
+class ServerHelpersTest < Minitest::Test
   def setup
     Resque.redis.flushall
     @worker = Resque::Worker.new(:testing)
@@ -21,5 +19,4 @@ class ServerHelpersTest < MiniTest::Unit::TestCase
     job = Resque.delayed_timestamp_peek(timestamp, 0, 1).first
     assert_equal '0', @helpers.retry_attempts_for_job(job), 'should have 0 retry attempt'
   end
-
 end

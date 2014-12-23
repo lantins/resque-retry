@@ -2,7 +2,7 @@ require 'test_helper'
 require 'resque/failure/redis'
 require 'digest/sha1'
 
-class RetryTest < MiniTest::Unit::TestCase
+class RetryTest < Minitest::Test
   def setup
     Resque.redis.flushall
     @worker = Resque::Worker.new(:testing)

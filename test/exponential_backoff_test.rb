@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class ExponentialBackoffTest < MiniTest::Unit::TestCase
+class ExponentialBackoffTest < Minitest::Test
   def setup
     Resque.redis.flushall
     @worker = Resque::Worker.new(:testing)

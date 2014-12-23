@@ -13,7 +13,7 @@ class MockFailureBackend < Resque::Failure::Base
   self.errors = []
 end
 
-class MultipleFailureTest < MiniTest::Unit::TestCase
+class MultipleFailureTest < Minitest::Test
 
   def setup
     Resque.redis.flushall
