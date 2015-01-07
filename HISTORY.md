@@ -1,5 +1,9 @@
 ## HEAD
 
+## 1.4.0 (2015-01-07)
+
+* Dependency on `resque-scheduler` bumped to ~> 4.0
+
 ## 1.3.2 (2014-10-09)
 
 * Fixed: Ensure `#constantize` is called on `Job` instance.
