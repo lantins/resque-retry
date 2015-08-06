@@ -90,6 +90,10 @@ require 'resque/failure/redis'
 
 Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
 Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
+
+# if you are using the exception_notification gem and want to be notified about the last failed retry be sure to include the ExceptionNotification::Resque failure backend
+Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis, ExceptionNotification::Resque]
+Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
 ```
 
 If a job fails, but **can and will** retry, the failure details wont be
