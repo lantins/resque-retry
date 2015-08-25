@@ -1,7 +1,7 @@
 resque-retry
 ============
 
-A [Resque][rq] plugin. Requires Resque ~> 1.25 & [resque-scheduler][rqs] ~> 4.0.
+A [Resque][resque] plugin. Requires Resque ~> 1.25 & [resque-scheduler][resque-scheduler] ~> 4.0.
 
 This gem provides retry, delay and exponential backoff support for resque jobs.
 
@@ -18,11 +18,12 @@ Install & Quick Start
 ---------------------
 
 To install:
+```
+$ gem install resque-retry
+```
 
-    $ gem install resque-retry
-
-If you're using [Bundler][bundler] to manage your dependencies, you should add `gem
-'resque-retry'` to your projects `Gemfile`.
+If you're using [Bundler][bundler] to manage your dependencies, you should add
+`gem 'resque-retry'` to your `Gemfile`.
 
 Add this to your `Rakefile`:
 ```ruby
@@ -30,7 +31,7 @@ require 'resque/tasks'
 require 'resque/scheduler/tasks'
 ```
 
-The delay between retry attempts is provided by [resque-scheduler][rqs].
+The delay between retry attempts is provided by [resque-scheduler][resque-scheduler].
 You'll want to run the scheduler process, otherwise delayed retry attempts
 will never perform:
 ```
@@ -79,7 +80,8 @@ actually completed successfully just by just using the resque-web interface.
 
 ### Failure Backend
 
-`MultipleWithRetrySuppression` is a multiple failure backend, with retry suppression.
+`MultipleWithRetrySuppression` is a multiple failure backend, with retry
+suppression.
 
 Here's an example, using the Redis failure backend:
 ```ruby
@@ -92,8 +94,8 @@ Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
 Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
 ```
 
-If a job fails, but **can and will** retry, the failure details wont be
-logged in the Redis failed queue *(visible via resque-web)*.
+If a job fails, but **can and will** retry, the failure details wont be logged
+in the Redis failed queue *(visible via resque-web)*.
 
 If the job fails, but **can't or won't** retry, the failure will be logged in
 the Redis failed queue, like a normal failure *(without retry)* would.
@@ -101,7 +103,7 @@ the Redis failed queue, like a normal failure *(without retry)* would.
 ### Resque Web Additions
 
 If you're using the `MultipleWithRetrySuppression` failure backend, you should
-also checkout the resque-web additions!
+also checkout the `resque-web` additions!
 
 The new Retry tab displays delayed jobs with retry information; the number of
 attempts and the exception details from the last failure.
@@ -109,17 +111,16 @@ attempts and the exception details from the last failure.
 
 ### Configuring and running the Resque-Web Interface
 
-#### Using a Rack configuration: 
+#### Using a Rack configuration:
 
-One alternative is to use a rack configuration file. To use this, make 
-sure you include this in your `config.ru` or similar file:
-
+One alternative is to use a rack configuration file. To use this, make sure you
+include this in your `config.ru` or similar file:
 ```ruby
 require 'resque-retry'
 require 'resque-retry/server'
 
 # Make sure to require your workers & application code below this line:
-# require '[path]/[to]/[jobs]/your_worker' 
+# require '[path]/[to]/[jobs]/your_worker'
 
 # Run the server
 run Resque::Server.new
@@ -132,33 +133,30 @@ rackup -p 9292 config.ru
 
 When using bundler, you can also run the server like this:
 ```
-bundle exec rackup -p 9292 config.ru 
+bundle exec rackup -p 9292 config.ru
 ```
 
 
 #### Using the 'resque-web' command with a configuration file:
 
-Another alternative is to use resque's built-in 'resque-web' command with
-the additional resque-retry tabs. In order to do this, you must first create
-a configuration file. For the sake of this example we'll create the configuration
-file in a 'config' directory, and name it 'resque_web_config.rb'. In practice 
-you could rename this configuration file to anything you'd like and place in your
-project in any directory of your choosing. The contents of the configuration file
+Another alternative is to use resque's built-in 'resque-web' command with the
+additional resque-retry tabs. In order to do this, you must first create a
+configuration file. For the sake of this example we'll create the configuration
+file in a 'config' directory, and name it 'resque_web_config.rb'. In practice
+you could rename this configuration file to anything you like and place in your
+project in a directory of your choosing. The contents of the configuration file
 would look like this:
-
 ```ruby
 # [app_dir]/config/resque_web_config.rb
 require 'resque-retry'
 require 'resque-retry/server'
 
 # Make sure to require your workers & application code below this line:
-# require '[path]/[to]/[jobs]/your_worker' 
-
+# require '[path]/[to]/[jobs]/your_worker'
 ```
 
 Once you have the configuration file ready, you can pass the configuration file
 to the resque-web command as a parameter, like so:
-
 ```
 resque-web [app_dir]/config/resque_web_config.rb
 ```
@@ -170,8 +168,8 @@ Retry Options & Logic
 Please take a look at the [yardoc](http://rubydoc.info/gems/resque-retry)/code
 for more details on methods you may wish to override.
 
-Customisation is pretty easy, the below examples should give you
-some ideas =), adapt for your own usage and feel free to pick and mix!
+Customisation is pretty easy, the below examples should give you some ideas =),
+adapt for your own usage and feel free to pick and mix!
 
 ### Retry Defaults
 
@@ -208,11 +206,10 @@ class DeliverWebHook
 end
 ```
 
-The above modification will allow your job to retry up to 10 times, with
-a delay of 120 seconds, or 2 minutes between retry attempts.
+The above modification will allow your job to retry up to 10 times, with a delay
+of 120 seconds, or 2 minutes between retry attempts.
 
-Alternatively you could override the `retry_delay` method to do something
-more special.
+You can override the `retry_delay` method to set the delay value dynamically.
 
 ### Sleep After Requeuing
 
@@ -235,14 +232,14 @@ end
 This retries the job once and causes the worker that failed to sleep for 5
 seconds after requeuing the job. If there are multiple workers in the system
 this allows the job to be retried immediately while the original worker heals
-itself.For example failed jobs may cause other (non-worker) OS processes to
-die. A system monitor such as [god][god] can fix the server while the job is
-being retried on a different worker.
+itself. For example failed jobs may cause other (non-worker) OS processes to
+die. A system monitor such as [monit][monit] or [god][god] can fix the server
+while the job is being retried on a different worker.
 
 `@sleep_after_requeue` is independent of `@retry_delay`. If you set both, they
 both take effect.
 
-You can override the method `sleep_after_requeue` to set the sleep value
+You can override the `sleep_after_requeue` method to set the sleep value
 dynamically.
 
 ### Exponential Backoff
@@ -263,17 +260,17 @@ end
 ```
 key: m = minutes, h = hours
 
-              no delay, 1m, 10m,   1h,    3h,    6h
+                    0s, 1m, 10m,   1h,    3h,    6h
 @backoff_strategy = [0, 60, 600, 3600, 10800, 21600]
 @retry_delay_multiplicand_min = 1.0
 @retry_delay_multiplicand_max = 1.0
 ```
 
-The first delay will be 0 seconds, the 2nd will be 60 seconds, etc...
-Again, tweak to your own needs.
+The first delay will be 0 seconds, the 2nd will be 60 seconds, etc...  Again,
+tweak to your own needs.
 
-The number of retries is equal to the size of the `backoff_strategy`
-array, unless you set `retry_limit` yourself.
+The number of retries is equal to the size of the `backoff_strategy` array,
+unless you set `retry_limit` yourself.
 
 The delay values will be multiplied by a random `Float` value between
 `retry_delay_multiplicand_min` and `retry_delay_multiplicand_max` (both have a
@@ -284,8 +281,8 @@ them all retried on the same schedule.
 
 ### Retry Specific Exceptions
 
-The default will allow a retry for any type of exception. You may change
-it so only specific exceptions are retried using `retry_exceptions`:
+The default will allow a retry for any type of exception. You may change it so
+only specific exceptions are retried using `retry_exceptions`:
 ```ruby
 class DeliverSMS
   extend Resque::Plugins::Retry
@@ -305,8 +302,8 @@ exception is thrown.
 You may also want to specify different retry delays for different exception
 types. You may optionally set `@retry_exceptions` to a hash where the keys are
 your specific exception classes to retry on, and the values are your retry
-delays in seconds or an array of retry delays to be used similar to
-exponential backoff.
+delays in seconds or an array of retry delays to be used similar to exponential
+backoff.
 ```ruby
 class DeliverSMS
   extend Resque::Plugins::Retry
@@ -379,8 +376,8 @@ job should retry.
 
 ### Retry Arguments
 
-You may override `retry_args`, which is passed the current
-job arguments, to modify the arguments for the next retry attempt.
+You may override `retry_args`, which is passed the current job arguments, to
+modify the arguments for the next retry attempt.
 ```ruby
 class DeliverViaSMSC
   extend Resque::Plugins::Retry
@@ -397,10 +394,10 @@ class DeliverViaSMSC
 end
 ```
 
-Alternatively, if you require finer control of the args based on the
-exception thrown, you may override `retry_args_for_exception`, which is passed
-the exception and the current job arguments, to modify the arguments for the
-next retry attempt.
+Alternatively, if you require finer control of the args based on the exception
+thrown, you may override `retry_args_for_exception`, which is passed the
+exception and the current job arguments, to modify the arguments for the next
+retry attempt.
 ```ruby
 class DeliverViaSMSC
   extend Resque::Plugins::Retry
@@ -418,15 +415,15 @@ end
 ```
 ### Job Retry Identifier/Key
 
-The retry attempt is incremented and stored in a Redis key. The key is
-built using the `retry_identifier`. If you have a lot of arguments or really long
+The retry attempt is incremented and stored in a Redis key. The key is built
+using the `retry_identifier`. If you have a lot of arguments or really long
 ones, you should consider overriding `retry_identifier` to define a more precise
 or loose custom retry identifier.
 
-The default retry identifier is just your job arguments joined with a dash `-`.
+The default identifier is just your job arguments joined with a dash `'-'`.
 
-By default the key uses this format: 
-`resque-retry:<job class name>:<retry_identifier>`.
+By default the key uses this format:
+`'resque-retry:<job class name>:<retry_identifier>'`.
 
 Or you can define the entire key by overriding `redis_retry_key`.
 ```ruby
@@ -448,7 +445,6 @@ end
 
 Allow the Redis to expire stale retry counters from the database by setting
 `@expire_retry_key_after`:
-
 ```ruby
 class DeliverSMS
   extend Resque::Plugins::Retry
@@ -459,13 +455,12 @@ class DeliverSMS
     heavy_lifting
   end
 end
-
 ```
 
 This saves you from having to run a "house cleaning" or "errand" job.
 
 The expiary timeout is "pushed forward" or "touched" after each failure to
-ensure its not expired too soon.
+ensure it's not expired too soon.
 
 ### Debug Plugin Logging
 
@@ -483,7 +478,8 @@ Contributing/Pull Requests
   * Send us a pull request. Bonus points for topic branches.
   * If you edit the gemspec/version etc, please do so in another commit.
 
-[god]: http://github.com/mojombo/god
-[rq]: http://github.com/resque/resque
-[rqs]: http://github.com/resque/resque-scheduler
+[monit]: https://mmonit.com
+[god]: http://godrb.com
+[resque]: http://github.com/resque/resque
+[resque-scheduler]: http://github.com/resque/resque-scheduler
 [bundler]: http://bundler.io
