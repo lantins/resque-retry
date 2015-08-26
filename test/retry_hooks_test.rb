@@ -8,7 +8,7 @@ class RetryHooksTest < Minitest::Test
   end
 
   def test_try_again_hooks_called
-    # Fail, but don't not fatally
+    # Fail, but not fatally
     Resque.enqueue(RetryHooksJob, false)
     order = sequence("hook_order")
 
