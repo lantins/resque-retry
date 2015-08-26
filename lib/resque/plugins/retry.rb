@@ -1,5 +1,6 @@
 require 'digest/sha1'
 require 'resque/plugins/retry/logging'
+require 'resque/plugins/retry/hooks'
 
 module Resque
   module Plugins
@@ -37,6 +38,7 @@ module Resque
     #
     module Retry
       include Resque::Plugins::Retry::Logging
+      include Resque::Plugins::Retry::Hooks
 
       # Raised if the retry-strategy cannot be determined or has conflicts
       #
@@ -420,9 +422,11 @@ module Resque
         end
 
         if retry_criteria_valid?(exception, *args)
+          run_try_again_hooks(exception, *args)
           try_again(exception, *args)
         else
           log_message 'retry criteria not sufficient for retry', args, exception
+          run_give_up_hooks(exception, *args)
           clean_retry_key(*args)
         end
 

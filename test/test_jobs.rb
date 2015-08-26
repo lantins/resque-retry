@@ -512,3 +512,28 @@ class RetryKilledJob
     Process.kill("KILL", Process.pid)
   end
 end
+
+class RetryHooksJob
+  extend Resque::Plugins::Retry
+  @queue = :testing
+
+  @fatal_exceptions = [CustomException]
+  @retry_exceptions = [AnotherCustomException]
+  @retry_limit = 1
+
+  def self.perform(is_fatal)
+    if is_fatal
+      raise CustomException, "RetryHooksJob failed fatally"
+    else
+      raise AnotherCustomException, "RetryHooksJob failed"
+    end
+  end
+
+  def self.on_try_again(ex, *args); end
+  def self.on_try_again_a(ex, *args); end
+  def self.on_try_again_b(ex, *args); end
+
+  def self.on_give_up(ex, *args); end
+  def self.on_give_up_a(ex, *args); end
+  def self.on_give_up_b(ex, *args); end
+end
