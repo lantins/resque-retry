@@ -1,6 +1,5 @@
 require 'digest/sha1'
 require 'resque/plugins/retry/logging'
-require 'resque/plugins/retry/hooks'
 
 module Resque
   module Plugins
@@ -38,7 +37,6 @@ module Resque
     #
     module Retry
       include Resque::Plugins::Retry::Logging
-      include Resque::Plugins::Retry::Hooks
 
       # Raised if the retry-strategy cannot be determined or has conflicts
       #
@@ -60,6 +58,8 @@ module Resque
       def inherited(subclass)
         super(subclass)
         subclass.instance_variable_set('@retry_criteria_checks', retry_criteria_checks.dup)
+        subclass.instance_variable_set('@try_again_callbacks', try_again_callbacks.dup)
+        subclass.instance_variable_set('@give_up_callbacks', give_up_callbacks.dup)
       end
 
       # @abstract You may override to implement a custom retry identifier,
@@ -337,6 +337,8 @@ module Resque
       # @api private
       def try_again(exception, *args)
         log_message 'try_again', args, exception
+        run_try_again_callbacks(exception, *args)
+
         # some plugins define retry_delay and have it take no arguments, so rather than break those,
         # we'll just check here to see whether it takes the additional exception class argument or not
         temp_retry_delay = ([-1, 1].include?(method(:retry_delay).arity) ? retry_delay(exception.class) : retry_delay)
@@ -365,6 +367,15 @@ module Resque
 
         # sleep after requeue if enabled.
         sleep(sleep_after_requeue) if sleep_after_requeue > 0
+      end
+
+      # We failed and we're not retrying.
+      #
+      # @api private
+      def give_up(exception, *args)
+        log_message 'retry criteria not sufficient for retry', args, exception
+        run_give_up_callbacks(exception, *args)
+        clean_retry_key(*args)
       end
 
       # Resque before_perform hook
@@ -422,12 +433,9 @@ module Resque
         end
 
         if retry_criteria_valid?(exception, *args)
-          run_try_again_hooks(exception, *args)
           try_again(exception, *args)
         else
-          log_message 'retry criteria not sufficient for retry', args, exception
-          run_give_up_hooks(exception, *args)
-          clean_retry_key(*args)
+          give_up(exception, *args)
         end
 
         @on_failure_retry_hook_already_called = true
@@ -455,6 +463,86 @@ module Resque
       def clean_retry_key(*args)
         log_message 'clean_retry_key', args
         Resque.redis.del(redis_retry_key(*args))
+      end
+
+      # Returns the try again callbacks.
+      #
+      # @return [Array<Proc>]
+      #
+      # @api public
+      def try_again_callbacks
+        @try_again_callbacks ||= []
+      end
+
+      # Register a try again callback that will be called when the job fails
+      # but is trying again.
+      #
+      # @example Using a try again callback
+      #
+      #   try_again_callback do |exception, *args|
+      #     logger.error(
+      #       "Resque job received exception #{exception} and is trying again")
+      #   end
+      #
+      # @yield [exception, *args]
+      # @yieldparam exception [Exception] the exception that was raised
+      # @yieldparam args [Array] job arguments
+      #
+      # @api public
+      def try_again_callback(&block)
+        try_again_callbacks << block
+      end
+
+      # Runs all the try again callbacks.
+      #
+      # @param exception [Exception]
+      # @param args [Object...]
+      #
+      # @api private
+      def run_try_again_callbacks(exception, *args)
+        try_again_callbacks.each do |callback|
+          instance_exec(exception, *args, &callback)
+        end
+      end
+
+      # Returns the give up callbacks.
+      #
+      # @return [Array<Proc>]
+      #
+      # @api public
+      def give_up_callbacks
+        @give_up_callbacks ||= []
+      end
+
+      # Register a give up callback that will be called when the job fails
+      # and is not retrying.
+      #
+      # @example Using a give up callback
+      #
+      #   give_up_callback do |exception, *args|
+      #     logger.error(
+      #       "Resque job received exception #{exception} and is giving up")
+      #   end
+      #
+      # @yield [exception, *args]
+      # @yieldparam exception [Exception] the exception that was raised
+      # @yieldparam args [Array] job arguments
+      #
+      # @api public
+      def give_up_callback(&block)
+        give_up_callbacks << block
+      end
+
+      # Runs all the give up callbacks.
+      #
+      # @param exception [Exception]
+      # @param args [Object...]
+      #
+      # @api private
+      def run_give_up_callbacks(exception, *args)
+        give_up_callbacks.each do |callback|
+          instance_exec(exception, *args, &callback)
+        end
       end
     end
   end

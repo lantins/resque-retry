@@ -513,7 +513,7 @@ class RetryKilledJob
   end
 end
 
-class RetryHooksJob
+class RetryCallbacksJob
   extend Resque::Plugins::Retry
   @queue = :testing
 
@@ -523,17 +523,35 @@ class RetryHooksJob
 
   def self.perform(is_fatal)
     if is_fatal
-      raise CustomException, "RetryHooksJob failed fatally"
+      raise CustomException, "RetryCallbacksJob failed fatally"
     else
-      raise AnotherCustomException, "RetryHooksJob failed"
+      raise AnotherCustomException, "RetryCallbacksJob failed"
     end
   end
 
-  def self.on_try_again(ex, *args); end
+  def self.on_try_again(ex, *args); p ex, args; end
   def self.on_try_again_a(ex, *args); end
   def self.on_try_again_b(ex, *args); end
 
   def self.on_give_up(ex, *args); end
   def self.on_give_up_a(ex, *args); end
   def self.on_give_up_b(ex, *args); end
+
+  @try_again_callbacks = [
+    lambda { |*args| self.on_try_again(*args) },
+    lambda { |*args| self.on_try_again_a(*args) }
+  ]
+
+  try_again_callback do |*args|
+    on_try_again_b(*args)
+  end
+
+  @give_up_callbacks = [
+    lambda { |*args| self.on_give_up(*args) },
+    lambda { |*args| self.on_give_up_a(*args) }
+  ]
+
+  give_up_callback do |*args|
+    on_give_up_b(*args)
+  end
 end
