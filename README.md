@@ -171,7 +171,21 @@ for more details on methods you may wish to override.
 Customisation is pretty easy, the below examples should give you some ideas =),
 adapt for your own usage and feel free to pick and mix!
 
-### Retry Defaults
+Here are a list of the options provided (click to jump):
+ * [Retry Defaults](#retry_defaults)
+ * [Custom Retry](#custom_retry)
+ * [Sleep After Requeuing](#sleep)
+ * [Exponential Backoff](#exp)
+ * [Retry Specific Exceptions](#specific)
+ * [Fail Fast For Specific Exceptions](#fail_fast)
+ * [Custom Retry Criteria Check Callbacks](#custom_check)
+ * [Retry Arguments](#retry_args)
+ * [Job Retry Identifier/Key](#retry_key)
+ * [Expire Retry Counters From Redis](#expire)
+ * [Try Again and Give Up Callbacks](#callbacks)
+ * [Debug Plugin Logging](#debug_log)
+
+### <a name="retry_defaults"></a> Retry Defaults 
 
 Retry the job **once** on failure, with zero delay.
 ```ruby
@@ -191,7 +205,7 @@ When a job runs, the number of retry attempts is checked and incremented
 in Redis. If your job fails, the number of retry attempts is used to
 determine if we can requeue the job for another go.
 
-### Custom Retry
+### <a name="custom_retry"></a> Custom Retry
 ```ruby
 class DeliverWebHook
   extend Resque::Plugins::Retry
@@ -211,7 +225,7 @@ of 120 seconds, or 2 minutes between retry attempts.
 
 You can override the `retry_delay` method to set the delay value dynamically.
 
-### Sleep After Requeuing
+### <a name="sleep"></a> Sleep After Requeuing
 
 Sometimes it is useful to delay the worker that failed a job attempt, but
 still requeue the job for immediate processing by other workers. This can be
@@ -242,7 +256,7 @@ both take effect.
 You can override the `sleep_after_requeue` method to set the sleep value
 dynamically.
 
-### Exponential Backoff
+### <a name="exp"></a> Exponential Backoff
 
 Use this if you wish to vary the delay between retry attempts:
 ```ruby
@@ -279,7 +293,7 @@ attempt. This feature can be useful if you have a lot of jobs fail at the same
 time (e.g. rate-limiting/throttling or connectivity issues) and you don't want
 them all retried on the same schedule.
 
-### Retry Specific Exceptions
+### <a name="specific"></a> Retry Specific Exceptions
 
 The default will allow a retry for any type of exception. You may change it so
 only specific exceptions are retried using `retry_exceptions`:
@@ -322,7 +336,7 @@ In the above example, Resque would retry any `DeliverSMS` jobs which throw a
 will be retried 30 seconds later, if it throws `SystemCallError` it will first
 retry 120 seconds later then subsequent retry attempts 240 seconds later.
 
-### Fail Fast For Specific Exceptions
+### <a name="fail_fast"></a> Fail Fast For Specific Exceptions
 
 The default will allow a retry for any type of exception. You may change
 it so specific exceptions fail immediately by using `fatal_exceptions`:
@@ -343,7 +357,7 @@ In the above example, Resque would retry any `DeliverSMS` jobs that throw any
 type of error other than `NetworkError`. If the job throws a `NetworkError` it
 will be marked as "failed" immediately.
 
-### Custom Retry Criteria Check Callbacks
+### <a name="custom_check"></a> Custom Retry Criteria Check Callbacks
 
 You may define custom retry criteria callbacks:
 ```ruby
@@ -374,7 +388,7 @@ return true.
 Use `@retry_exceptions = []` to **only** use callbacks, to determine if the
 job should retry.
 
-### Retry Arguments
+### <a name="retry_args"></a> Retry Arguments
 
 You may override `retry_args`, which is passed the current job arguments, to
 modify the arguments for the next retry attempt.
@@ -413,7 +427,7 @@ class DeliverViaSMSC
   end
 end
 ```
-### Job Retry Identifier/Key
+### <a name="retry_key"></a> Job Retry Identifier/Key
 
 The retry attempt is incremented and stored in a Redis key. The key is built
 using the `retry_identifier`. If you have a lot of arguments or really long
@@ -441,7 +455,7 @@ class DeliverSMS
 end
 ```
 
-### Expire Retry Counters From Redis
+### <a name="expire"></a> Expire Retry Counters From Redis
 
 Allow the Redis to expire stale retry counters from the database by setting
 `@expire_retry_key_after`:
@@ -462,7 +476,40 @@ This saves you from having to run a "house cleaning" or "errand" job.
 The expiary timeout is "pushed forward" or "touched" after each failure to
 ensure it's not expired too soon.
 
-### Debug Plugin Logging
+### <a name="callbacks"></a> Try Again and Give Up Callbacks
+Resque's `on_failure` callbacks are always called, regardless of whether the
+job is going to be retried or not. If you want to run a callback only when the
+job is being retried, you can add a `try_again_callback`:
+```ruby
+class LoggedJob
+  extend Resque::Plugins::Retry
+
+  try_again_callback do |exception, *args|
+    logger.info("Received #{exception}, retrying job #{self.name} with #{args}")
+  end
+end
+```
+
+Similarly, if you want to run a callback only when the job has failed, and is
+_not_ retrying, you can add a `give_up_callback`:
+```ruby
+class LoggedJob
+  extend Resque::Plugins::Retry
+  
+  give_up_callback do |exception, *args|
+    logger.error("Received #{exception}, job #{self.name} failed with #{args}")
+  end
+end
+```
+
+You can register multiple callbacks, and they will be called in the order that
+they were registered.
+
+Warning: Make sure your callbacks do not throw any exceptions. If they do,
+subsequent callbacks will not be triggered, and the job will not be retried
+(if it was trying again). The retry counter also will not be reset.
+
+### <a name="debug_log"></a> Debug Plugin Logging
 
 The inner-workings of the plugin are output to the Resque [Logger](https://github.com/resque/resque/wiki/Logging)
 when `Resque.logger.level` is set to `Logger::DEBUG`.
