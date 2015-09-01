@@ -65,7 +65,40 @@ class RetryCallbacksTest < Minitest::Test
     RetryCallbacksJob.expects(:on_give_up_b).once
       .with(instance_of(AnotherCustomException), false).in_sequence(order)
 
+
     perform_next_job(@worker)  # Fail and retry
     perform_next_job(@worker)  # Fail and give up
+  end
+
+  # If an exception is raised in a try again callback, then it should fail and
+  # not be retried.
+  def test_try_again_callback_exception
+    # Trigger a try again callback that throws an exception
+    Resque.enqueue(RetryCallbacksJob, false)
+
+    RetryCallbacksJob.expects(:on_try_again).once.raises(StandardError)
+    RetryCallbacksJob.expects(:on_try_again_a).never
+    RetryCallbacksJob.expects(:on_try_again_b).never
+
+    perform_next_job(@worker)
+
+    assert_equal 0, Resque.info[:pending], 'pending jobs'
+    assert_equal 1, Resque.info[:failed], 'failed jobs'
+  end
+
+  # If an exception is raised in a give up callback, then it should fail and
+  # not be retried.
+  def test_give_up_callback_exception
+    # Trigger a give up callback that throws an exception
+    Resque.enqueue(RetryCallbacksJob, true)
+
+    RetryCallbacksJob.expects(:on_give_up).once.raises(StandardError)
+    RetryCallbacksJob.expects(:on_give_up_a).never
+    RetryCallbacksJob.expects(:on_give_up_b).never
+
+    perform_next_job(@worker)
+
+    assert_equal 0, Resque.info[:pending], 'pending jobs'
+    assert_equal 1, Resque.info[:failed], 'failed jobs'
   end
 end

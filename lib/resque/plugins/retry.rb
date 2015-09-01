@@ -52,7 +52,8 @@ module Resque
         end
       end
 
-      # Copy retry criteria checks on inheritance.
+      # Copy retry criteria checks, try again callbacks, and give up callbacks
+      # on inheritance.
       #
       # @api private
       def inherited(subclass)
