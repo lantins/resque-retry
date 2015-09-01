@@ -529,7 +529,7 @@ class RetryCallbacksJob
     end
   end
 
-  def self.on_try_again(ex, *args); p ex, args; end
+  def self.on_try_again(ex, *args); end
   def self.on_try_again_a(ex, *args); end
   def self.on_try_again_b(ex, *args); end
 
