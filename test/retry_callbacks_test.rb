@@ -68,12 +68,16 @@ class RetryCallbacksTest < Minitest::Test
       .with(instance_of(AnotherCustomException), false).in_sequence(order)
     RetryCallbacksJob.expects(:on_try_again_b).once
       .with(instance_of(AnotherCustomException), false).in_sequence(order)
+    RetryCallbacksJob.expects(:on_try_again_c).once
+      .with(instance_of(AnotherCustomException), false).in_sequence(order)
 
     RetryCallbacksJob.expects(:on_give_up).once
       .with(instance_of(AnotherCustomException), false).in_sequence(order)
     RetryCallbacksJob.expects(:on_give_up_a).once
       .with(instance_of(AnotherCustomException), false).in_sequence(order)
     RetryCallbacksJob.expects(:on_give_up_b).once
+      .with(instance_of(AnotherCustomException), false).in_sequence(order)
+    RetryCallbacksJob.expects(:on_give_up_c).once
       .with(instance_of(AnotherCustomException), false).in_sequence(order)
 
 
@@ -90,6 +94,7 @@ class RetryCallbacksTest < Minitest::Test
     RetryCallbacksJob.expects(:on_try_again).once.raises(StandardError)
     RetryCallbacksJob.expects(:on_try_again_a).never
     RetryCallbacksJob.expects(:on_try_again_b).never
+    RetryCallbacksJob.expects(:on_try_again_c).never
 
     perform_next_job(@worker)
 
@@ -106,6 +111,7 @@ class RetryCallbacksTest < Minitest::Test
     RetryCallbacksJob.expects(:on_give_up).once.raises(StandardError)
     RetryCallbacksJob.expects(:on_give_up_a).never
     RetryCallbacksJob.expects(:on_give_up_b).never
+    RetryCallbacksJob.expects(:on_give_up_c).never
 
     perform_next_job(@worker)
 
