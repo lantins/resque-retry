@@ -502,8 +502,39 @@ class LoggedJob
 end
 ```
 
+You can register a callback with a Symbol if the method is already defined on
+the job class:
+```ruby
+class LoggedJob
+  extend Resque::Plugins::Retry
+  
+  give_up_callback :log_give_up
+
+  def self.log_give_up(ex, *args)
+    logger.error("Received #{exception}, job #{self.name} failed with #{args}")
+  end
+end
+```
+
 You can register multiple callbacks, and they will be called in the order that
-they were registered.
+they were registered. You can also set callbacks by setting
+`@try_again_callbacks` or `@give_up_callbacks` to an array of `Proc`s or
+`Symbol`s.
+```ruby
+class CallbackJob
+  extend Resque::Plugins::Retry
+
+  @try_again_callbacks = [
+    :call_me_first,
+    :call_me_second,
+    lambda { |*args| call_me_third(*args) }
+  ]
+
+  def self.call_me_first(ex, *args); end
+  def self.call_me_second(ex, *args); end
+  def self.call_me_third(ex, *args); end
+end
+```
 
 Warning: Make sure your callbacks do not throw any exceptions. If they do,
 subsequent callbacks will not be triggered, and the job will not be retried

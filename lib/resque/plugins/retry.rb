@@ -476,22 +476,31 @@ module Resque
       end
 
       # Register a try again callback that will be called when the job fails
-      # but is trying again.
+      # but is trying again. Can be registered with a block or a symbol.
       #
-      # @example Using a try again callback
+      # @example Registering a callback with a block
       #
       #   try_again_callback do |exception, *args|
       #     logger.error(
       #       "Resque job received exception #{exception} and is trying again")
       #   end
       #
+      # @example Registering a callback with a Symbol
+      #
+      #   try_again_callback :my_callback
+      #
+      # @param [Symbol?] method
       # @yield [exception, *args]
       # @yieldparam exception [Exception] the exception that was raised
       # @yieldparam args [Array] job arguments
       #
       # @api public
-      def try_again_callback(&block)
-        try_again_callbacks << block
+      def try_again_callback(method=nil, &block)
+        if method.is_a? Symbol
+          try_again_callbacks << method
+        elsif block_given?
+          try_again_callbacks << block
+        end
       end
 
       # Runs all the try again callbacks.
@@ -502,7 +511,11 @@ module Resque
       # @api private
       def run_try_again_callbacks(exception, *args)
         try_again_callbacks.each do |callback|
-          instance_exec(exception, *args, &callback)
+          if callback.is_a? Proc
+            instance_exec(exception, *args, &callback)
+          elsif callback.is_a? Symbol
+            send(callback, exception, *args)
+          end
         end
       end
 
@@ -516,22 +529,31 @@ module Resque
       end
 
       # Register a give up callback that will be called when the job fails
-      # and is not retrying.
+      # and is not retrying. Can be registered with a block or a symbol.
       #
-      # @example Using a give up callback
+      # @example Registering a callback with a block
       #
       #   give_up_callback do |exception, *args|
       #     logger.error(
       #       "Resque job received exception #{exception} and is giving up")
       #   end
       #
+      # @example Registering a callback with a Symbol
+      #
+      #   give_up_callback :my_callback
+      #
+      # @param [Symbol?] method
       # @yield [exception, *args]
       # @yieldparam exception [Exception] the exception that was raised
       # @yieldparam args [Array] job arguments
       #
       # @api public
-      def give_up_callback(&block)
-        give_up_callbacks << block
+      def give_up_callback(method=nil, &block)
+        if method.is_a? Symbol
+          give_up_callbacks << method
+        elsif block_given?
+          give_up_callbacks << block
+        end
       end
 
       # Runs all the give up callbacks.
@@ -542,7 +564,11 @@ module Resque
       # @api private
       def run_give_up_callbacks(exception, *args)
         give_up_callbacks.each do |callback|
-          instance_exec(exception, *args, &callback)
+          if callback.is_a? Proc
+            instance_exec(exception, *args, &callback)
+          elsif callback.is_a? Symbol
+            send(callback, exception, *args)
+          end
         end
       end
     end

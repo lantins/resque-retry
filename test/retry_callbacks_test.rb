@@ -12,12 +12,17 @@ class RetryCallbacksTest < Minitest::Test
     Resque.enqueue(RetryCallbacksJob, false)
     order = sequence('callback_order')
 
-    # xcxc add arguments too
+    # Make sure that we're testing both blocks and symbols in our callbacks.
+    refute_empty RetryCallbacksJob.try_again_callbacks.select { |x| x.is_a? Symbol }
+    refute_empty RetryCallbacksJob.try_again_callbacks.select { |x| x.is_a? Proc }
+
     RetryCallbacksJob.expects(:on_try_again).once
       .with(instance_of(AnotherCustomException), false).in_sequence(order)
     RetryCallbacksJob.expects(:on_try_again_a).once
       .with(instance_of(AnotherCustomException), false).in_sequence(order)
     RetryCallbacksJob.expects(:on_try_again_b).once
+      .with(instance_of(AnotherCustomException), false).in_sequence(order)
+    RetryCallbacksJob.expects(:on_try_again_c).once
       .with(instance_of(AnotherCustomException), false).in_sequence(order)
 
     RetryCallbacksJob.expects(:on_give_up).never
@@ -32,11 +37,17 @@ class RetryCallbacksTest < Minitest::Test
     Resque.enqueue(RetryCallbacksJob, true)
     order = sequence('callback_order')
 
+    # Make sure that we're testing both blocks and symbols in our callbacks.
+    refute_empty RetryCallbacksJob.give_up_callbacks.select { |x| x.is_a? Symbol }
+    refute_empty RetryCallbacksJob.give_up_callbacks.select { |x| x.is_a? Proc }
+
     RetryCallbacksJob.expects(:on_give_up).once
       .with(instance_of(CustomException), true).in_sequence(order)
     RetryCallbacksJob.expects(:on_give_up_a).once
       .with(instance_of(CustomException), true).in_sequence(order)
     RetryCallbacksJob.expects(:on_give_up_b).once
+      .with(instance_of(CustomException), true).in_sequence(order)
+    RetryCallbacksJob.expects(:on_give_up_c).once
       .with(instance_of(CustomException), true).in_sequence(order)
 
     RetryCallbacksJob.expects(:on_try_again).never

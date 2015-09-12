@@ -532,26 +532,32 @@ class RetryCallbacksJob
   def self.on_try_again(ex, *args); end
   def self.on_try_again_a(ex, *args); end
   def self.on_try_again_b(ex, *args); end
+  def self.on_try_again_c(ex, *args); end
 
   def self.on_give_up(ex, *args); end
   def self.on_give_up_a(ex, *args); end
   def self.on_give_up_b(ex, *args); end
+  def self.on_give_up_c(ex, *args); end
 
   @try_again_callbacks = [
     lambda { |*args| self.on_try_again(*args) },
-    lambda { |*args| self.on_try_again_a(*args) }
+    :on_try_again_a
   ]
 
   try_again_callback do |*args|
     on_try_again_b(*args)
   end
 
+  try_again_callback :on_try_again_c
+
   @give_up_callbacks = [
     lambda { |*args| self.on_give_up(*args) },
-    lambda { |*args| self.on_give_up_a(*args) }
+    :on_give_up_a
   ]
 
   give_up_callback do |*args|
     on_give_up_b(*args)
   end
+
+  give_up_callback :on_give_up_c
 end
