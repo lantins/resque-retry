@@ -518,8 +518,8 @@ end
 
 You can register multiple callbacks, and they will be called in the order that
 they were registered. You can also set callbacks by setting
-`@try_again_callbacks` or `@give_up_callbacks` to an array of `Proc`s or
-`Symbol`s.
+`@try_again_callbacks` or `@give_up_callbacks` to an array where each element
+is a `Proc` or `Symbol`.
 ```ruby
 class CallbackJob
   extend Resque::Plugins::Retry
