@@ -511,10 +511,10 @@ module Resque
       # @api private
       def run_try_again_callbacks(exception, *args)
         try_again_callbacks.each do |callback|
-          if callback.is_a? Proc
-            instance_exec(exception, *args, &callback)
-          elsif callback.is_a? Symbol
+          if callback.is_a? Symbol
             send(callback, exception, *args)
+          elsif callback.respond_to?(:call)
+            callback.call(exception, *args)
           end
         end
       end
@@ -564,10 +564,10 @@ module Resque
       # @api private
       def run_give_up_callbacks(exception, *args)
         give_up_callbacks.each do |callback|
-          if callback.is_a? Proc
-            instance_exec(exception, *args, &callback)
-          elsif callback.is_a? Symbol
+          if callback.is_a? Symbol
             send(callback, exception, *args)
+          elsif callback.respond_to?(:call)
+            callback.call(exception, *args)
           end
         end
       end
