@@ -52,12 +52,15 @@ module Resque
         end
       end
 
-      # Copy retry criteria checks on inheritance.
+      # Copy retry criteria checks, try again callbacks, and give up callbacks
+      # on inheritance.
       #
       # @api private
       def inherited(subclass)
         super(subclass)
         subclass.instance_variable_set('@retry_criteria_checks', retry_criteria_checks.dup)
+        subclass.instance_variable_set('@try_again_callbacks', try_again_callbacks.dup)
+        subclass.instance_variable_set('@give_up_callbacks', give_up_callbacks.dup)
       end
 
       # @abstract You may override to implement a custom retry identifier,
@@ -335,6 +338,8 @@ module Resque
       # @api private
       def try_again(exception, *args)
         log_message 'try_again', args, exception
+        run_try_again_callbacks(exception, *args)
+
         # some plugins define retry_delay and have it take no arguments, so rather than break those,
         # we'll just check here to see whether it takes the additional exception class argument or not
         temp_retry_delay = ([-1, 1].include?(method(:retry_delay).arity) ? retry_delay(exception.class) : retry_delay)
@@ -363,6 +368,15 @@ module Resque
 
         # sleep after requeue if enabled.
         sleep(sleep_after_requeue) if sleep_after_requeue > 0
+      end
+
+      # We failed and we're not retrying.
+      #
+      # @api private
+      def give_up(exception, *args)
+        log_message 'retry criteria not sufficient for retry', args, exception
+        run_give_up_callbacks(exception, *args)
+        clean_retry_key(*args)
       end
 
       # Resque before_perform hook
@@ -422,8 +436,7 @@ module Resque
         if retry_criteria_valid?(exception, *args)
           try_again(exception, *args)
         else
-          log_message 'retry criteria not sufficient for retry', args, exception
-          clean_retry_key(*args)
+          give_up(exception, *args)
         end
 
         @on_failure_retry_hook_already_called = true
@@ -451,6 +464,112 @@ module Resque
       def clean_retry_key(*args)
         log_message 'clean_retry_key', args
         Resque.redis.del(redis_retry_key(*args))
+      end
+
+      # Returns the try again callbacks.
+      #
+      # @return [Array<Proc>]
+      #
+      # @api public
+      def try_again_callbacks
+        @try_again_callbacks ||= []
+      end
+
+      # Register a try again callback that will be called when the job fails
+      # but is trying again. Can be registered with a block or a symbol.
+      #
+      # @example Registering a callback with a block
+      #
+      #   try_again_callback do |exception, *args|
+      #     logger.error(
+      #       "Resque job received exception #{exception} and is trying again")
+      #   end
+      #
+      # @example Registering a callback with a Symbol
+      #
+      #   try_again_callback :my_callback
+      #
+      # @param [Symbol?] method
+      # @yield [exception, *args]
+      # @yieldparam exception [Exception] the exception that was raised
+      # @yieldparam args [Array] job arguments
+      #
+      # @api public
+      def try_again_callback(method=nil, &block)
+        if method.is_a? Symbol
+          try_again_callbacks << method
+        elsif block_given?
+          try_again_callbacks << block
+        end
+      end
+
+      # Runs all the try again callbacks.
+      #
+      # @param exception [Exception]
+      # @param args [Object...]
+      #
+      # @api private
+      def run_try_again_callbacks(exception, *args)
+        try_again_callbacks.each do |callback|
+          if callback.is_a? Symbol
+            send(callback, exception, *args)
+          elsif callback.respond_to?(:call)
+            callback.call(exception, *args)
+          end
+        end
+      end
+
+      # Returns the give up callbacks.
+      #
+      # @return [Array<Proc>]
+      #
+      # @api public
+      def give_up_callbacks
+        @give_up_callbacks ||= []
+      end
+
+      # Register a give up callback that will be called when the job fails
+      # and is not retrying. Can be registered with a block or a symbol.
+      #
+      # @example Registering a callback with a block
+      #
+      #   give_up_callback do |exception, *args|
+      #     logger.error(
+      #       "Resque job received exception #{exception} and is giving up")
+      #   end
+      #
+      # @example Registering a callback with a Symbol
+      #
+      #   give_up_callback :my_callback
+      #
+      # @param [Symbol?] method
+      # @yield [exception, *args]
+      # @yieldparam exception [Exception] the exception that was raised
+      # @yieldparam args [Array] job arguments
+      #
+      # @api public
+      def give_up_callback(method=nil, &block)
+        if method.is_a? Symbol
+          give_up_callbacks << method
+        elsif block_given?
+          give_up_callbacks << block
+        end
+      end
+
+      # Runs all the give up callbacks.
+      #
+      # @param exception [Exception]
+      # @param args [Object...]
+      #
+      # @api private
+      def run_give_up_callbacks(exception, *args)
+        give_up_callbacks.each do |callback|
+          if callback.is_a? Symbol
+            send(callback, exception, *args)
+          elsif callback.respond_to?(:call)
+            callback.call(exception, *args)
+          end
+        end
       end
     end
   end
