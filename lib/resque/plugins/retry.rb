@@ -335,7 +335,7 @@ module Resque
       def retry_criteria_check(method=nil, &block)
         if method.is_a? Symbol
           retry_criteria_checks << method
-        else
+        elsif block_given?
           retry_criteria_checks << block
         end
       end
