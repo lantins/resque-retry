@@ -409,6 +409,24 @@ class CustomRetryCriteriaCheckMultipleFailTwice
   end
 end
 
+# A job that defines a custom retry criteria check via a symbol, for a method
+# that is already defined.
+class CustomRetryCriteriaWithSymbol
+  extend Resque::Plugins::Retry
+  @queue = :testing
+
+  # make sure the retry exceptions check will return false.
+  @retry_exceptions = [CustomException]
+
+  retry_criteria_check :yes
+
+  def self.yes(ex, *args); true; end
+
+  def self.perform(*args)
+    raise
+  end
+end
+
 # A job to test whether self.inherited is respected
 # when added by other modules.
 class InheritOrderingJobExtendFirst

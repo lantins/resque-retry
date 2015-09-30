@@ -274,11 +274,9 @@ module Resque
         retry_based_on_criteria = false
         unless retry_based_on_exception
           # call user retry criteria check blocks.
-          retry_criteria_checks.each do |criteria_check|
-            retry_based_on_criteria ||= !!instance_exec(exception, *args, &criteria_check)
-          end
+          retry_based_on_criteria = retry_criteria_checks_pass?(exception, *args)
+          log_message "user retry criteria is #{retry_based_on_criteria ? '' : 'not '}sufficient for a retry", args, exception
         end
-        log_message "user retry criteria is #{retry_based_on_criteria ? '' : 'not '}sufficient for a retry", args, exception
 
         retry_based_on_exception || retry_based_on_criteria
       end
@@ -308,11 +306,11 @@ module Resque
       end
 
       # Register a retry criteria check callback to be run before retrying
-      # the job again
+      # the job again. Can be registered with a block or a symbol.
       #
       # If any callback returns `true`, the job will be retried.
       #
-      # @example Using a custom retry criteria check.
+      # @example Registering a custom retry criteria check.
       #
       #   retry_criteria_check do |exception, *args|
       #     if exception.message =~ /InvalidJobId/
@@ -323,14 +321,36 @@ module Resque
       #     end
       #   end
       #
+      # @example
+      #
+      #   retry_criteria_check :my_check
+      #
+      # @param [Symbol?] method
       # @yield [exception, *args]
       # @yieldparam exception [Exception] the exception that was raised
       # @yieldparam args [Array] job arguments
-      # @yieldreturn [Boolean] false == dont retry, true = can retry
+      # @yieldreturn [Boolean] false == dont retry, true == can retry
       #
       # @api public
-      def retry_criteria_check(&block)
-        retry_criteria_checks << block
+      def retry_criteria_check(method=nil, &block)
+        if method.is_a? Symbol
+          retry_criteria_checks << method
+        else
+          retry_criteria_checks << block
+        end
+      end
+
+      # Returns true if *any* of the retry criteria checks pass. When a retry
+      # criteria check passes, the remaining ones are not executed.
+      #
+      # @returns [Boolean] whether any of the retry criteria checks pass
+      #
+      # @api private
+      def retry_criteria_checks_pass?(exception, *args)
+        retry_criteria_checks.each do |criteria_check|
+          return true if !!call_symbol_or_block(criteria_check, exception, *args)
+        end
+        false
       end
 
       # Retries the job
@@ -511,11 +531,7 @@ module Resque
       # @api private
       def run_try_again_callbacks(exception, *args)
         try_again_callbacks.each do |callback|
-          if callback.is_a? Symbol
-            send(callback, exception, *args)
-          elsif callback.respond_to?(:call)
-            callback.call(exception, *args)
-          end
+          call_symbol_or_block(callback, exception, *args)
         end
       end
 
@@ -564,11 +580,24 @@ module Resque
       # @api private
       def run_give_up_callbacks(exception, *args)
         give_up_callbacks.each do |callback|
-          if callback.is_a? Symbol
-            send(callback, exception, *args)
-          elsif callback.respond_to?(:call)
-            callback.call(exception, *args)
-          end
+          call_symbol_or_block(callback, exception, *args)
+        end
+      end
+
+      # Helper to call functions that may be passed as Symbols or Procs. If
+      # a symbol, it is assumed to refer to a method that is already defined
+      # on this class.
+      #
+      # @param [Symbol|Proc] method
+      # @param [Object...] *args
+      # @return [Object]
+      #
+      # @api private
+      def call_symbol_or_block(method, *args)
+        if method.is_a?(Symbol)
+          send(method, *args)
+        elsif method.respond_to?(:call)
+          instance_exec(*args, &method)
         end
       end
     end

@@ -385,8 +385,25 @@ Similar to the previous example, this job will retry if either a
 `NetworkError` (or subclass) exception is thrown **or** any of the callbacks
 return true.
 
-Use `@retry_exceptions = []` to **only** use callbacks, to determine if the
-job should retry.
+You can also register a retry criteria check with a Symbol if the method is
+already defined on the job class:
+```
+class AlwaysRetryJob
+  extend Resque::Plugins::Retry
+
+  retry_criteria_check :yes
+
+  def self.yes(ex, *args)
+    true
+  end
+end
+
+Use `@retry_exceptions = []` to **only** use your custom retry criteria checks
+to determine if the job should retry.
+
+NB: Your callback must be able to accept the exception and job arguments as
+passed parameters, or else it cannot be called. e.g., in the example above,
+defining `def self.yes; true; end` would not work.
 
 ### <a name="retry_args"></a> Retry Arguments
 
