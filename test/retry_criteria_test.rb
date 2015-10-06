@@ -72,4 +72,15 @@ class RetryCriteriaTest < Minitest::Test
     assert_equal 2, Resque.info[:failed], 'failed jobs'
     assert_equal 3, Resque.info[:processed], 'processed job'
   end
+
+  def test_retry_criteria_checks_can_be_registered_with_symbols
+    Resque.enqueue(CustomRetryCriteriaWithSymbol)
+    3.times do
+      perform_next_job(@worker)
+    end
+
+    assert_equal 0, Resque.info[:pending], 'pending jobs'
+    assert_equal 2, Resque.info[:failed], 'failed jobs'
+    assert_equal 2, Resque.info[:processed], 'processed job'
+  end
 end
