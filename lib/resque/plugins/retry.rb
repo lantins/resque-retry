@@ -453,6 +453,13 @@ module Resque
           return
         end
 
+        # If we are "ignoring" the exception, then we decrement the retry
+        # counter, so that the current attempt didn't count toward the retry
+        # counter.
+        if !@ignore_exceptions.nil? && @ignore_exceptions.include?(exception.class)
+          Resque.redis.decr(redis_retry_key(*args))
+        end
+
         if retry_criteria_valid?(exception, *args)
           try_again(exception, *args)
         else
