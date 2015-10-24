@@ -1,5 +1,10 @@
 ## HEAD
 
+# 1.5.0 (2015-10-24)
+
+* Ability to define 'try again' and 'give up' callbacks/hooks (@thenovices)
+* Allow `retry_criteria_check` to be registered with Symbols (@thenovices)
+
 ## 1.4.0 (2015-01-07)
 
 * Dependency on `resque-scheduler` bumped to ~> 4.0
