@@ -456,8 +456,8 @@ module Resque
         # If we are "ignoring" the exception, then we decrement the retry
         # counter, so that the current attempt didn't count toward the retry
         # counter.
-        if !@ignore_exceptions.nil? && @ignore_exceptions.include?(exception.class)
-          Resque.redis.decr(redis_retry_key(*args))
+        if ignore_exceptions.include?(exception.class)
+          @retry_attempt = Resque.redis.decr(redis_retry_key(*args))
         end
 
         if retry_criteria_valid?(exception, *args)
@@ -589,6 +589,10 @@ module Resque
         give_up_callbacks.each do |callback|
           call_symbol_or_block(callback, exception, *args)
         end
+      end
+
+      def ignore_exceptions
+        @ignore_exceptions ||= []
       end
 
       # Helper to call functions that may be passed as Symbols or Procs. If
