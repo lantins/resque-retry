@@ -387,7 +387,7 @@ return true.
 
 You can also register a retry criteria check with a Symbol if the method is
 already defined on the job class:
-```
+```ruby
 class AlwaysRetryJob
   extend Resque::Plugins::Retry
 
@@ -397,6 +397,7 @@ class AlwaysRetryJob
     true
   end
 end
+```
 
 Use `@retry_exceptions = []` to **only** use your custom retry criteria checks
 to determine if the job should retry.
