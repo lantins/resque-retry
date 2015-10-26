@@ -183,6 +183,7 @@ Here are a list of the options provided (click to jump):
  * [Job Retry Identifier/Key](#retry_key)
  * [Expire Retry Counters From Redis](#expire)
  * [Try Again and Give Up Callbacks](#callbacks)
+ * [Ignored Exceptions](#ignored)
  * [Debug Plugin Logging](#debug_log)
 
 ### <a name="retry_defaults"></a> Retry Defaults 
@@ -557,6 +558,25 @@ end
 Warning: Make sure your callbacks do not throw any exceptions. If they do,
 subsequent callbacks will not be triggered, and the job will not be retried
 (if it was trying again). The retry counter also will not be reset.
+
+### <a name="ignored"></a> Ignored Exceptions
+If there is an exception for which you want to retry, but you don't want it to
+increment your retry counter, you can add it to `@ignore_exceptions`.
+
+One use case: Restarting your workers triggers a `Resque::TermException`. You
+may want your workers to retry the job that they were working on, but without
+incrementing the retry counter.
+
+```ruby
+class RestartResilientJob
+  extend Resque::Plugins::Retry
+
+  @retry_exceptions = [Resque::TermException]
+  @ignore_exceptions = [Resque::TermException]
+end
+```
+
+Reminder: `@ignore_exceptions` should be a subset of `@retry_exceptions`.
 
 ### <a name="debug_log"></a> Debug Plugin Logging
 
