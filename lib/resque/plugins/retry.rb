@@ -43,12 +43,29 @@ module Resque
       # @api public
       class AmbiguousRetryStrategyException < StandardError; end
 
+      # Raised if there is a problem with the configuration of resque-retry.
+      #
+      # @api public
+      class RetryConfigurationException < StandardError; end
+
       # Fail fast, when extended, if the "receiver" is misconfigured
       #
       # @api private
       def self.extended(receiver)
         if receiver.instance_variable_get('@fatal_exceptions') && receiver.instance_variable_get('@retry_exceptions')
           raise AmbiguousRetryStrategyException.new(%{You can't define both "@fatal_exceptions" and "@retry_exceptions"})
+        end
+
+        # Check that ignore_exceptions is a subset of retry_exceptions
+        retry_exceptions = receiver.instance_variable_get('@retry_exceptions')
+        if retry_exceptions.is_a?(Hash)
+          exceptions = retry_exceptions.keys
+        else
+          exceptions = Array(retry_exceptions)
+        end
+        excess_exceptions = Array(receiver.instance_variable_get('@ignore_exceptions')) - exceptions
+        unless excess_exceptions.empty?
+          raise RetryConfigurationException, "The following exceptions are defined in @ignore_exceptions but not in @retry_exceptions: #{excess_exceptions.join(', ')}."
         end
       end
 
