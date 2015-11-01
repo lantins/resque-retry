@@ -579,3 +579,28 @@ class RetryCallbacksJob
 
   give_up_callback :on_give_up_c
 end
+
+class IgnoreExceptionsJob
+  extend Resque::Plugins::Retry
+  @queue = :testing
+  @ignore_exceptions = [CustomException]
+  @retry_exceptions = [CustomException, AnotherCustomException]
+  @retry_limit = 3
+
+  def self.perform
+    "Hello, World!"
+  end
+end
+
+class IgnoreExceptionsImproperlyConfiguredJob1
+  # Manually extend Resque::Plugins::Retry in the test code to catch the
+  # exception.
+  @ignore_exceptions = [CustomException]
+end
+
+class IgnoreExceptionsImproperlyConfiguredJob2
+  # Manually extend Resque::Plugins::Retry in the test code to catch the
+  # exception.
+  @ignore_exceptions = [CustomException]
+  @retry_exceptions = { AnotherCustomException => 0 }
+end

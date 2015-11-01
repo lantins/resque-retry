@@ -43,12 +43,33 @@ module Resque
       # @api public
       class AmbiguousRetryStrategyException < StandardError; end
 
+      # Raised if there is a problem with the configuration of resque-retry.
+      #
+      # @api public
+      class RetryConfigurationException < StandardError; end
+
       # Fail fast, when extended, if the "receiver" is misconfigured
       #
       # @api private
       def self.extended(receiver)
-        if receiver.instance_variable_get('@fatal_exceptions') && receiver.instance_variable_get('@retry_exceptions')
+        retry_exceptions = receiver.instance_variable_get('@retry_exceptions')
+        fatal_exceptions = receiver.instance_variable_get('@fatal_exceptions')
+        ignore_exceptions = receiver.instance_variable_get('@ignore_exceptions')
+
+        if fatal_exceptions && retry_exceptions
           raise AmbiguousRetryStrategyException.new(%{You can't define both "@fatal_exceptions" and "@retry_exceptions"})
+        end
+
+        # Check that ignore_exceptions is a subset of retry_exceptions
+        if retry_exceptions.is_a?(Hash)
+          exceptions = retry_exceptions.keys
+        else
+          exceptions = Array(retry_exceptions)
+        end
+
+        excess_exceptions = Array(ignore_exceptions) - exceptions
+        unless excess_exceptions.empty?
+          raise RetryConfigurationException, "The following exceptions are defined in @ignore_exceptions but not in @retry_exceptions: #{excess_exceptions.join(', ')}."
         end
       end
 
@@ -453,6 +474,13 @@ module Resque
           return
         end
 
+        # If we are "ignoring" the exception, then we decrement the retry
+        # counter, so that the current attempt didn't count toward the retry
+        # counter.
+        if ignore_exceptions.include?(exception.class)
+          @retry_attempt = Resque.redis.decr(redis_retry_key(*args))
+        end
+
         if retry_criteria_valid?(exception, *args)
           try_again(exception, *args)
         else
@@ -582,6 +610,10 @@ module Resque
         give_up_callbacks.each do |callback|
           call_symbol_or_block(callback, exception, *args)
         end
+      end
+
+      def ignore_exceptions
+        @ignore_exceptions ||= []
       end
 
       # Helper to call functions that may be passed as Symbols or Procs. If
