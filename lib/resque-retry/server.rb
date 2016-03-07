@@ -40,7 +40,7 @@ module ResqueRetry
       # builds a retry key for the specified job.
       def retry_key_for_job(job)
         klass = get_class(job)
-        if klass && klass.respond_to?(:redis_retry_key)
+        if klass.respond_to?(:redis_retry_key)
           klass.redis_retry_key(job['args'])
         else
           nil
