@@ -484,7 +484,7 @@ class DeliverSMS
   @queue = :mt_messages
   @expire_retry_key_after = 3600 # expire key after `retry_delay` plus 1 hour
 
-  self.perform(mt_id, mobile_number, message)
+  def self.perform(mt_id, mobile_number, message)
     heavy_lifting
   end
 end
