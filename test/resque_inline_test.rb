@@ -12,12 +12,12 @@ class ResqueInlineTest < Minitest::Test
 
   def test_runs_inline
     GoodJob.expects :perform
-    Resque.enqueue GoodJob
+    Resque.enqueue(GoodJob)
   end
 
   def test_fails_inline
     assert_raises CustomException do
-      Resque.enqueue RetryCustomExceptionsJob, 'CustomException'
+      Resque.enqueue(RetryCustomExceptionsJob, 'CustomException')
     end
   end
 end
