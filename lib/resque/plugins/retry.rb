@@ -152,7 +152,7 @@ module Resque
 
       # @abstract
       # Number of seconds to sleep after job is requeued
-      # 
+      #
       # @return [Number] number of seconds to sleep
       #
       # @api public
@@ -285,7 +285,7 @@ module Resque
         # if the retry limit was reached, dont bother checking anything else.
         if retry_limit_reached?
           log_message 'retry limit reached', args, exception
-          return false 
+          return false
         end
 
         # We always want to retry if the exception matches.
@@ -390,7 +390,7 @@ module Resque
 
         # remember that this job is now being retried. before_perform_retry will increment
         # this so it represents the retry count, and MultipleWithRetrySuppression uses
-        # the existence of this to determine if the job should be sent to the 
+        # the existence of this to determine if the job should be sent to the
         # parent failure backend (e.g. failed queue) or not.  Removing this means
         # jobs that fail before ::perform will be both retried and sent to the failed queue.
         Resque.redis.setnx(redis_retry_key(*args), -1)
@@ -427,6 +427,7 @@ module Resque
       #
       # @api private
       def before_perform_retry(*args)
+        return if Resque.inline?
         log_message 'before_perform_retry', args
         @on_failure_retry_hook_already_called = false
 
@@ -449,6 +450,7 @@ module Resque
       #
       # @api private
       def after_perform_retry(*args)
+        return if Resque.inline?
         log_message 'after_perform_retry, clearing retry key', args
         clean_retry_key(*args)
       end
@@ -464,6 +466,7 @@ module Resque
       #
       # @api private
       def on_failure_retry(exception, *args)
+        return if Resque.inline?
         log_message 'on_failure_retry', args, exception
         if exception.is_a?(Resque::DirtyExit)
           # This hook is called from a worker processes, not the job process
