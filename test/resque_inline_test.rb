@@ -1,21 +1,23 @@
 require 'test_helper'
 
-class IgnoreExceptionsTest < Minitest::Test
+class ResqueInlineTest < Minitest::Test
   def setup
-    Resque.stubs(:redis)
     Resque.inline = true
+    Resque.expects(:redis).never
   end
 
   def teardown
     Resque.inline = false
-    Resque.unstub(:redis)
   end
 
-  def test_ignore_exceptions
-    GoodJob.stubs(:perform).raises(CustomException)
+  def test_runs_inline
+    GoodJob.expects :perform
+    Resque.enqueue GoodJob
+  end
+
+  def test_fails_inline
     assert_raises CustomException do
-      Resque.enqueue(GoodJob)
+      Resque.enqueue RetryCustomExceptionsJob, 'CustomException'
     end
-    GoodJob.unstub(:perform)
   end
 end
