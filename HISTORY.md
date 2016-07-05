@@ -1,5 +1,7 @@
 ## HEAD
 
+* Feature: When running Resque inline, explicitly don't try to retry, don't touch Redis (@michaelglass)
+
 # 1.5.0 (2015-10-24)
 
 * Ability to define 'try again' and 'give up' callbacks/hooks (@thenovices)
