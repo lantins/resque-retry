@@ -136,13 +136,18 @@ module Resque
 
       # @abstract
       # Number of seconds to delay until the job is retried
+      # If @retry_exceptions is a Hash and there is no delay defined for exception_class,
+      # looks for closest superclass and assigns it's delay to @retry_exceptions[exception_class]
       #
       # @return [Number] number of seconds to delay
       #
       # @api public
       def retry_delay(exception_class = nil)
         if @retry_exceptions.is_a?(Hash)
-          delay = @retry_exceptions[exception_class] || 0
+          delay = @retry_exceptions[exception_class] ||= begin
+            relevant_definitions = @retry_exceptions.select { |ex| exception_class <= ex }
+            relevant_definitions.any? ? relevant_definitions.sort.first[1] : 0
+          end
           # allow an array of delays.
           delay.is_a?(Array) ? delay[retry_attempt] || delay.last : delay
         else

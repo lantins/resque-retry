@@ -286,9 +286,12 @@ class RetryTest < Minitest::Test
 
   def test_retry_delay
     assert_equal 3, NormalRetryCountJob.retry_delay
-    assert_equal 7, PerExceptionClassRetryCountJob.retry_delay(RuntimeError)
-    assert_equal 11, PerExceptionClassRetryCountJob.retry_delay(Exception)
-    assert_equal 13, PerExceptionClassRetryCountJob.retry_delay(Timeout::Error)
+    assert_equal 7, PerExceptionClassRetryCountJob.retry_delay(StandardError)
+    assert_equal 7, PerExceptionClassRetryCountJob.retry_delay(CustomException)
+    assert_equal 11, PerExceptionClassRetryCountJob.retry_delay(AnotherCustomException)
+    assert_equal 13, PerExceptionClassRetryCountJob.retry_delay(HierarchyCustomException)
+
+    assert_equal 7, PerExceptionClassRetryCountJob.instance_variable_get("@retry_exceptions")[CustomException]
   end
 
   def test_expire_key_set
