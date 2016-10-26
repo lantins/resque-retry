@@ -496,7 +496,7 @@ class PerExceptionClassRetryCountJob
 
   @queue = :testing
   @retry_limit = 3
-  @retry_exceptions = { RuntimeError => 7, Exception => 11, Timeout::Error => 13 }
+  @retry_exceptions = { StandardError => 7, AnotherCustomException => 11, HierarchyCustomException => 13 }
 
   def self.perform
     raise RuntimeError, 'I always fail with a RuntimeError'

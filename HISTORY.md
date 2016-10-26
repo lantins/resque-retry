@@ -1,5 +1,6 @@
 ## HEAD
 
+* Feature: If no exact exception class is present in `@retry_exceptions` hash, try to find closest superclass (@fanfilmu)
 * Feature: When running Resque inline, explicitly don't try to retry, don't touch Redis (@michaelglass)
 
 # 1.5.0 (2015-10-24)
