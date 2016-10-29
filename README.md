@@ -421,7 +421,7 @@ class DeliverViaSMSC
     [999, mt_message]
   end
 
-  self.perform(smsc_id, mt_message)
+  def self.perform(smsc_id, mt_message)
     heavy_lifting
   end
 end
@@ -441,7 +441,7 @@ class DeliverViaSMSC
     [999, mt_message + exception.message]
   end
 
-  self.perform(smsc_id, mt_message)
+  def self.perform(smsc_id, mt_message)
     heavy_lifting
   end
 end
@@ -468,7 +468,7 @@ class DeliverSMS
     "#{mobile_number}:#{mt_id}"
   end
 
-  self.perform(mt_id, mobile_number, message)
+  def self.perform(mt_id, mobile_number, message)
     heavy_lifting
   end
 end
