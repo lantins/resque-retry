@@ -186,7 +186,7 @@ Here are a list of the options provided (click to jump):
  * [Ignored Exceptions](#ignored)
  * [Debug Plugin Logging](#debug_log)
 
-### <a name="retry_defaults"></a> Retry Defaults 
+### <a name="retry_defaults"></a> Retry Defaults
 
 Retry the job **once** on failure, with zero delay.
 ```ruby
@@ -514,7 +514,7 @@ _not_ retrying, you can add a `give_up_callback`:
 ```ruby
 class LoggedJob
   extend Resque::Plugins::Retry
-  
+
   give_up_callback do |exception, *args|
     logger.error("Received #{exception}, job #{self.name} failed with #{args}")
   end
@@ -526,10 +526,10 @@ the job class:
 ```ruby
 class LoggedJob
   extend Resque::Plugins::Retry
-  
+
   give_up_callback :log_give_up
 
-  def self.log_give_up(ex, *args)
+  def self.log_give_up(exception, *args)
     logger.error("Received #{exception}, job #{self.name} failed with #{args}")
   end
 end
