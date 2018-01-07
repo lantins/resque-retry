@@ -18,8 +18,8 @@ class RetryTest < Minitest::Test
   def test_default_settings
     assert_equal 1, RetryDefaultSettingsJob.retry_limit, 'default retry limit'
     assert_equal 0, RetryDefaultSettingsJob.retry_attempt, 'default number of retry attempts'
-    assert_equal nil, RetryDefaultSettingsJob.fatal_exceptions, 'default fatal exceptions; nil = none'
-    assert_equal nil, RetryDefaultSettingsJob.retry_exceptions, 'default retry exceptions; nil = any'
+    assert_nil RetryDefaultSettingsJob.fatal_exceptions, 'default fatal exceptions; nil = none'
+    assert_nil RetryDefaultSettingsJob.retry_exceptions, 'default retry exceptions; nil = any'
     assert_equal 0, RetryDefaultSettingsJob.retry_delay, 'default seconds until retry'
   end
 
@@ -223,7 +223,7 @@ class RetryTest < Minitest::Test
 
     assert job_from_retry_queue = Resque.pop(:testing_retry)
     assert_equal ['arg1'], job_from_retry_queue['args']
-    assert_equal nil, Resque.redis.get(JobWithRetryQueue.redis_retry_key('arg1'))
+    assert_nil Resque.redis.get(JobWithRetryQueue.redis_retry_key('arg1'))
   end
 
   def test_clean_retry_key_should_splat_args
@@ -244,14 +244,14 @@ class RetryTest < Minitest::Test
   def test_delete_redis_key_when_job_is_successful
     Resque.enqueue(GoodJob, 'arg1')
 
-    assert_equal nil, Resque.redis.get(GoodJob.redis_retry_key('arg1'))
+    assert_nil Resque.redis.get(GoodJob.redis_retry_key('arg1'))
     perform_next_job(@worker)
-    assert_equal nil, Resque.redis.get(GoodJob.redis_retry_key('arg1'))
+    assert_nil Resque.redis.get(GoodJob.redis_retry_key('arg1'))
   end
 
   def test_delete_redis_key_after_final_failed_retry
     Resque.enqueue(FailFiveTimesJob, 'yarrrr')
-    assert_equal nil, Resque.redis.get(FailFiveTimesJob.redis_retry_key('yarrrr'))
+    assert_nil Resque.redis.get(FailFiveTimesJob.redis_retry_key('yarrrr'))
 
     perform_next_job(@worker)
     assert_equal '0', Resque.redis.get(FailFiveTimesJob.redis_retry_key('yarrrr'))
@@ -262,7 +262,7 @@ class RetryTest < Minitest::Test
     5.times do
       perform_next_job(@worker)
     end
-    assert_equal nil, Resque.redis.get(FailFiveTimesJob.redis_retry_key('yarrrr'))
+    assert_nil Resque.redis.get(FailFiveTimesJob.redis_retry_key('yarrrr'))
 
     assert_equal 5, Resque.info[:failed], 'failed jobs'
     assert_equal 6, Resque.info[:processed], 'processed job'
@@ -330,7 +330,7 @@ class RetryTest < Minitest::Test
         job.fail(Resque::DirtyExit.new)
       end
 
-      assert_equal nil, @worker.reserve
+      assert_nil @worker.reserve
     end
   end
 end
