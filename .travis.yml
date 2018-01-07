@@ -1,16 +1,21 @@
 language: ruby
+
 sudo: false
 
 matrix:
   allow_failures:
+    - rvm: 1.9.3
+    - rvm: 2.0.0
     - rvm: jruby-19mode
     - rvm: rbx-2
 
 rvm:
   - 1.9.3
   - 2.0.0
-  - 2.1.0
-  - 2.1.1
-  - 2.1.2
+  - 2.1.10
+  - 2.2.9
+  - 2.3.6
+  - 2.4.3
+  - 2.5.0
   - jruby-19mode
   - rbx-2
