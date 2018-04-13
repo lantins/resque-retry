@@ -56,7 +56,7 @@ end
 
 class JobRetryQueue
   extend Resque::Plugins::Retry
-  @queue = :testing_retry
+  @queue = :testing_retry_delegate
 
   def self.perform(*args)
   end
