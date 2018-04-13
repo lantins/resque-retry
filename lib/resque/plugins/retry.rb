@@ -388,7 +388,16 @@ module Resque
 
         # some plugins define retry_delay and have it take no arguments, so rather than break those,
         # we'll just check here to see whether it takes the additional exception class argument or not
-        temp_retry_delay = ([-1, 1].include?(method(:retry_delay).arity) ? retry_delay(exception.class) : retry_delay)
+        # we also allow all job args to be passed to a custom `retry_delay` method
+        retry_delay_arity = method(:retry_delay).arity
+
+        temp_retry_delay = if [-2, 2].include?(retry_delay_arity)
+          retry_delay(exception.class, *args)
+        elsif [-1, 1].include?(retry_delay_arity)
+          retry_delay(exception.class)
+        else
+          retry_delay
+        end
 
         retry_in_queue = retry_job_delegate ? retry_job_delegate : self
         log_message "retry delay: #{temp_retry_delay} for class: #{retry_in_queue}", args, exception
