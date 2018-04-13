@@ -399,7 +399,9 @@ module Resque
           retry_delay
         end
 
-        retry_in_queue = retry_job_delegate ? retry_job_delegate : self
+        retry_job_class = retry_job_delegate ? retry_job_delegate : self
+        retry_in_queue = Resque.queue_from_class(retry_job_class)
+
         log_message "retry delay: #{temp_retry_delay} for class: #{retry_in_queue}", args, exception
 
         # remember that this job is now being retried. before_perform_retry will increment
@@ -410,12 +412,12 @@ module Resque
         Resque.redis.setnx(redis_retry_key(*args), -1)
 
         retry_args = retry_args_for_exception(exception, *args)
-
+        
         if temp_retry_delay <= 0
           # If the delay is 0, no point passing it through the scheduler
-          Resque.enqueue(retry_in_queue, *retry_args)
+          Resque.enqueue_to(retry_in_queue, retry_job_class, *retry_args)
         else
-          Resque.enqueue_in(temp_retry_delay, retry_in_queue, *retry_args)
+          Resque.enqueue_in_with_queue(retry_in_queue, temp_retry_delay, retry_job_class, *retry_args)
         end
 
         # remove retry key from redis if we handed retry off to another queue.
