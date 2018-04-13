@@ -177,6 +177,16 @@ module Resque
       end
 
       # @abstract
+      # Specify the queue that the job should be placed in upon failure
+      #
+      # @return [Symbol] Symbol representing queue that job should be placed in
+      #
+      # @api public
+      def retry_queue(exception, *args)
+        nil
+      end
+
+      # @abstract
       # Modify the arguments used to retry the job. Use this to do something
       # other than try the exact same job again
       #
@@ -400,9 +410,11 @@ module Resque
         end
 
         retry_job_class = retry_job_delegate ? retry_job_delegate : self
-        retry_in_queue = Resque.queue_from_class(retry_job_class)
 
-        log_message "retry delay: #{temp_retry_delay} for class: #{retry_in_queue}", args, exception
+        retry_in_queue = retry_queue(exception, *args)
+        retry_in_queue ||= Resque.queue_from_class(retry_job_class)
+
+        log_message "retry delay: #{temp_retry_delay} for queue: #{retry_in_queue}", args, exception
 
         # remember that this job is now being retried. before_perform_retry will increment
         # this so it represents the retry count, and MultipleWithRetrySuppression uses
@@ -412,7 +424,7 @@ module Resque
         Resque.redis.setnx(redis_retry_key(*args), -1)
 
         retry_args = retry_args_for_exception(exception, *args)
-        
+
         if temp_retry_delay <= 0
           # If the delay is 0, no point passing it through the scheduler
           Resque.enqueue_to(retry_in_queue, retry_job_class, *retry_args)
