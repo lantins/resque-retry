@@ -358,6 +358,8 @@ In the above example, Resque would retry any `DeliverSMS` jobs that throw any
 type of error other than `NetworkError`. If the job throws a `NetworkError` it
 will be marked as "failed" immediately.
 
+You should use either `@fatal_exceptions` or `@retry_exceptions`. If you specify `@fatal_exceptions` the `@retry_exceptions` are ignored.
+
 ### <a name="custom_check"></a> Custom Retry Criteria Check Callbacks
 
 You may define custom retry criteria callbacks:
@@ -369,11 +371,11 @@ class TurkWorker
   @retry_exceptions = [NetworkError]
 
   retry_criteria_check do |exception, *args|
-    if exception.message =~ /InvalidJobId/
-      false # don't retry if we got passed a invalid job id.
-    else
-      true  # its okay for a retry attempt to continue.
+    if exception.message =~ /SpecialErrorMessageToRetry/
+      return true
     end
+
+    false
   end
 
   def self.perform(job_id)
@@ -385,6 +387,15 @@ end
 Similar to the previous example, this job will retry if either a
 `NetworkError` (or subclass) exception is thrown **or** any of the callbacks
 return true.
+
+You'll want to return false by default in the `retry_criteria_check` callback since
+the result of this callback is OR'd with the result of your `retry_exceptions` or
+`fatal_exceptions` configuration. In other words, if you returned true your
+`retry_exceptions` configuration would never be used.
+
+If you want to AND the result of `fatal_exceptions` or `retry_exceptions` with
+custom retry criteria, you'll need to implement your own logic in a `retry_criteria_check`
+to check for `fatal_exceptions` or `retry_exceptions`.
 
 You can also register a retry criteria check with a Symbol if the method is
 already defined on the job class:
@@ -400,7 +411,7 @@ class AlwaysRetryJob
 end
 ```
 
-Use `@retry_exceptions = []` to **only** use your custom retry criteria checks
+Use `@retry_exceptions = []` and `@fatal_exceptions = []` to **only** use your custom retry criteria checks
 to determine if the job should retry.
 
 NB: Your callback must be able to accept the exception and job arguments as
