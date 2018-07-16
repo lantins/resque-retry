@@ -1,3 +1,8 @@
+# 1.5.2 (2018-07-16)
+
+* Remove build support for `ruby < 2.3`, `jruby < 9.1` and `rbx`
+* Improving custom retry criteria documentation (@iloveitaly) 
+
 # 1.5.1 (2018-01-07)
 
 * Added build support for `ruby-2.2.x`, `ruby-2.3.x`, `ruby-2.4.x` and `ruby-2.5.x`
