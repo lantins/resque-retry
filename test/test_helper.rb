@@ -2,13 +2,6 @@ dir = File.dirname(File.expand_path(__FILE__))
 $LOAD_PATH.unshift dir + '/../lib'
 $TESTING = true
 
-require 'rubygems'
-require 'timeout'
-require 'minitest/autorun'
-require 'minitest/pride'
-require 'rack/test'
-require 'mocha/setup'
-
 # Run code coverage in MRI 1.9 only.
 if RUBY_VERSION >= '1.9' && RUBY_ENGINE == 'ruby'
   require 'simplecov'
@@ -16,6 +9,13 @@ if RUBY_VERSION >= '1.9' && RUBY_ENGINE == 'ruby'
     add_filter '/test/'
   end
 end
+
+require 'rubygems'
+require 'timeout'
+require 'minitest/autorun'
+require 'minitest/pride'
+require 'rack/test'
+require 'mocha/setup'
 
 require 'resque-retry'
 require dir + '/test_jobs'
