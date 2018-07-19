@@ -234,13 +234,6 @@ class RetryTest < Minitest::Test
     perform_next_job(@worker)
   end
 
-  def test_retry_delayed_failed_jobs_in_separate_queue
-    Resque.enqueue(DelayedJobWithRetryQueue, 'arg1')
-    Resque.expects(:enqueue_in_with_queue).with(:testing_retry_delegate, 1, JobRetryQueue, 'arg1')
-
-    perform_next_job(@worker)
-  end
-
   def test_delete_redis_key_when_job_is_successful
     Resque.enqueue(GoodJob, 'arg1')
 
