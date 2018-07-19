@@ -72,6 +72,20 @@ class JobWithRetryQueue
   end
 end
 
+class JobWithDynamicRetryQueue
+  extend Resque::Plugins::Retry
+  @queue = :testing
+  @retry_delay = 1
+
+  def self.retry_queue(exception, *args)
+    args.first
+  end
+
+  def self.perform(*args)
+    raise
+  end
+end
+
 class DelayedJobWithRetryQueue
   extend Resque::Plugins::Retry
   @queue = :testing
