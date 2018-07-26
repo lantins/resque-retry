@@ -224,7 +224,48 @@ end
 The above modification will allow your job to retry up to 10 times, with a delay
 of 120 seconds, or 2 minutes between retry attempts.
 
-You can override the `retry_delay` method to set the delay value dynamically.
+You can override the `retry_delay` method to set the delay value dynamically. For example:
+
+```ruby
+class ExampleJob
+  extend Resque::Plugins::Retry
+  @queue = :testing
+
+  def self.retry_delay(exception)
+    if exception == SocketError
+      10
+    else
+      1
+    end
+  end
+
+  def self.perform(*args)
+    heavy_lifting
+  end
+end
+```
+
+Or, if you'd like the delay to be dependent on job arguments:
+
+```ruby
+class ExampleJob
+  extend Resque::Plugins::Retry
+  @queue = :testing
+
+  def self.retry_delay(exception, *args)
+    # the delay is dependent on the arguments passed to the job
+    # in this case, "3" is passed as the arg and that is used as the delay
+    # make sure this method returns a integer
+    args.first.to_i
+  end
+
+  def self.perform(*args)
+    heavy_lifting
+  end
+end
+
+Resque.enqueue(ExampleJob, '3')
+```
 
 ### <a name="sleep"></a> Sleep After Requeuing
 
@@ -457,6 +498,47 @@ class DeliverViaSMSC
   end
 end
 ```
+
+### Custom Retry Queues
+
+By default, when a job is retried, it is added to the `@queue` specified in the worker. However, you may want to push the job into another (lower or higher priority) queue when the job fails. You can do this by dynamically specifying the retry queue. For example:
+
+```ruby
+class ExampleJob
+  extend Resque::Plugins::Retry
+  @queue = :testing
+  @retry_delay = 1
+
+  def self.work(*args)
+    user_id, user_mode, record_id = *args
+    
+    Resque.enqueue_to(
+      target_queue_for_args(user_id, user_mode, record_id),
+      self,
+      *args
+     )
+  end
+
+  def self.retry_queue(exception, *args)
+    target_queue_for_args(*args)
+  end
+
+  def self.perform(*args)
+    heavy_lifting
+  end
+
+  def self.target_queue_for_args(*args)
+    user_id, user_mode, record_id = *args
+
+    if user_mode
+      'high
+    else
+      'low'
+    end
+  end
+end
+```
+
 ### <a name="retry_key"></a> Job Retry Identifier/Key
 
 The retry attempt is incremented and stored in a Redis key. The key is built
@@ -593,6 +675,18 @@ Reminder: `@ignore_exceptions` should be a subset of `@retry_exceptions`.
 
 The inner-workings of the plugin are output to the Resque [Logger](https://github.com/resque/resque/wiki/Logging)
 when `Resque.logger.level` is set to `Logger::DEBUG`.
+
+Add `VVERBOSE=true` as an environment variable to easily set the log level to debug.
+
+### Testing
+
+To run a specific test and inspect logging output
+
+```
+bundle exec rake TEST=the_test_file.rb VVERBOSE=true
+```
+
+There are many example jobs implementing various use-cases for this gem in `test_jobs.rb`
 
 Contributing/Pull Requests
 --------------------------
