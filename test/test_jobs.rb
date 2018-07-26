@@ -86,6 +86,36 @@ class JobWithDynamicRetryQueue
   end
 end
 
+class DynamicDelayedJobOnExceptionAndArgs
+  extend Resque::Plugins::Retry
+  @queue = :testing
+
+  def self.retry_delay(exception, *args)
+    args.first.to_i
+  end
+
+  def self.perform(*args)
+    raise
+  end
+end
+
+class DynamicDelayedJobOnException
+  extend Resque::Plugins::Retry
+  @queue = :testing
+
+  def self.retry_delay(exception)
+    if exception == SocketError
+      4
+    else
+      1
+    end
+  end
+
+  def self.perform(*args)
+    raise SocketError
+  end
+end
+
 class DelayedJobWithRetryQueue
   extend Resque::Plugins::Retry
   @queue = :testing
