@@ -23,16 +23,4 @@ class IgnoreExceptionsTest < Minitest::Test
     perform_next_job(@worker)
     assert_equal '1', Resque.redis.get(retry_key), 'retry counter'
   end
-
-  def test_ignore_exception_configuration_1
-    assert_raises Resque::Plugins::Retry::RetryConfigurationException do
-      IgnoreExceptionsImproperlyConfiguredJob1.extend(Resque::Plugins::Retry)
-    end
-  end
-
-  def test_ignore_exception_configuration_2
-    assert_raises Resque::Plugins::Retry::RetryConfigurationException do
-      IgnoreExceptionsImproperlyConfiguredJob2.extend(Resque::Plugins::Retry)
-    end
-  end
 end
