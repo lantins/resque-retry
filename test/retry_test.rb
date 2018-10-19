@@ -221,7 +221,7 @@ class RetryTest < Minitest::Test
 
     perform_next_job(@worker)
 
-    assert job_from_retry_queue = Resque.pop(:testing_retry)
+    assert job_from_retry_queue = Resque.pop(:testing_retry_delegate)
     assert_equal ['arg1'], job_from_retry_queue['args']
     assert_nil Resque.redis.get(JobWithRetryQueue.redis_retry_key('arg1'))
   end
@@ -230,13 +230,6 @@ class RetryTest < Minitest::Test
     JobWithRetryQueue.expects(:clean_retry_key).once.with({"a" => 1, "b" => 2})
 
     Resque.enqueue(JobWithRetryQueue, {"a" => 1, "b" => 2})
-
-    perform_next_job(@worker)
-  end
-
-  def test_retry_delayed_failed_jobs_in_separate_queue
-    Resque.enqueue(DelayedJobWithRetryQueue, 'arg1')
-    Resque.expects(:enqueue_in).with(1, JobRetryQueue, 'arg1')
 
     perform_next_job(@worker)
   end

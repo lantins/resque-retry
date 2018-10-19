@@ -177,6 +177,16 @@ module Resque
       end
 
       # @abstract
+      # Specify the queue that the job should be placed in upon failure
+      #
+      # @return [Symbol] Symbol representing queue that job should be placed in
+      #
+      # @api public
+      def retry_queue(exception, *args)
+        nil
+      end
+
+      # @abstract
       # Modify the arguments used to retry the job. Use this to do something
       # other than try the exact same job again
       #
@@ -388,10 +398,23 @@ module Resque
 
         # some plugins define retry_delay and have it take no arguments, so rather than break those,
         # we'll just check here to see whether it takes the additional exception class argument or not
-        temp_retry_delay = ([-1, 1].include?(method(:retry_delay).arity) ? retry_delay(exception.class) : retry_delay)
+        # we also allow all job args to be passed to a custom `retry_delay` method
+        retry_delay_arity = method(:retry_delay).arity
 
-        retry_in_queue = retry_job_delegate ? retry_job_delegate : self
-        log_message "retry delay: #{temp_retry_delay} for class: #{retry_in_queue}", args, exception
+        temp_retry_delay = if [-2, 2].include?(retry_delay_arity)
+          retry_delay(exception.class, *args)
+        elsif [-1, 1].include?(retry_delay_arity)
+          retry_delay(exception.class)
+        else
+          retry_delay
+        end
+
+        retry_job_class = retry_job_delegate ? retry_job_delegate : self
+
+        retry_in_queue = retry_queue(exception, *args)
+        retry_in_queue ||= Resque.queue_from_class(retry_job_class)
+
+        log_message "retry delay: #{temp_retry_delay} for queue: #{retry_in_queue}", args, exception
 
         # remember that this job is now being retried. before_perform_retry will increment
         # this so it represents the retry count, and MultipleWithRetrySuppression uses
@@ -404,9 +427,9 @@ module Resque
 
         if temp_retry_delay <= 0
           # If the delay is 0, no point passing it through the scheduler
-          Resque.enqueue(retry_in_queue, *retry_args)
+          Resque.enqueue_to(retry_in_queue, retry_job_class, *retry_args)
         else
-          Resque.enqueue_in(temp_retry_delay, retry_in_queue, *retry_args)
+          Resque.enqueue_in_with_queue(retry_in_queue, temp_retry_delay, retry_job_class, *retry_args)
         end
 
         # remove retry key from redis if we handed retry off to another queue.
