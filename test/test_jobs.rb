@@ -635,16 +635,3 @@ class IgnoreExceptionsJob
     "Hello, World!"
   end
 end
-
-class IgnoreExceptionsImproperlyConfiguredJob1
-  # Manually extend Resque::Plugins::Retry in the test code to catch the
-  # exception.
-  @ignore_exceptions = [CustomException]
-end
-
-class IgnoreExceptionsImproperlyConfiguredJob2
-  # Manually extend Resque::Plugins::Retry in the test code to catch the
-  # exception.
-  @ignore_exceptions = [CustomException]
-  @retry_exceptions = { AnotherCustomException => 0 }
-end
