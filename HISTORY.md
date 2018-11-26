@@ -1,3 +1,7 @@
+# 1.5.3 (2018-11-26)
+
+* Monkey patch in the `requeue_queue` method onto the `Resque::Failure` backend (this _should_ be a temporary fix)
+
 # 1.5.2 (2018-07-16)
 
 * Remove build support for `ruby < 2.3`, `jruby < 9.1` and `rbx`
