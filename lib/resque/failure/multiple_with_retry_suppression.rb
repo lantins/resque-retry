@@ -89,8 +89,12 @@ module Resque
       # https://github.com/resque/resque/pull/1659
       #
       # @api public
-      def self.requeue_queue(queue)
-        classes.first.requeue_queue(queue)
+      class_eval do |klass|
+        if !klass.respond_to?(:requeue_queue)
+          def klass.requeue_queue(queue)
+            classes.first.requeue_queue(queue)
+          end
+        end
       end
 
       protected
