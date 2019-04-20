@@ -4,8 +4,8 @@ require 'test_helper'
 class ResqueTest < Minitest::Test
   def test_resque_version
     major, minor, patch = Resque::Version.split('.')
-    assert_equal 1, major.to_i, 'major version does not match'
-    assert_operator minor.to_i, :>=, 8, 'minor version is too low'
+    assert_equal 2, major.to_i, 'major version does not match'
+    assert_operator minor.to_i, :>=, 0, 'minor version is too low'
   end
 
   def test_good_job
