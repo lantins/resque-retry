@@ -52,8 +52,13 @@ module Resque
       #
       # @api private
       def self.extended(receiver)
-        retry_exceptions = receiver.instance_variable_get('@retry_exceptions')
-        fatal_exceptions = receiver.instance_variable_get('@fatal_exceptions')
+        retry_exceptions = nil
+        retry_exceptions = receiver.instance_variable_get(:@retry_exceptions) \
+          if receiver.instance_variable_defined?(:@retry_exceptions)
+
+        fatal_exceptions = nil
+        fatal_exceptions = receiver.instance_variable_get(:@fatal_exceptions) \
+          if receiver.instance_variable_defined?(:@fatal_exceptions)
 
         if fatal_exceptions && retry_exceptions
           raise AmbiguousRetryStrategyException.new(%{You can't define both "@fatal_exceptions" and "@retry_exceptions"})
@@ -130,7 +135,7 @@ module Resque
       #
       # @api public
       def retry_delay(exception_class = nil)
-        if @retry_exceptions.is_a?(Hash)
+        if instance_variable_defined?(:@retry_exceptions) && @retry_exceptions.is_a?(Hash)
           delay = @retry_exceptions[exception_class] ||= begin
             relevant_definitions = @retry_exceptions.select { |ex| exception_class <= ex }
             relevant_definitions.any? ? relevant_definitions.sort.first[1] : 0
@@ -261,7 +266,7 @@ module Resque
       #
       # @api public
       def retry_exceptions
-        if @retry_exceptions.is_a?(Hash)
+        if instance_variable_defined?(:@retry_exceptions) && @retry_exceptions.is_a?(Hash)
           @retry_exceptions.keys
         else
           @retry_exceptions ||= nil
@@ -487,7 +492,8 @@ module Resque
           # This hook is called from a worker processes, not the job process
           # that failed with a DirtyExit, so @retry_attempt wasn't set yet
           @retry_attempt = Resque.redis.get(redis_retry_key(*args)).to_i
-        elsif @on_failure_retry_hook_already_called
+        elsif instance_variable_defined?(:@on_failure_retry_hook_already_called) && \
+          @on_failure_retry_hook_already_called
           log_message 'on_failure_retry_hook_already_called', args, exception
           return
         end

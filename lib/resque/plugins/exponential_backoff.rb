@@ -52,12 +52,16 @@ module Resque
       #
       # @api private
       def self.extended(receiver)
+        retry_delay_multiplicand_min = DEFAULT_RETRY_DELAY_MULTIPLICAND_MIN
         retry_delay_multiplicand_min = \
-          receiver.instance_variable_get("@retry_delay_multiplicand_min") || \
-            DEFAULT_RETRY_DELAY_MULTIPLICAND_MIN
+          receiver.instance_variable_get(:@retry_delay_multiplicand_min) \
+            if receiver.instance_variable_defined?(:@retry_delay_multiplicand_min)
+
+        retry_delay_multiplicand_max = DEFAULT_RETRY_DELAY_MULTIPLICAND_MAX
         retry_delay_multiplicand_max = \
-          receiver.instance_variable_get("@retry_delay_multiplicand_max") || \
-            DEFAULT_RETRY_DELAY_MULTIPLICAND_MAX
+          receiver.instance_variable_get(:@retry_delay_multiplicand_max) \
+            if receiver.instance_variable_defined?(:@retry_delay_multiplicand_max)
+
         if retry_delay_multiplicand_min > retry_delay_multiplicand_max
           raise InvalidRetryDelayMultiplicandConfigurationException.new(
             %{"@retry_delay_multiplicand_min" must be less than or equal to "@retry_delay_multiplicand_max"}

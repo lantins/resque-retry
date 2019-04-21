@@ -364,8 +364,15 @@ class BaseJob < AsyncJob
 
     def inherited(subclass)
       super
-      %w(@retry_exceptions @retry_delay @retry_limit @auto_retry_limit).each do |variable|
-        value = BaseJob.instance_variable_get(variable)
+      %i[
+        @auto_retry_limit
+        @retry_delay
+        @retry_exceptions
+        @retry_limit
+      ].each do |variable|
+        value = nil
+        value = BaseJob.instance_variable_get(variable) \
+          if BaseJob.instance_variable_defined?(variable)
         value = value.dup rescue value
         subclass.instance_variable_set(variable, value)
       end

@@ -14,7 +14,6 @@ class MockFailureBackend < Resque::Failure::Base
 end
 
 class MultipleFailureTest < Minitest::Test
-
   def setup
     Resque.redis.flushall
     @worker = Resque::Worker.new(:testing)
@@ -27,8 +26,7 @@ class MultipleFailureTest < Minitest::Test
   end
 
   def failure_key_for(klass)
-    args = []
-    key = 'failure-' + klass.redis_retry_key(args)
+    'failure-' + klass.redis_retry_key([])
   end
 
   def test_failure_is_passed_on_when_job_class_not_found
@@ -41,7 +39,9 @@ class MultipleFailureTest < Minitest::Test
     perform_next_job(@worker)
 
     assert_equal 1, MockFailureBackend.errors.count, 'should have one error'
-    assert_match /uninitialized constant.* LimitThreeJobTemp/, MockFailureBackend.errors.first
+
+    uninitialized_constant_pattern = /uninitialized constant.* LimitThreeJobTemp/
+    assert_match uninitialized_constant_pattern, MockFailureBackend.errors.first
   end
 
   def test_last_failure_is_saved_in_redis_if_delay
