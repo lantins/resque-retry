@@ -1,3 +1,8 @@
+# 1.6.0 (2019-04-21)
+
+* Clean-up / refactoring in preparation for a release (`ruby` deprecations, etc.)
+* Loosen version requirement to allow resque v2.0 and up (@peret)
+
 # 1.5.3 (2018-11-26)
 
 * Monkey patch in the `requeue_queue` method onto the `Resque::Failure` backend (this _should_ be a temporary fix)
