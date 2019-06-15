@@ -25,7 +25,6 @@ Gem::Specification.new do |s|
   s.homepage = 'http://github.com/lantins/resque-retry'
   s.license = 'MIT'
 
-  s.has_rdoc = false
   s.files = `git ls-files`.split($/)
   s.require_paths = %w[lib]
 

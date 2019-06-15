@@ -55,13 +55,6 @@ class RetryTest < Minitest::Test
     assert_equal test_args, job['args']
   end
 
-  def test_job_args_can_be_modified_by_overriding_args_for_retry
-    Resque.enqueue(DeprecatedRetryWithModifiedArgsJob)
-    DeprecatedRetryWithModifiedArgsJob.expects(:warn)
-    DeprecatedRetryWithModifiedArgsJob.expects(:args_for_retry)
-    perform_next_job(@worker)
-  end
-
   def test_job_args_can_be_modified_by_overriding_retry_args
     Resque.enqueue(RetryWithModifiedArgsJob)
     RetryWithModifiedArgsJob.expects(:retry_args)

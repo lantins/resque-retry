@@ -27,7 +27,9 @@ module Resque
       #
       # @api private
       def save
-        log_message 'failure backend save', args_from(payload), exception
+        args = args_from(payload)
+
+        log_message 'failure backend save', args, exception
 
         retryable = retryable?
         job_being_retried = retryable && retrying?
@@ -35,7 +37,7 @@ module Resque
         if !job_being_retried
           log_message(
             "#{retryable ? '' : 'non-'}retryable job is not being retried - sending failure to superclass",
-            args_from(payload),
+            args,
             exception
           )
 
@@ -44,7 +46,7 @@ module Resque
         elsif retry_delay > 0
           log_message(
             "retry_delay: #{retry_delay} > 0 - saving details in Redis",
-            args_from(payload),
+            args,
             exception
           )
 
@@ -67,7 +69,7 @@ module Resque
         else
           log_message(
             "retry_delay: #{retry_delay} <= 0 - ignoring",
-            args_from(payload),
+            args,
             exception
           )
         end
@@ -100,7 +102,7 @@ module Resque
       protected
 
       def args_from(payload)
-        (payload || {})['args']
+        (payload || {})['args'].dup
       end
 
       def cleanup_retry_failure_log!

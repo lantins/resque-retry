@@ -146,14 +146,6 @@ class InheritTestWithMoreExtraJob < InheritTestWithExtraJob
   end
 end
 
-class DeprecatedRetryWithModifiedArgsJob < RetryDefaultsJob
-  @queue = :testing
-
-  def self.args_for_retry(*args)
-    # NOTE: implementation is irrelevant we only care that it's invoked
-  end
-end
-
 class RetryWithModifiedArgsJob < RetryDefaultsJob
   @queue = :testing
 
