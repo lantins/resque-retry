@@ -1,3 +1,14 @@
+# 1.7.0 (2019-06-15)
+
+!!! [Potential] breaking changes -- details below !!!
+
+* Remove support for `args_for_retry` -- it has been deprecated for almost 5
+  years
+* Work w/ shallow-clone(s) of `args` in `MultipleWithRetrySuppression#save` and
+  `Retry.retry_args`
+* Remove deprecated options from `Gem::Specification`
+* Clean-up formatting in HISTORY.md
+
 # 1.6.0 (2019-04-21)
 
 * Clean-up / refactoring in preparation for a release (`ruby` deprecations,
