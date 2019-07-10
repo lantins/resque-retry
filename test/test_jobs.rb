@@ -526,6 +526,13 @@ class CustomRetryIdentifierFailingJob
   end
 end
 
+class NoRetryDelayJob
+  extend Resque::Plugins::Retry
+
+  @queue = :testing
+  @retry_exceptions = {}
+end
+
 class NormalRetryCountJob
   extend Resque::Plugins::Retry
 

@@ -271,6 +271,7 @@ class RetryTest < Minitest::Test
   end
 
   def test_retry_delay
+    assert_equal 0, NoRetryDelayJob.retry_delay
     assert_equal 3, NormalRetryCountJob.retry_delay
     assert_equal 7, PerExceptionClassRetryCountJob.retry_delay(StandardError)
     assert_equal 7, PerExceptionClassRetryCountJob.retry_delay(CustomException)

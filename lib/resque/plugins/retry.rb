@@ -135,9 +135,13 @@ module Resque
       #
       # @api public
       def retry_delay(exception_class = nil)
-        if instance_variable_defined?(:@retry_exceptions) && @retry_exceptions.is_a?(Hash)
+        if \
+          !exception_class.nil? && \
+          instance_variable_defined?(:@retry_exceptions) && \
+          @retry_exceptions.is_a?(Hash)
           delay = @retry_exceptions[exception_class] ||= begin
-            relevant_definitions = @retry_exceptions.select { |ex| exception_class <= ex }
+            relevant_definitions = \
+              @retry_exceptions.select { |ex| exception_class <= ex }
             relevant_definitions.any? ? relevant_definitions.sort.first[1] : 0
           end
           # allow an array of delays.
