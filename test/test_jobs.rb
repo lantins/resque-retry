@@ -546,6 +546,7 @@ class PerExceptionClassRetryCountJob
 
   @queue = :testing
   @retry_limit = 3
+  @expire_retry_key_after = 10
   @retry_exceptions = { StandardError => 7, AnotherCustomException => 11, HierarchyCustomException => 13 }
 
   def self.perform
