@@ -1,3 +1,7 @@
+# 1.7.3 (2019-11-21)
+
+* Do not crash if job class is not found on the resque-web server
+
 # 1.7.2 (2019-11-21)
 
 * Address part 2 of issue #158
