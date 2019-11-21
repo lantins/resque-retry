@@ -1,3 +1,7 @@
+# 1.7.2 (2019-11-21)
+
+* Address part 2 of issue #158
+
 # 1.7.1 (2019-07-10)
 
 * Prevent `NoMethodError` when calculating `retry_delay`
