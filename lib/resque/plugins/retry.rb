@@ -456,7 +456,8 @@ module Resque
         # set/update the "retry_key" expiration
         if expire_retry_key_after
           log_message "updating expiration for retry key: #{retry_key}", args
-          Resque.redis.expire(retry_key, retry_delay + expire_retry_key_after)
+          exception_class = Object.const_get(args[0]) rescue nil
+          Resque.redis.expire(retry_key, retry_delay(exception_class) + expire_retry_key_after)
         end
       end
 

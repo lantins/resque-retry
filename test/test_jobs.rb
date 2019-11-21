@@ -7,7 +7,7 @@ class NoRetryJob
   @queue = :testing
 
   def self.perform(*args)
-    raise "error"
+    raise 'error'
   end
 end
 
@@ -23,6 +23,17 @@ class ExpiringJob
   extend Resque::Plugins::Retry
   @queue = :testing
   @expire_retry_key_after = 60 * 60
+
+  def self.perform(*args)
+  end
+end
+
+class ExpiringJobWithRetryExceptions
+  extend Resque::Plugins::Retry
+
+  @queue = :testing
+  @expire_retry_key_after = 10
+  @retry_exceptions = { StandardError => 7 }
 
   def self.perform(*args)
   end
