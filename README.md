@@ -531,7 +531,7 @@ class ExampleJob
     user_id, user_mode, record_id = *args
 
     if user_mode
-      'high
+      'high'
     else
       'low'
     end
