@@ -80,10 +80,11 @@ module Resque
 
       # Selects the delay from the backoff strategy
       #
+      # @param _ [Exception] unused exception argument for signature parity
       # @return [Number] seconds to delay until the next retry.
       #
       # @api private
-      def retry_delay(_exception_class = nil)
+      def retry_delay(_ = nil)
         delay = backoff_strategy[retry_attempt] || backoff_strategy.last
         # if the values are the same don't bother generating a random number, if
         # the delta is zero, some platforms will raise an error
