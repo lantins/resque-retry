@@ -231,8 +231,8 @@ class ExampleJob
   extend Resque::Plugins::Retry
   @queue = :testing
 
-  def self.retry_delay(exception)
-    if exception == SocketError
+  def self.retry_delay(exception_class)
+    if exception_class == SocketError
       10
     else
       1
