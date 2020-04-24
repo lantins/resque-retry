@@ -359,12 +359,16 @@ You may also want to specify different retry delays for different exception
 types. You may optionally set `@retry_exceptions` to a hash where the keys are
 your specific exception classes to retry on, and the values are your retry
 delays in seconds or an array of retry delays to be used similar to exponential
-backoff.
+backoff.  **You must define `@retry_limit` such that it allows for your retry
+strategy to complete.  If your `@retry_limit` is less than the number of desired
+retry attempts defined in `@retry_exceptions`, your job will only retry
+`@retry_limit` times.**
 ```ruby
 class DeliverSMS
   extend Resque::Plugins::Retry
   @queue = :mt_messages
 
+  @retry_limit = 2
   @retry_exceptions = { NetworkError => 30, SystemCallError => [120, 240] }
 
   def self.perform(mt_id, mobile_number, message)
@@ -375,8 +379,9 @@ end
 
 In the above example, Resque would retry any `DeliverSMS` jobs which throw a
 `NetworkError` or `SystemCallError`. If the job throws a `NetworkError` it
-will be retried 30 seconds later, if it throws `SystemCallError` it will first
-retry 120 seconds later then subsequent retry attempts 240 seconds later.
+will be retried 30 seconds later with a subsequent retry 30 seconds after that.
+If it throws `SystemCallError` it will first retry 120 seconds later then a
+subsequent retry attempt 240 seconds later.
 
 ### <a name="fail_fast"></a> Fail Fast For Specific Exceptions
 
