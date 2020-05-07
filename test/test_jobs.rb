@@ -576,6 +576,17 @@ class PerExceptionClassRetryCountArrayJob
   end
 end
 
+class PerExceptionClassRetryCountArrayNoRetryLimitSpecifiedJob
+  extend Resque::Plugins::Retry
+
+  @queue = :testing
+  @retry_exceptions = { Exception => 11, RuntimeError => [5, 10, 15],  Timeout::Error => [2, 4, 6, 8, 10] }
+
+  def self.perform
+    raise RuntimeError, 'I always fail with a RuntimeError'
+  end
+end
+
 # We can't design a job to fail during connect, see perform_next_job_fail_on_reconnect
 class FailsDuringConnectJob < RetryDefaultsJob
   @queue = :testing

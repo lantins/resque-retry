@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class RetryExeptionDelayTest < Minitest::Test
+class RetryExceptionDelayTest < Minitest::Test
   def setup
     Resque.redis.flushall
     @worker = Resque::Worker.new(:testing)
@@ -42,5 +42,13 @@ class RetryExeptionDelayTest < Minitest::Test
     assert_in_delta (start_time + 5),  delayed[0], 1.00, '1st retry delay timestamp'
     assert_in_delta (start_time + 10), delayed[1], 1.00, '2nd retry delay timestamp'
     assert_in_delta (start_time + 15), delayed[2], 1.00, '3rd retry delay timestamp'
+  end
+
+  def test_retry_delay_per_exception_multiple_delay_no_retry_limit_specified
+    # For this job-type there are 3 `Exception` types defined: `Exception`,
+    # `StandardError` and `Timeout::Error` -- their array-lengths are are 1, 3
+    # and 5 (respectively). We expect the `retry_limit` to default to the
+    # maximum length of the `Array` of delays or 1 (in this case: 5)
+    assert_equal 5, PerExceptionClassRetryCountArrayNoRetryLimitSpecifiedJob.retry_limit
   end
 end

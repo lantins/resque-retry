@@ -107,11 +107,27 @@ module Resque
       # A retry limit of 0 will *never* retry.
       # A retry limit of -1 or below will retry forever.
       #
+      # The default value is: `1` or in the case of where `@retry_exceptions` is
+      # specified, and it contains one or more `Array` values, the maximum
+      # length will be used (e.g. `@retry_exceptions = { NetworkError => 30, SystemCallError => [120, 240] }`
+      # would return `2` because `SystemCallError` _should_ be attempted at
+      # least twice to respect the specified configuration).
+      #
       # @return [Fixnum]
       #
       # @api public
       def retry_limit
-        @retry_limit ||= 1
+        @retry_limit ||= begin
+          default_retry_limit = 1
+          if instance_variable_defined?(:@retry_exceptions) && @retry_exceptions.is_a?(Hash)
+            @retry_exceptions.values.each do |value|
+              if value.is_a?(Array) && value.length > default_retry_limit
+                default_retry_limit = value.length
+              end
+            end
+          end
+          default_retry_limit
+        end
       end
 
       # Number of retry attempts used to try and perform the job
