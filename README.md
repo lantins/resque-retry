@@ -359,16 +359,17 @@ You may also want to specify different retry delays for different exception
 types. You may optionally set `@retry_exceptions` to a hash where the keys are
 your specific exception classes to retry on, and the values are your retry
 delays in seconds or an array of retry delays to be used similar to exponential
-backoff.  **You must define `@retry_limit` such that it allows for your retry
-strategy to complete.  If your `@retry_limit` is less than the number of desired
-retry attempts defined in `@retry_exceptions`, your job will only retry
-`@retry_limit` times.**
+backoff.  `resque-retry` will attempt to determine your retry strategy's
+`@retry_limit` based on your specified `@retry_exceptions`.  If, however, you
+define `@retry_limit` explicitly, you should define `@retry_limit` such that it
+allows for your retry strategies to complete.  If your `@retry_limit` is less
+than the number of desired retry attempts defined in `@retry_exceptions`, your
+job will only retry `@retry_limit` times.
 ```ruby
 class DeliverSMS
   extend Resque::Plugins::Retry
   @queue = :mt_messages
 
-  @retry_limit = 2
   @retry_exceptions = { NetworkError => 30, SystemCallError => [120, 240] }
 
   def self.perform(mt_id, mobile_number, message)
@@ -378,10 +379,15 @@ end
 ```
 
 In the above example, Resque would retry any `DeliverSMS` jobs which throw a
-`NetworkError` or `SystemCallError`. If the job throws a `NetworkError` it
-will be retried 30 seconds later with a subsequent retry 30 seconds after that.
-If it throws `SystemCallError` it will first retry 120 seconds later then a
-subsequent retry attempt 240 seconds later.
+`NetworkError` or `SystemCallError`. The `@retry_limit` would be inferred to be
+2 based on the longest retry strategy defined in `@retry_exceptions`. If the job
+throws a `NetworkError` it will be retried 30 seconds later with a subsequent
+retry 30 seconds after that. If it throws a `SystemCallError` it will first
+retry 120 seconds later then a subsequent retry attempt 240 seconds later.  If
+the job fails due to a `NetworkError`, Resque would retry the job in 30 seconds.
+If the job fails a second time, this time due to a `SystemCallError`, the next
+retry would occur 240 seconds later as specified in the `SystemCallError`
+array defined in `@retry_exceptions`.
 
 ### <a name="fail_fast"></a> Fail Fast For Specific Exceptions
 
@@ -516,7 +522,7 @@ class ExampleJob
 
   def self.work(*args)
     user_id, user_mode, record_id = *args
-    
+
     Resque.enqueue_to(
       target_queue_for_args(user_id, user_mode, record_id),
       self,
