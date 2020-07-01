@@ -596,7 +596,7 @@ end
 
 This saves you from having to run a "house cleaning" or "errand" job.
 
-The expiary timeout is "pushed forward" or "touched" after each failure to
+The expiry timeout is "pushed forward" or "touched" after each failure to
 ensure it's not expired too soon.
 
 ### <a name="callbacks"></a> Try Again and Give Up Callbacks
