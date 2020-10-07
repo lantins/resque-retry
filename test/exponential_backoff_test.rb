@@ -128,4 +128,11 @@ class ExponentialBackoffTest < Minitest::Test
     assert_equal 4, Resque.info[:failed],     'failed jobs'
     assert_equal 0, Resque.info[:pending],    'pending jobs'
   end
+
+  def test_backoff_with_expiration
+    Resque.redis.expects(:expire)
+
+    Resque.enqueue(ExponentialBackoffWithExpiryJob)
+    perform_next_job(@worker)
+  end
 end
