@@ -1,3 +1,8 @@
+# 1.7.4 (2020-10-09)
+
+* Rework how the default `retry_limit` is calculated
+* Numerous documentation updates
+
 # 1.7.3 (2019-11-21)
 
 * Do not crash if job class is not found on the resque-web server
