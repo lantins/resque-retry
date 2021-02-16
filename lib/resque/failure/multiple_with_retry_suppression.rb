@@ -132,7 +132,7 @@ module Resque
       end
 
       def retrying?
-        Resque.redis.exists(retry_key)
+        Resque.redis.exists?(retry_key)
       end
     end
   end

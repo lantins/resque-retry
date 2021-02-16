@@ -1,3 +1,7 @@
+# 1.7.5 (2021-02-16)
+
+* Fix scenario where multiple failure backend does not save failures
+
 # 1.7.4 (2020-10-09)
 
 * Rework how the default `retry_limit` is calculated
