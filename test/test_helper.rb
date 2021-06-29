@@ -20,25 +20,29 @@ require 'mocha/setup'
 require 'resque-retry'
 require dir + '/test_jobs'
 
-# make sure we can run redis-server
-if !system('which redis-server')
-  puts '', "** `redis-server` was not found in your PATH"
-  abort ''
+if !ENV['CI'] || ENV['CI'] != 'true'
+  # make sure we can run redis-server
+  if !system('which redis-server')
+    puts '', "** `redis-server` was not found in your PATH"
+    abort ''
+  end
+
+  # make sure we can shutdown the server using cli.
+  if !system('which redis-cli')
+    puts '', "** `redis-cli` was not found in your PATH"
+    abort ''
+  end
+
+  # This code is run after all the tests have finished running to ensure that the
+  # Redis server is shutdowa
+  Minitest.after_run { `redis-cli -p 9736 shutdown nosave` }
+
+  puts "Starting redis for testing at localhost:9736..."
+  `redis-server #{dir}/redis-test.conf`
+  Resque.redis = '127.0.0.1:9736'
+else
+  Resque.redis = '127.0.0.1:6379'
 end
-
-# make sure we can shutdown the server using cli.
-if !system('which redis-cli')
-  puts '', "** `redis-cli` was not found in your PATH"
-  abort ''
-end
-
-# This code is run after all the tests have finished running to ensure that the
-# Redis server is shutdowa
-Minitest.after_run { `redis-cli -p 9736 shutdown nosave` }
-
-puts "Starting redis for testing at localhost:9736..."
-`redis-server #{dir}/redis-test.conf`
-Resque.redis = '127.0.0.1:9736'
 
 # Test helpers
 class Minitest::Test
@@ -65,11 +69,11 @@ class Minitest::Test
 
   def delayed_jobs
     # The double-checks here are so that we won't blow up if the config stops using redis-namespace
-    timestamps = Resque.redis.zrange("resque:delayed_queue_schedule", 0, -1) + 
+    timestamps = Resque.redis.zrange("resque:delayed_queue_schedule", 0, -1) +
                  Resque.redis.zrange("delayed_queue_schedule", 0, -1)
 
     delayed_jobs_as_json = timestamps.map do |timestamp|
-      Resque.redis.lrange("resque:delayed:#{timestamp}", 0, -1) + 
+      Resque.redis.lrange("resque:delayed:#{timestamp}", 0, -1) +
       Resque.redis.lrange("delayed:#{timestamp}", 0, -1)
     end.flatten
 
