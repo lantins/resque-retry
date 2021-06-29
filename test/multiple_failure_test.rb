@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative './test_helper'
 
 # Mock failure backend for testing MultipleWithRetrySuppression
 class MockFailureBackend < Resque::Failure::Base
@@ -25,8 +25,8 @@ class MultipleFailureTest < Minitest::Test
     Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
   end
 
-  def failure_key_for(klass)
-    'failure-' + klass.redis_retry_key([])
+  def failure_key_for(klass, args = [])
+    Resque::Failure::MultipleWithRetrySuppression.failure_key(klass.redis_retry_key(args))
   end
 
   def test_failure_is_passed_on_when_job_class_not_found
@@ -51,6 +51,23 @@ class MultipleFailureTest < Minitest::Test
     # I don't like this, but...
     key = failure_key_for(LimitThreeJobDelay1Hour)
     assert Resque.redis.exists(key)
+  end
+
+  def test_retry_delay_is_calculated_with_custom_calculation
+    delay = 5
+    args = [delay.to_s]
+    Resque.enqueue(DynamicDelayedJobOnExceptionAndArgs, *args)
+    perform_next_job(@worker)
+
+    key = failure_key_for(DynamicDelayedJobOnExceptionAndArgs, args)
+    ttl = Resque.redis.ttl(key)
+    assert Resque.redis.exists(key)
+    assert MockFailureBackend.errors.size == 0
+
+    # expiration on failure_key is set to 2x the delay
+    # to ensure the customized delay is properly calculated using
+    # dynamic retry_delay method on the job
+    assert ttl > delay && delay <= (delay * 2)
   end
 
   def test_retry_key_splatting_args
