@@ -25,7 +25,7 @@ class MultipleFailureTest < Minitest::Test
     Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
   end
 
-  def failure_key_for(klass, args = [])
+  def failure_key_for(klass, *args)
     Resque::Failure::MultipleWithRetrySuppression.failure_key(klass.redis_retry_key(args))
   end
 
@@ -55,11 +55,10 @@ class MultipleFailureTest < Minitest::Test
 
   def test_retry_delay_is_calculated_with_custom_calculation
     delay = 5
-    args = [delay.to_s]
-    Resque.enqueue(DynamicDelayedJobOnExceptionAndArgs, *args)
+    Resque.enqueue(DynamicDelayedJobOnExceptionAndArgs, delay.to_s)
     perform_next_job(@worker)
 
-    key = failure_key_for(DynamicDelayedJobOnExceptionAndArgs, args)
+    key = failure_key_for(DynamicDelayedJobOnExceptionAndArgs, delay.to_s)
     ttl = Resque.redis.ttl(key)
     assert Resque.redis.exists(key)
     assert MockFailureBackend.errors.size == 0
