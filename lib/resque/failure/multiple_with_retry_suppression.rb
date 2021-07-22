@@ -42,25 +42,10 @@ module Resque
           )
 
           cleanup_retry_failure_log!
-          return super
-        end
-
-        # some plugins define retry_delay and have it take no arguments, so rather than break those,
-        # we'll just check here to see whether it takes the additional exception class argument or not
-        # we also allow all job args to be passed to a custom `retry_delay` method
-        retry_delay_arity = klass.method(:retry_delay).arity
-
-        calculated_retry_delay = if [-2, 2].include?(retry_delay_arity)
-          klass.retry_delay(exception.class, *args)
-        elsif [-1, 1].include?(retry_delay_arity)
-          klass.retry_delay(exception.class)
-        else
-          klass.retry_delay
-        end
-
-        if calculated_retry_delay > 0
+          super
+        elsif retry_delay > 0
           log_message(
-            "retry_delay: #{calculated_retry_delay} > 0 - saving details in Redis",
+            "retry_delay: #{retry_delay} > 0 - saving details in Redis",
             args,
             exception
           )
@@ -78,12 +63,12 @@ module Resque
 
           Resque.redis.setex(
             failure_key,
-            2 * calculated_retry_delay,
+            2 * retry_delay,
             data
           )
         else
           log_message(
-            "retry_delay: #{calculated_retry_delay} <= 0 - ignoring",
+            "retry_delay: #{retry_delay} <= 0 - ignoring",
             args,
             exception
           )
@@ -130,6 +115,10 @@ module Resque
 
       def klass
         Resque::Job.new(nil, nil).constantize(payload['class'])
+      end
+
+      def retry_delay
+        klass.retry_delay
       end
 
       def retry_key
