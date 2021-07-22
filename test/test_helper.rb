@@ -20,7 +20,7 @@ require 'mocha/setup'
 require 'resque-retry'
 require dir + '/test_jobs'
 
-if ENV['CI'] == 'true'
+if ENV['CI'] != 'true'
   # make sure we can run redis-server
   if !system('which redis-server')
     puts '', "** `redis-server` was not found in your PATH"
