@@ -1,3 +1,8 @@
+# 1.7.5 (2021-08-06)
+
+* Support `retry_delay` methods with different arity
+* Switch over to _GitHub_ CI for PR test-execution
+
 # 1.7.4 (2020-10-09)
 
 * Rework how the default `retry_limit` is calculated
