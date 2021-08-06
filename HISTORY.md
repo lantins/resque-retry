@@ -1,3 +1,9 @@
+# 1.7.6 (2021-08-06)
+
+* Fix Redis 4.3 breaking saving job failures with multiple failure backend
+* Disable verbose logging by default during test-runs
+* Remove support for ruby < 2.6
+
 # 1.7.5 (2021-08-06)
 
 * Support `retry_delay` methods with different arity
