@@ -157,6 +157,20 @@ class MultipleFailureTest < Minitest::Test
     end
   end
 
+  def test_redis_exists_returns_integer
+    Resque.enqueue(RetryDefaultsJob)
+    original = Redis.exists_returns_integer
+    Redis.exists_returns_integer = true
+
+    3.times do
+      perform_next_job(@worker)
+    end
+
+    Redis.exists_returns_integer = original
+
+    assert_equal 1, MockFailureBackend.errors.size
+  end
+
   def teardown
     Resque::Failure.backend = @old_failure_backend
   end
