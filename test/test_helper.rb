@@ -1,6 +1,8 @@
 dir = File.dirname(File.expand_path(__FILE__))
 $LOAD_PATH.unshift dir + '/../lib'
+
 $TESTING = true
+$VERBOSE = ENV['VERBOSE'] != 'true' ? nil : true
 
 # Run code coverage in MRI 1.9 only.
 if RUBY_VERSION >= '1.9' && RUBY_ENGINE == 'ruby'

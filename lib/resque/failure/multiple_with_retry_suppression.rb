@@ -143,7 +143,17 @@ module Resque
       end
 
       def retrying?
-        Resque.redis.exists(retry_key)
+        redis_key_exists?(retry_key)
+      end
+
+      private
+
+      def redis_key_exists?(key)
+        if Resque.redis.respond_to?(:exists?)
+          Resque.redis.exists?(key)
+        else
+          ![false, 0].include?(Resque.redis.exists(key) || false)
+        end
       end
     end
   end
