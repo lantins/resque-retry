@@ -1,3 +1,14 @@
+# 1.8.0 (2023-04-15)
+
+* Address `retry_key_exists?` issue that was originally reported /
+  partially addressed here:
+  https://github.com/lantins/resque-retry/pull/173
+* Fix test-failures due to API / interface changes for dependencies
+* Remove `ruby@2.6` from the test[ing] matrix as it has been EOL for
+  quite some time at this point (as of this PR `ruby@2.7` is also EOL,
+  but I left this in for the time being)
+* Add `ruby@3.1` to the test[ing] matrix
+
 # 1.7.6 (2021-08-06)
 
 * Fix Redis 4.3 breaking saving job failures with multiple failure backend
