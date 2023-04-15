@@ -316,7 +316,7 @@ class RetryTest < Minitest::Test
       2.times do
         job = @worker.reserve
         child = fork do
-          Resque.redis.client.reconnect
+          Resque.redis.reconnect rescue Resque.redis.client.reconnect
           job.perform
         end
         Process.waitpid(child)
