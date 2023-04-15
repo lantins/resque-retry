@@ -91,7 +91,7 @@ class MultipleFailureTest < Minitest::Test
 
     Resque.enqueue(LimitThreeJobDelay1Hour)
     perform_next_job(@worker)
-    assert !Resque.redis.exists(key), 'key should have been removed.'
+    assert [false, 0].include?(Resque.redis.exists(key) || false), 'key should have been removed.'
   end
 
   def test_last_failure_has_double_delay_redis_expiry_if_delay
@@ -109,7 +109,7 @@ class MultipleFailureTest < Minitest::Test
 
     # I don't like this, but...
     key = failure_key_for(LimitThreeJob)
-    assert !Resque.redis.exists(key)
+    assert [false, 0].include?(Resque.redis.exists(key) || false), 'key should have not been added.'
   end
 
   def test_errors_are_suppressed_up_to_retry_limit
@@ -158,7 +158,10 @@ class MultipleFailureTest < Minitest::Test
   end
 
   def test_redis_exists_returns_integer
+    return if !Redis.respond_to?(:exists_returns_integer)
+
     Resque.enqueue(RetryDefaultsJob)
+
     original = Redis.exists_returns_integer
     Redis.exists_returns_integer = true
 
