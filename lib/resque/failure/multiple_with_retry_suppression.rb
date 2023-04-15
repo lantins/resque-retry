@@ -150,7 +150,11 @@ module Resque
 
       def redis_key_exists?(key)
         if Resque.redis.respond_to?(:exists?)
-          Resque.redis.exists?(key)
+          begin
+            Resque.redis.exists?(key)
+          rescue
+            ![false, 0].include?(Resque.redis.exists(key) || false)
+          end
         else
           ![false, 0].include?(Resque.redis.exists(key) || false)
         end
