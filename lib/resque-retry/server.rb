@@ -43,7 +43,7 @@ module ResqueRetry
         if klass.respond_to?(:redis_retry_key)
           klass.redis_retry_key(job['args'])
         else
-          nil
+          ''
         end
       end
 

@@ -198,6 +198,10 @@ class LimitThreeJobDelay1Hour < LimitThreeJob
   @retry_delay = 3600
 end
 
+class DelayedJobNoRetryKey
+  @queue = :testing
+end
+
 class FailFiveTimesJob < RetryDefaultsJob
   @queue = :testing
   @retry_limit = 6
