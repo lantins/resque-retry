@@ -49,12 +49,21 @@ module ResqueRetry
 
       # gets the number of retry attempts for a job.
       def retry_attempts_for_job(job)
-        Resque.redis.get(retry_key_for_job(job))
+        retry_key = retry_key_for_job(job)
+        if retry_key
+          Resque.redis.get(retry_key)
+        else
+          nil
+        end
       end
 
       # gets the failure details hash for a job.
       def retry_failure_details(retry_key)
-        Resque.decode(Resque.redis.get("failure-#{retry_key}"))
+        if retry_key
+          Resque.decode(Resque.redis.get("failure-#{retry_key}"))
+        else
+          nil
+        end
       end
 
       # reads a 'local' template file.
