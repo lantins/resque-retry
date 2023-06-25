@@ -1,3 +1,7 @@
+# 1.8.1 (2023-06-25)
+
+* Prevent crashing due to `nil` keys on newer _Redis_ client
+
 # 1.8.0 (2023-04-15)
 
 * Address `retry_key_exists?` issue that was originally reported /
