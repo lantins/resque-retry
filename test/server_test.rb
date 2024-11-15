@@ -4,7 +4,7 @@ require 'resque-retry/server'
 ENV['RACK_ENV'] = ENV['RAILS_ENV']
 
 # Testing the Resque web interface additions.
-class ServerTest < MiniTest::Test
+class ServerTest < Minitest::Test
   include Rack::Test::Methods
 
   def setup
