@@ -17,7 +17,7 @@ require 'timeout'
 require 'minitest/autorun'
 require 'minitest/pride'
 require 'rack/test'
-require 'mocha/setup'
+require 'mocha/minitest'
 
 require 'resque-retry'
 require dir + '/test_jobs'
