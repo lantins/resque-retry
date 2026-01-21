@@ -16,7 +16,6 @@ require 'rubygems'
 require 'timeout'
 require 'minitest/autorun'
 require 'minitest/pride'
-require 'rack/test'
 require 'mocha/minitest'
 
 require 'resque-retry'

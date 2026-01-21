@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'rack/test'
 require 'resque-retry/server'
 
 ENV['RACK_ENV'] = ENV['RAILS_ENV']
@@ -15,6 +16,10 @@ class ServerTest < Minitest::Test
 
   def app
     Resque::Server
+  end
+
+  def default_host
+    'localhost'
   end
 
   # make sure the world looks okay first =)
