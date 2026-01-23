@@ -1,3 +1,10 @@
+# 1.9.0 (2026-01-23)
+
+* Allow Resque 3.X versions
+* Add Ruby 3.2, 3.3, 3.4, and 4.0 to the test matrix
+* Remove Ruby 2.7, 3.0, and 3.1 from the test matrix (EOL)
+* Update development dependencies (`minitest`, `rack-test`, `mocha`, `rake`)
+
 # 1.8.1 (2023-06-25)
 
 * Prevent crashing due to `nil` keys on newer _Redis_ client
