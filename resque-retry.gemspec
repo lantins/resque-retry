@@ -4,6 +4,8 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'resque-retry/version'
 
 Gem::Specification.new do |s|
+  s.required_ruby_version = '>= 3.2'
+
   s.name = 'resque-retry'
   s.version = ResqueRetry::VERSION
   s.date = Time.now.strftime('%Y-%m-%d')
