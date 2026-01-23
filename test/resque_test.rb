@@ -3,7 +3,7 @@ require 'test_helper'
 class ResqueTest < Minitest::Test
   def test_resque_version
     major, minor, _ = resque_version.split('.')
-    assert [1, 2].include?(major.to_i), 'major version does not match'
+    assert [1, 2, 3].include?(major.to_i), 'major version does not match'
 
     if major.to_i == 1
       assert_operator minor.to_i, :>=, 25, 'minor version is too low'
